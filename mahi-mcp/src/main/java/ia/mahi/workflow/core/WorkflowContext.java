@@ -1,5 +1,7 @@
 package ia.mahi.workflow.core;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,10 +17,13 @@ public class WorkflowContext {
     private String flowId;
     private String workflowType;
     private String state;
-    private Map<String, ArtifactState> artifacts = new HashMap<>();
+    private Map<String, Artifact> artifacts = new HashMap<>();
     private Map<String, Object> metadata = new HashMap<>();
     private List<TransitionRecord> history = new ArrayList<>();
     private Instant updatedAt;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private SessionContext sessionContext;
 
     /** Default constructor for JSON deserialization. */
     public WorkflowContext() {
@@ -29,7 +34,7 @@ public class WorkflowContext {
         this.workflowType = workflowType;
         this.state = definition.getInitialState().name();
         this.updatedAt = Instant.now();
-        definition.getArtifacts().forEach((k, v) -> artifacts.put(k, new ArtifactState(k)));
+        definition.getArtifacts().forEach((k, v) -> artifacts.put(k, v.factory().get()));
     }
 
     /**
@@ -54,8 +59,8 @@ public class WorkflowContext {
         this.updatedAt = Instant.now();
     }
 
-    public Map<String, ArtifactState> getArtifacts() { return artifacts; }
-    public void setArtifacts(Map<String, ArtifactState> artifacts) { this.artifacts = artifacts; }
+    public Map<String, Artifact> getArtifacts() { return artifacts; }
+    public void setArtifacts(Map<String, Artifact> artifacts) { this.artifacts = artifacts; }
 
     public Map<String, Object> getMetadata() { return metadata; }
     public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }
@@ -65,4 +70,7 @@ public class WorkflowContext {
 
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    public SessionContext getSessionContext() { return sessionContext; }
+    public void setSessionContext(SessionContext sessionContext) { this.sessionContext = sessionContext; }
 }

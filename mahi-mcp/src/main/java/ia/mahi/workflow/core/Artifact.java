@@ -1,5 +1,6 @@
 package ia.mahi.workflow.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -57,6 +58,7 @@ public abstract class Artifact {
         }
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return this.status == ArtifactStatus.VALID;
     }

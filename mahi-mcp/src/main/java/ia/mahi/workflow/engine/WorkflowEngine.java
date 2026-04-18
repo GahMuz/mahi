@@ -1,7 +1,7 @@
 package ia.mahi.workflow.engine;
 
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.ArtifactState;
+import ia.mahi.workflow.core.Artifact;
 import ia.mahi.workflow.core.ArtifactStatus;
 import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
@@ -109,9 +109,9 @@ public class WorkflowEngine {
         List<String> impacted = graph.getOrDefault(artifactName, List.of());
 
         for (String downstream : impacted) {
-            ArtifactState state = context.getArtifacts().get(downstream);
-            if (state != null && state.getStatus() != ArtifactStatus.MISSING) {
-                state.markStale();
+            Artifact artifact = context.getArtifacts().get(downstream);
+            if (artifact != null && artifact.getStatus() != ArtifactStatus.MISSING) {
+                artifact.markStale();
                 // Recursive propagation
                 propagateInvalidation(context, definition, downstream);
             }

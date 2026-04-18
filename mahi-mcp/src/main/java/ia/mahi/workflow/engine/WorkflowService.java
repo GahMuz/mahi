@@ -3,7 +3,7 @@ package ia.mahi.workflow.engine;
 import ia.mahi.service.ArtifactService;
 import ia.mahi.service.GitWorktreeService;
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.ArtifactState;
+import ia.mahi.workflow.core.Artifact;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import org.springframework.stereotype.Service;
@@ -50,15 +50,15 @@ public class WorkflowService {
     public WorkflowContext writeArtifact(String flowId, String artifactName, String content) {
         WorkflowContext context = store.load(flowId);
 
-        ArtifactState artifactState = context.getArtifacts().get(artifactName);
-        if (artifactState == null) {
+        Artifact artifact = context.getArtifacts().get(artifactName);
+        if (artifact == null) {
             throw new IllegalArgumentException("Unknown artifact: " + artifactName
                     + " for workflow type: " + context.getWorkflowType());
         }
 
         String path = artifactService.writeArtifact(flowId, artifactName, content);
-        artifactState.markDraft(path);
-        artifactState.markValid();
+        artifact.markDraft(path);
+        artifact.markValid();
 
         return store.save(context);
     }

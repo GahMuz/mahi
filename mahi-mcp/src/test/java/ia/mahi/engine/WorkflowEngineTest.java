@@ -3,6 +3,7 @@ package ia.mahi.engine;
 import ia.mahi.store.WorkflowStore;
 import ia.mahi.workflow.core.ArtifactDefinition;
 import ia.mahi.workflow.core.ArtifactStatus;
+import ia.mahi.workflow.core.FileArtifact;
 import ia.mahi.workflow.core.Guard;
 import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
@@ -166,8 +167,8 @@ class WorkflowEngineTest {
         @Override
         public Map<String, ArtifactDefinition> getArtifacts() {
             return Map.of(
-                    "artifact-a", new ArtifactDefinition("artifact-a"),
-                    "artifact-b", new ArtifactDefinition("artifact-b")
+                    "artifact-a", ArtifactDefinition.file("artifact-a"),
+                    "artifact-b", ArtifactDefinition.file("artifact-b")
             );
         }
 

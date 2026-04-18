@@ -2,7 +2,9 @@ package ia.mahi.workflow.definitions.spec;
 
 import ia.mahi.workflow.core.Action;
 import ia.mahi.workflow.core.ArtifactDefinition;
+import ia.mahi.workflow.core.DesignArtifact;
 import ia.mahi.workflow.core.Guard;
+import ia.mahi.workflow.core.RequirementsArtifact;
 import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
@@ -30,12 +32,12 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "scenario",       new ArtifactDefinition("scenario"),
-                "rules",          new ArtifactDefinition("rules"),
-                "requirements",   new ArtifactDefinition("requirements"),
-                "design",         new ArtifactDefinition("design"),
-                "plan",           new ArtifactDefinition("plan"),
-                "retrospective",  new ArtifactDefinition("retrospective")
+                "scenario",      ArtifactDefinition.file("scenario"),
+                "rules",         ArtifactDefinition.file("rules"),
+                "requirements",  new ArtifactDefinition("requirements", () -> new RequirementsArtifact("requirements")),
+                "design",        new ArtifactDefinition("design",       () -> new DesignArtifact("design")),
+                "plan",          ArtifactDefinition.file("plan"),
+                "retrospective", ArtifactDefinition.file("retrospective")
         );
     }
 
