@@ -1,11 +1,16 @@
 package ia.mahi.mcp;
 
+import ia.mahi.service.ActiveStateService;
+import ia.mahi.service.StateFileService;
+import ia.mahi.workflow.core.ActiveState;
+import ia.mahi.workflow.core.ChangelogEntry;
 import ia.mahi.workflow.core.CoherenceViolation;
 import ia.mahi.workflow.core.DesignItem;
 import ia.mahi.workflow.core.DesignSummary;
 import ia.mahi.workflow.core.RequirementItem;
 import ia.mahi.workflow.core.RequirementSummary;
 import ia.mahi.workflow.core.SessionContext;
+import ia.mahi.workflow.core.StateSnapshot;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.engine.WorkflowService;
 import org.springframework.ai.tool.annotation.Tool;
@@ -22,9 +27,15 @@ import java.util.List;
 public class WorkflowTools {
 
     private final WorkflowService workflowService;
+    private final ActiveStateService activeStateService;
+    private final StateFileService stateFileService;
 
-    public WorkflowTools(WorkflowService workflowService) {
+    public WorkflowTools(WorkflowService workflowService,
+                         ActiveStateService activeStateService,
+                         StateFileService stateFileService) {
         this.workflowService = workflowService;
+        this.activeStateService = activeStateService;
+        this.stateFileService = stateFileService;
     }
 
     @Tool(name = "mahi_create_workflow",
@@ -170,6 +181,45 @@ public class WorkflowTools {
     public List<CoherenceViolation> checkCoherence(
             @ToolParam(description = "Workflow identifier", required = true) String flowId) {
         return workflowService.checkCoherence(flowId);
+    }
+
+    // =========================================================================
+    // TASK-001.6 — Gestion active.json, registry.md et state.json (DES-001)
+    // =========================================================================
+
+    @Tool(name = "mahi_activate",
+          description = "Write .sdd/local/active.json to mark a spec as active on this machine. Resolves path relative to git repo root.")
+    public ActiveState activate(
+            @ToolParam(description = "Spec identifier (kebab-case)", required = true) String specId,
+            @ToolParam(description = "Type of item: spec | adr", required = true) String type,
+            @ToolParam(description = "Relative path to spec directory (e.g., .sdd/specs/2026/04/my-spec)", required = true) String path,
+            @ToolParam(description = "Workflow identifier (UUID)", required = true) String workflowId) {
+        return activeStateService.activate(specId, type, path, workflowId);
+    }
+
+    @Tool(name = "mahi_deactivate",
+          description = "Delete .sdd/local/active.json to release the active spec on this machine.")
+    public void deactivate() {
+        activeStateService.deactivate();
+    }
+
+    @Tool(name = "mahi_update_registry",
+          description = "Update the status of a spec row in .sdd/specs/registry.md. Creates the row if absent.")
+    public void updateRegistry(
+            @ToolParam(description = "Spec identifier", required = true) String specId,
+            @ToolParam(description = "New status (requirements | design | worktree | planning | implementation | finishing | retrospective | completed | discarded)", required = true) String status,
+            @ToolParam(description = "Spec title (used only when creating a new row)", required = false) String title,
+            @ToolParam(description = "Period YYYY/MM (used only when creating a new row)", required = false) String period) {
+        activeStateService.updateRegistry(specId, status, title, period);
+    }
+
+    @Tool(name = "mahi_update_state",
+          description = "Write or update state.json for a spec. Manages currentPhase, changelog and updatedAt.")
+    public StateSnapshot updateState(
+            @ToolParam(description = "Absolute path to the spec directory", required = true) String specPath,
+            @ToolParam(description = "New current phase", required = true) String currentPhase,
+            @ToolParam(description = "Optional changelog entry (may be null)", required = false) ChangelogEntry changelogEntry) {
+        return stateFileService.updateState(specPath, currentPhase, changelogEntry);
     }
 
     // =========================================================================

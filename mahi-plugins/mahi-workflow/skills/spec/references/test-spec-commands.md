@@ -9,14 +9,22 @@ Aucune transition de phase ne doit être gérée localement par le LLM.
 
 ## `/spec new <titre>`
 
-**Appel MCP attendu :**
+**Appels MCP attendus :**
 ```
 mahi_create_workflow(type="spec", title="<titre>")
+EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")
+mahi_update_registry(specId, "requirements", title, period)
+mahi_activate(specId, "spec", path, workflowId)
 ```
 
 **Critères :**
 - [ ] `mahi_create_workflow` est appelé avec `type="spec"`
 - [ ] Le `workflowId` retourné est stocké dans `active.json`
+- [ ] `EnterWorktree` est appelé avec `branch="spec/<username>/<spec-id>"` et `path=".worktrees/<spec-id>"`
+- [ ] `mahi_update_registry` est appelé avec `specId`, `"requirements"`, `title`, `period`
+- [ ] `mahi_activate` est appelé avec `specId`, `type="spec"`, `path`, `workflowId`
+- [ ] Le LLM n'écrit PAS `active.json` directement
+- [ ] Le LLM n'écrit PAS de ligne dans `registry.md` directement
 - [ ] `state.json` n'est PAS créé
 - [ ] La phase initiale est retournée par le serveur, pas définie localement
 
@@ -24,45 +32,59 @@ mahi_create_workflow(type="spec", title="<titre>")
 
 ## `/spec open [titre]`
 
-**Appel MCP attendu :**
+**Appels MCP attendus :**
 ```
+mahi_activate(specId, "spec", path, workflowId)
+EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")
 mahi_get_workflow(workflowId)
 ```
 
 **Critères :**
+- [ ] `mahi_activate` est appelé avec `specId`, `type="spec"`, `path`, `workflowId`
+- [ ] `EnterWorktree` est appelé avec `branch="spec/<username>/<spec-id>"` et `path=".worktrees/<spec-id>"`
 - [ ] `mahi_get_workflow` est appelé avec le `workflowId` depuis `active.json`
 - [ ] La phase courante est lue depuis la réponse serveur
 - [ ] Aucune lecture de `state.json` pour déterminer la phase
+- [ ] Le LLM n'écrit PAS `active.json` directement
 - [ ] Le briefing de contexte est construit depuis la réponse `mahi_get_workflow`
 
 ---
 
 ## `/spec approve`
 
-**Appel MCP attendu :**
+**Appels MCP attendus :**
 ```
 mahi_fire_event(workflowId, event="approve")
+mahi_update_registry(specId, <newPhase>)
+mahi_update_state(specPath, <newPhase>, changelogEntry)
 ```
 
 **Critères :**
 - [ ] `mahi_get_workflow(workflowId)` est appelé pour lire la phase courante avant validation
 - [ ] `mahi_fire_event` est appelé avec `event="approve"` pour déclencher la transition
 - [ ] Si le serveur retourne une erreur (transition invalide), elle est affichée en français
-- [ ] `state.json` n'est PAS mis à jour par le LLM
+- [ ] `mahi_update_registry` est appelé avec le nouveau statut après transition réussie
+- [ ] `mahi_update_state` est appelé pour mettre à jour la phase dans `state.json`
+- [ ] Le LLM n'écrit PAS `state.json` directement
+- [ ] Le LLM n'écrit PAS dans `registry.md` directement
 - [ ] Aucune logique locale de validation de transition (ex. `requirements → design`) dans SKILL.md
 
 ---
 
 ## `/spec close`
 
-**Appel MCP attendu :**
+**Appels MCP attendus :**
 ```
-mahi_fire_event(workflowId, event="close")
+ExitWorktree()
+mahi_save_context(flowId, context)
+mahi_deactivate()
 ```
 
 **Critères :**
-- [ ] `mahi_fire_event` avec `event="close"` est appelé avant suppression de `active.json`
-- [ ] `active.json` est supprimé après l'appel MCP
+- [ ] `ExitWorktree()` est appelé avant la sauvegarde du contexte (Step 0 de CLOSE)
+- [ ] `mahi_save_context` est appelé pour persister le contexte côté serveur
+- [ ] `mahi_deactivate()` est appelé pour supprimer `active.json`
+- [ ] Le LLM ne supprime PAS `active.json` directement
 - [ ] Aucune sauvegarde locale de `state.json`
 
 ---
@@ -73,15 +95,21 @@ mahi_fire_event(workflowId, event="close")
 ```
 mahi_remove_worktree(workflowId)
 mahi_fire_event(workflowId, event="discard")
+mahi_update_registry(specId, "discarded")
+ExitWorktree()
+mahi_deactivate()
 ```
 
 **Critères :**
 - [ ] Confirmation explicite demandée à l'utilisateur avant tout appel MCP
 - [ ] `mahi_remove_worktree` est appelé pour supprimer le worktree côté serveur
 - [ ] `mahi_fire_event` avec `event="discard"` est appelé pour marquer le workflow comme annulé
+- [ ] `mahi_update_registry` est appelé avec `"discarded"` pour marquer la ligne en registry
 - [ ] Le répertoire `.sdd/specs/YYYY/MM/<id>/` est supprimé localement
-- [ ] `active.json` est supprimé
-- [ ] La ligne correspondante est retirée de `.sdd/specs/registry.md`
+- [ ] `ExitWorktree()` est appelé avant la suppression
+- [ ] `mahi_deactivate()` est appelé pour supprimer `active.json`
+- [ ] Le LLM ne supprime PAS `active.json` directement
+- [ ] Le LLM n'écrit PAS dans `registry.md` directement
 
 ---
 

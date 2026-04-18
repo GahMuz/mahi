@@ -89,6 +89,9 @@ Dernières actions : ...
 
 ## CLOSE
 
+### Step 0 : Quitter le worktree
+Appeler `ExitWorktree()` pour retourner au répertoire principal du dépôt avant la sauvegarde du contexte.
+
 ### Step 1 : Identifier la spec active
 Lire `.sdd/local/active.json`. (Le handler parent a déjà échoué si absent.) Récupérer `flowId`.
 
@@ -124,8 +127,8 @@ Mettre à jour `MEMORY.md` : ajouter ou mettre à jour la ligne :
 - [Spec : <spec-id>](spec_<spec-id>.md) — <description courte de l'état actuel>
 ```
 
-### Step 6 : Libérer la spec active
-Supprimer `.sdd/local/active.json` — plus de spec active sur cette machine.
+### Step 6 : Libérer la spec active via le serveur Mahi
+Appeler `mahi_deactivate()` pour supprimer `.sdd/local/active.json` — plus de spec active sur cette machine.
 
 ### Step 7 : Confirmer
 ```

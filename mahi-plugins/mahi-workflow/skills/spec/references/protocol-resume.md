@@ -10,8 +10,8 @@
 ### Worktree Phase
 1. Check worktree exists at `worktreePath` (obtenu via `mahi_get_workflow`)
 2. Exists → verify branch, continue to test baseline
-3. Missing → re-create from branch via `mahi_create_worktree`
-4. Branch also missing → report error, suggest re-entering design
+3. Missing → call `EnterWorktree(branch, path)` to recreate it (creates if absent, reuses if existing)
+4. Branch also missing → report error: "Branche manquante — suggérer de re-créer la branche puis relancer `/spec open`"
 
 ### Implementation Phase
 Follow half-done detection below.
