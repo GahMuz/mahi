@@ -12,7 +12,7 @@ Le contexte d'une spec est persisté sur **deux niveaux complémentaires** :
 | **Partagé** | `.sdd/specs/YYYY/MM/<id>/context.md` | Commité dans le repo — accessible à tous les développeurs | Source de vérité partagée |
 | **Local** | `spec_<id>.md` dans le memory Claude Code | Machine locale uniquement (`~/.claude/projects/`) | Cache de session, rechargement rapide |
 
-**Règle :** `/spec close` écrit les deux. `/spec open` charge depuis le memory local s'il existe, sinon depuis `context.md`, sinon reconstitue depuis `log.md` + `mahi_get_workflow(workflowId)`.
+**Règle :** `/spec close` écrit les deux. `/spec open` charge depuis le memory local s'il existe, sinon depuis `context.md`, sinon reconstitue depuis `log.md` + `mahi_get_workflow(flowId)`.
 
 Un développeur qui clone le repo et ouvre une spec verra le contexte via `context.md` — pas le memory local de son collègue.
 
@@ -70,7 +70,7 @@ Appelé par `/spec open` après identification de la spec. Établit la spec comm
 
 **2. `context.md` dans le repo** (`.sdd/specs/YYYY/MM/<spec-id>/context.md`) — si présent, utiliser (contexte partagé par un collègue ou session précédente).
 
-**3. Reconstitution** — si aucun des deux n'existe : appeler `mahi_get_workflow(workflowId)` pour obtenir la phase, les artifacts et les statuts courants, puis lire `log.md` pour les actions passées.
+**3. Reconstitution** — si aucun des deux n'existe : appeler `mahi_get_workflow(flowId)` pour obtenir la phase, les artifacts, les statuts courants et le `sessionContext` (si une session précédente a appelé `mahi_save_context`), puis lire `log.md` pour les actions passées.
 
 Présenter en français :
 ```
@@ -90,26 +90,32 @@ Dernières actions : ...
 ## CLOSE
 
 ### Step 1 : Identifier la spec active
-Lire `.sdd/local/active.json`. (Le handler parent a déjà échoué si absent.) Récupérer `workflowId`.
+Lire `.sdd/local/active.json`. (Le handler parent a déjà échoué si absent.) Récupérer `flowId`.
 
 ### Step 2 : Synthétiser le contexte
 Depuis la conversation courante et les fichiers de la spec (log.md, requirement.md, design.md) :
-- Phase courante (via `mahi_get_workflow(workflowId)`)
+- Phase courante (via `mahi_get_workflow(flowId)`)
 - Objectif
 - Décisions clés (session courante + précédentes)
 - Fichiers identifiés/modifiés
 - Questions ouvertes non résolues
 - 3-5 dernières actions significatives
 
-### Step 3 : Écrire `context.md` (repo — partagé)
-Écrire `.sdd/specs/YYYY/MM/<spec-id>/context.md` en suivant le format ci-dessus.
-Ce fichier sera commité avec le reste de la spec — accessible à tous les développeurs.
+### Step 3 : Persister le contexte dans le serveur Mahi
+Appeler `mahi_save_context` pour stocker les données structurées côté serveur ET écrire `context.md` automatiquement (si `specPath` est dans les métadonnées du workflow) :
+```
+mahi_save_context(flowId: <depuis active.json>, context: {
+  lastAction: "<dernière action significative>",
+  keyDecisions: ["<décision 1>", "<décision 2>", ...],
+  openQuestions: ["<question 1>", ...],
+  nextStep: "<prochaine action recommandée>"
+})
+```
+Ce `SessionContext` est retourné dans `mahi_get_workflow` lors de la prochaine ouverture.
 
-### Step 4 : Notifier le serveur Mahi
-```
-mahi_fire_event(workflowId: <depuis active.json>, event="close")
-```
-Cette opération signale au serveur FSM que la session est fermée. La spec reste dans son état courant — elle peut être rouverte avec `/spec open`.
+### Step 4 : Écrire `context.md` enrichi (repo — partagé)
+Écrire `.sdd/specs/YYYY/MM/<spec-id>/context.md` en suivant le format ci-dessus (inclut Fichiers identifiés et Dernières actions — plus riche que le SessionContext seul).
+Ce fichier sera commité avec le reste de la spec — accessible à tous les développeurs.
 
 ### Step 5 : Écrire l'entrée memory Claude Code (local)
 Écrire `spec_<spec-id>.md` dans le répertoire memory du projet (même contenu + frontmatter).
@@ -124,9 +130,9 @@ Supprimer `.sdd/local/active.json` — plus de spec active sur cette machine.
 ### Step 7 : Confirmer
 ```
 Contexte sauvegardé :
+- SessionContext persisté via mahi_save_context (retourné à la prochaine ouverture)
 - context.md mis à jour (partageable via git)
 - Memory local mis à jour (session suivante sur cette machine)
-- Serveur Mahi notifié (event "close")
 
 Spec fermée.
 

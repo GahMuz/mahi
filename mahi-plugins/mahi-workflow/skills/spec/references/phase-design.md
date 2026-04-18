@@ -179,14 +179,25 @@ Add a "Couverture des exigences" table at the end of design.md:
 
 ### Step 9: Save
 Write design.md using template.
-Après écriture du fichier, appeler :
+Après écriture du fichier, synchroniser l'artefact :
 ```
-mahi_write_artifact(workflowId: <depuis active.json>, artifactKey: "design.md", content: <contenu complet>)
+mahi_write_artifact(flowId: <depuis active.json>, artifactName: "design", content: <contenu complet>)
 ```
-Par élément DES-xxx finalisé, appeler :
+Par élément DES-xxx finalisé, enregistrer les données structurées :
 ```
-mahi_add_design_info(workflowId: <depuis active.json>, id: "DES-xxx", title: "<titre>", implementsReqs: ["REQ-xxx", ...])
+mahi_add_design_element(flowId: <depuis active.json>, des: {
+  id: "DES-xxx",
+  title: "<titre>",
+  status: "VALID",
+  coversAC: ["REQ-xxx.AC-1", "REQ-yyy.AC-2"],
+  content: "<description complète>"
+})
 ```
+Vérifier la cohérence avant approbation :
+```
+mahi_check_coherence(flowId: <depuis active.json>)
+```
+Si violations → corriger avant de continuer.
 Append log.md entry: date, "Phase conception", DES sections créées, décisions SOLID, conflits résolus.
 
 ### Step 10: Await Approval
@@ -203,7 +214,7 @@ Append log.md entry: date, "Phase conception", DES sections créées, décisions
 - Project rules respected (conflicts resolved with user)
 - Patterns existants respectés : la conception suit les conventions du codebase plutôt que d'en introduire de nouvelles sans justification
 - spec-design-validator passed (zero auto-fixable violations)
-- `mahi_write_artifact` et `mahi_add_design_info` appelés après finalisation
+- `mahi_write_artifact`, `mahi_add_design_element` et `mahi_check_coherence` appelés après finalisation
 
 ## Formatting Rules (apply when writing design.md)
 - Maximum line length : 200 characters — wrap longer lines

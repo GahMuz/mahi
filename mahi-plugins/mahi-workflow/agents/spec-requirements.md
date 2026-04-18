@@ -110,12 +110,22 @@ Ajouter les REQ approuvés/générés à la fin de `<specPath>/requirement.md`.
 
 Appeler pour chaque REQ finalisé :
 ```
-mahi_add_requirement_info(workflowId: <depuis active.json>, requirementId: "REQ-xxx", title: "<titre>", priority: "<priorité>", status: "draft")
+mahi_add_requirement(flowId: <depuis active.json>, req: {
+  id: "REQ-xxx",
+  title: "<titre>",
+  priority: "must|should|could",
+  status: "VALID",
+  content: "<description complète>",
+  acceptanceCriteria: [
+    { id: "REQ-xxx.AC-1", description: "<critère testable>" },
+    ...
+  ]
+})
 ```
 
 Après écriture du fichier, synchroniser l'artefact avec le serveur :
 ```
-mahi_write_artifact(workflowId: <depuis active.json>, artifactKey: "requirement.md", content: <contenu complet du fichier>)
+mahi_write_artifact(flowId: <depuis active.json>, artifactName: "requirements", content: <contenu complet du fichier>)
 ```
 
 Appender à `<specPath>/log.md` : "X exigences ajoutées depuis revue spec."

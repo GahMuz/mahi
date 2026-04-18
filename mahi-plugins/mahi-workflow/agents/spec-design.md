@@ -117,13 +117,25 @@ Mettre à jour la table de couverture REQ → DES en fin de design.md (ajouter l
 
 Appeler pour chaque DES finalisé :
 ```
-mahi_add_design_info(workflowId: <depuis active.json>, designId: "DES-xxx", title: "<titre>", implementsReqs: ["REQ-xxx", "REQ-yyy"])
+mahi_add_design_element(flowId: <depuis active.json>, des: {
+  id: "DES-xxx",
+  title: "<titre>",
+  status: "VALID",
+  coversAC: ["REQ-xxx.AC-1", "REQ-yyy.AC-2"],
+  content: "<description complète>"
+})
 ```
 
 Après écriture du fichier, synchroniser l'artefact avec le serveur :
 ```
-mahi_write_artifact(workflowId: <depuis active.json>, artifactKey: "design.md", content: <contenu complet du fichier>)
+mahi_write_artifact(flowId: <depuis active.json>, artifactName: "design", content: <contenu complet du fichier>)
 ```
+
+Vérifier la cohérence REQ/DES :
+```
+mahi_check_coherence(flowId: <depuis active.json>)
+```
+Si violations → corriger avant d'appeler spec-design-validator.
 
 Appender à `<specPath>/log.md` : "X décisions de conception ajoutées depuis revue spec."
 

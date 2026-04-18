@@ -216,13 +216,23 @@ This is advisory only — never block the user. If they choose to continue, do n
 ### Step 5: Save
 
 Write `requirement.md` using the template from `references/templates.md` section `requirement.md`.
-Après écriture du fichier, appeler :
+Après écriture du fichier, synchroniser l'artefact :
 ```
-mahi_write_artifact(workflowId: <depuis active.json>, artifactKey: "requirement.md", content: <contenu complet>)
+mahi_write_artifact(flowId: <depuis active.json>, artifactName: "requirements", content: <contenu complet>)
 ```
-Par exigence finalisée, appeler :
+Par exigence finalisée, enregistrer les données structurées :
 ```
-mahi_add_requirement_info(workflowId: <depuis active.json>, id: "REQ-xxx", title: "<titre>", priority: "<priorité>", status: "brouillon")
+mahi_add_requirement(flowId: <depuis active.json>, req: {
+  id: "REQ-xxx",
+  title: "<titre>",
+  priority: "must|should|could",
+  status: "VALID",
+  content: "<description complète>",
+  acceptanceCriteria: [
+    { id: "REQ-xxx.AC-1", description: "<critère testable>" },
+    ...
+  ]
+})
 ```
 Append log.md entry: date, "Phase exigences", actions (X exigences rédigées), decisions prises.
 
@@ -238,7 +248,7 @@ Append log.md entry: date, "Phase exigences", actions (X exigences rédigées), 
 - Section "Contexte codebase" présente (modules concernés ou mention explicite "Aucun")
 - No architecture, code, or SQL in requirement.md
 - Each REQ addresses a single concern
-- `mahi_write_artifact` et `mahi_add_requirement_info` appelés après finalisation
+- `mahi_write_artifact` et `mahi_add_requirement` appelés après finalisation (avec `acceptanceCriteria` structurés)
 
 ## Formatting Rules (apply when writing requirement.md)
 - Maximum line length : 200 characters — wrap longer lines
