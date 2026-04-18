@@ -1,5 +1,6 @@
 package ia.mahi.mcp;
 
+import ia.mahi.workflow.core.CoherenceViolation;
 import ia.mahi.workflow.core.DesignItem;
 import ia.mahi.workflow.core.DesignSummary;
 import ia.mahi.workflow.core.RequirementItem;
@@ -158,6 +159,21 @@ public class WorkflowTools {
             @ToolParam(description = "Workflow identifier", required = true) String flowId,
             @ToolParam(description = "Design element ID", required = true) String desId) {
         return workflowService.getDesignElement(flowId, desId);
+    }
+
+    // =========================================================================
+    // TASK-006.2 — Contexte de session (REQ-005)
+    // =========================================================================
+
+    // =========================================================================
+    // TASK-005.2 — Vérification de cohérence (REQ-004)
+    // =========================================================================
+
+    @Tool(name = "mahi_check_coherence",
+          description = "Check coherence of requirements and design elements. Returns all violations (empty = coherent).")
+    public List<CoherenceViolation> checkCoherence(
+            @ToolParam(description = "Workflow identifier", required = true) String flowId) {
+        return workflowService.checkCoherence(flowId);
     }
 
     // =========================================================================

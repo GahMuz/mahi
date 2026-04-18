@@ -4,6 +4,7 @@ import ia.mahi.service.ArtifactService;
 import ia.mahi.service.GitWorktreeService;
 import ia.mahi.store.WorkflowStore;
 import ia.mahi.workflow.core.Artifact;
+import ia.mahi.workflow.core.CoherenceViolation;
 import ia.mahi.workflow.core.DesignArtifact;
 import ia.mahi.workflow.core.DesignItem;
 import ia.mahi.workflow.core.DesignSummary;
@@ -161,9 +162,8 @@ public class WorkflowService {
         }
 
         reqs.getItems().put(reqId, req);
-        // propagateRequirementStale will be fully implemented in TASK-004.2
-        // Stub: reset stalePropagated metadata
-        context.getMetadata().put("stalePropagated", List.of());
+        List<String> stalePropagated = propagateRequirementStale(context, reqId);
+        context.getMetadata().put("stalePropagated", stalePropagated);
 
         return store.save(context);
     }
@@ -326,6 +326,128 @@ public class WorkflowService {
         }
 
         return phaseDurations;
+    }
+
+    // =========================================================================
+    // TASK-004.2 — Propagation STALE fine-grained REQ → DES
+    // =========================================================================
+
+    /**
+     * Marks as STALE all DesignItems that cover at least one AC of the given requirement.
+     * Already-STALE or MISSING design items are NOT re-signaled.
+     * Returns the list of IDs that were newly marked STALE.
+     */
+    private List<String> propagateRequirementStale(WorkflowContext context, String reqId) {
+        DesignArtifact designArtifact = designArtifact(context);
+        List<String> stalePropagated = new ArrayList<>();
+
+        for (DesignItem des : designArtifact.getItems().values()) {
+            if (des.getCoversAC() == null) continue;
+            boolean coversReqAC = des.getCoversAC().stream()
+                    .anyMatch(acId -> acId.startsWith(reqId + "."));
+            if (coversReqAC
+                    && des.getStatus() != ItemStatus.MISSING
+                    && des.getStatus() != ItemStatus.STALE) {
+                des.setStatus(ItemStatus.STALE);
+                stalePropagated.add(des.getId());
+            }
+        }
+
+        return stalePropagated;
+    }
+
+    // =========================================================================
+    // TASK-005.2 — Vérification de cohérence
+    // =========================================================================
+
+    /**
+     * Checks the coherence between requirements and design elements.
+     * Returns a list of violations (empty = coherent).
+     */
+    public List<CoherenceViolation> checkCoherence(String flowId) {
+        WorkflowContext context = store.load(flowId);
+        RequirementsArtifact reqs = requirementsArtifact(context);
+        DesignArtifact designArtifact = designArtifact(context);
+
+        List<CoherenceViolation> violations = new ArrayList<>();
+
+        // REQ sans AC
+        for (RequirementItem req : reqs.getItems().values()) {
+            if (req.getAcceptanceCriteria() == null || req.getAcceptanceCriteria().isEmpty()) {
+                violations.add(new CoherenceViolation(
+                        "REQ_NO_AC",
+                        req.getId(),
+                        req.getId() + " n'a aucun critère d'acceptation défini"
+                ));
+            }
+        }
+
+        // DES sans AC
+        for (DesignItem des : designArtifact.getItems().values()) {
+            if (des.getCoversAC() == null || des.getCoversAC().isEmpty()) {
+                violations.add(new CoherenceViolation(
+                        "DES_NO_AC",
+                        des.getId(),
+                        des.getId() + " ne couvre aucun critère d'acceptation"
+                ));
+            }
+        }
+
+        // AC inexistante référencée par un DES
+        for (DesignItem des : designArtifact.getItems().values()) {
+            if (des.getCoversAC() == null) continue;
+            for (String acId : des.getCoversAC()) {
+                var matcher = AC_ID_PATTERN.matcher(acId);
+                if (!matcher.matches()) {
+                    violations.add(new CoherenceViolation(
+                            "AC_NOT_FOUND",
+                            des.getId(),
+                            des.getId() + " référence " + acId + " qui n'existe pas"
+                    ));
+                    continue;
+                }
+                String reqId = matcher.group(1);
+                RequirementItem req = reqs.getItems().get(reqId);
+                if (req == null) {
+                    violations.add(new CoherenceViolation(
+                            "AC_NOT_FOUND",
+                            des.getId(),
+                            des.getId() + " référence " + acId + " qui n'existe pas"
+                    ));
+                } else {
+                    boolean acExists = req.getAcceptanceCriteria() != null &&
+                            req.getAcceptanceCriteria().stream().anyMatch(ac -> acId.equals(ac.id()));
+                    if (!acExists) {
+                        violations.add(new CoherenceViolation(
+                                "AC_NOT_FOUND",
+                                des.getId(),
+                                des.getId() + " référence " + acId + " qui n'existe pas"
+                        ));
+                    }
+                }
+            }
+        }
+
+        // AC orphelines (couvertes par aucun DES)
+        var acsCouvertes = designArtifact.getItems().values().stream()
+                .filter(d -> d.getCoversAC() != null)
+                .flatMap(d -> d.getCoversAC().stream())
+                .collect(java.util.stream.Collectors.toSet());
+
+        for (RequirementItem req : reqs.getItems().values()) {
+            if (req.getAcceptanceCriteria() == null) continue;
+            for (var ac : req.getAcceptanceCriteria()) {
+                if (!acsCouvertes.contains(ac.id())) {
+                    violations.add(new CoherenceViolation(
+                            "AC_ORPHAN",
+                            ac.id(),
+                            ac.id() + " n'est couverte par aucun élément de design"
+                    ));
+                }
+            }
+        }
+
+        return violations;
     }
 
     // =========================================================================
