@@ -4,6 +4,7 @@ import ia.mahi.service.ArtifactService;
 import ia.mahi.service.GitWorktreeService;
 import ia.mahi.store.WorkflowStore;
 import ia.mahi.workflow.core.AcceptanceCriterion;
+import ia.mahi.workflow.core.ArtifactStatus;
 import ia.mahi.workflow.core.DesignItem;
 import ia.mahi.workflow.core.ItemStatus;
 import ia.mahi.workflow.core.RequirementItem;
@@ -142,6 +143,49 @@ class StalePropagationTest {
         assertThat(stalePropagated).containsExactlyInAnyOrder("DES-001", "DES-002");
     }
 
+    /**
+     * updateDesignElement avec implementedBy non vide → artefact plan marqué STALE (DES-004)
+     */
+    @Test
+    void shouldMarkPlanStaleWhenDesignElementWithTasksIsUpdated() {
+        // Arrange: mark plan as VALID first (markStale is a no-op on MISSING artifacts)
+        workflowService.writeArtifact("spec-stale-test", "plan", "# Plan");
+
+        WorkflowContext beforeUpdate = workflowService.get("spec-stale-test");
+        assertThat(beforeUpdate.getArtifacts().get("plan").getStatus()).isEqualTo(ArtifactStatus.VALID);
+
+        // Update DES-001 with implementedBy tasks
+        DesignItem desWithTask = buildDes("DES-001", ItemStatus.VALID, List.of("REQ-001.AC-1"));
+        desWithTask.setImplementedBy(List.of("TASK-001"));
+
+        WorkflowContext ctx = workflowService.updateDesignElement("spec-stale-test", "DES-001", desWithTask);
+
+        // plan must be STALE
+        assertThat(ctx.getArtifacts().get("plan").getStatus()).isEqualTo(ArtifactStatus.STALE);
+
+        // stalePropagated must contain the task IDs
+        @SuppressWarnings("unchecked")
+        List<String> stalePropagated = (List<String>) ctx.getMetadata().get("stalePropagated");
+        assertThat(stalePropagated).containsExactly("TASK-001");
+    }
+
+    /**
+     * updateDesignElement sans implementedBy → plan non touché (DES-004)
+     */
+    @Test
+    void shouldNotMarkPlanStaleWhenDesignElementHasNoTasks() {
+        workflowService.writeArtifact("spec-stale-test", "plan", "# Plan");
+
+        DesignItem desWithoutTask = buildDes("DES-001", ItemStatus.VALID, List.of("REQ-001.AC-1"));
+        WorkflowContext ctx = workflowService.updateDesignElement("spec-stale-test", "DES-001", desWithoutTask);
+
+        assertThat(ctx.getArtifacts().get("plan").getStatus()).isEqualTo(ArtifactStatus.VALID);
+
+        @SuppressWarnings("unchecked")
+        List<String> stalePropagated = (List<String>) ctx.getMetadata().get("stalePropagated");
+        assertThat(stalePropagated).isEmpty();
+    }
+
     // --- Helpers ---
 
     private RequirementItem buildReq(String id, List<AcceptanceCriterion> acs) {
@@ -160,6 +204,7 @@ class StalePropagationTest {
         des.setTitle("Design " + id);
         des.setStatus(status);
         des.setCoversAC(coversAC);
+        des.setImplementedBy(List.of());
         return des;
     }
 }
