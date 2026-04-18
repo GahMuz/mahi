@@ -3,3 +3,4 @@
 .idea/
 mahi-mcp/build/classes/
 sdd-spec/
+.claude/settings.local.json

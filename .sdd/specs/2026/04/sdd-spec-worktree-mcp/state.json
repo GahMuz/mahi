@@ -1,0 +1,38 @@
+{
+  "id": "sdd-spec-worktree-mcp",
+  "title": "sdd-spec-worktree-mcp — Refonte architecturale : MCP, worktree et active.json sur branche principale",
+  "currentPhase": "completed",
+  "branch": "spec/vincent-bailly/sdd-spec-worktree-mcp",
+  "worktreePath": ".worktrees/sdd-spec-worktree-mcp",
+  "createdAt": "2026-04-18T23:00:00Z",
+  "updatedAt": "2026-04-19T01:00:00Z",
+  "phases": {
+    "requirements":   { "status": "approved", "startedAt": "2026-04-18T23:00:00Z", "approvedAt": "2026-04-18T23:55:00Z" },
+    "design":         { "status": "approved", "startedAt": "2026-04-18T23:55:00Z", "approvedAt": "2026-04-18T23:58:00Z" },
+    "worktree":       { "status": "completed", "startedAt": "2026-04-18T23:58:00Z", "completedAt": "2026-04-18T23:59:00Z" },
+    "planning":       { "status": "approved", "startedAt": "2026-04-18T23:59:00Z", "approvedAt": "2026-04-19T00:05:00Z" },
+    "implementation": { "status": "approved", "startedAt": "2026-04-19T00:05:00Z", "approvedAt": "2026-04-18T23:00:00Z" },
+    "finishing":      { "status": "approved", "startedAt": "2026-04-18T23:00:00Z", "approvedAt": "2026-04-19T01:30:00Z" },
+    "retrospective":  { "status": "completed", "startedAt": "2026-04-19T01:30:00Z", "completedAt": "2026-04-19T02:00:00Z" }
+  },
+  "changelog": [
+    {
+      "date": "2026-04-18T23:05:00Z",
+      "type": "clarification",
+      "description": "Ajout de REQ-004 : la liste des fichiers du plugin mahi-workflow à modifier est formalisée comme exigence traçable avec 6 critères d'acceptation détaillés.",
+      "affectedItems": ["REQ-004"]
+    },
+    {
+      "date": "2026-04-18T23:30:00Z",
+      "type": "clarification",
+      "description": "REQ-002 précisé : la résolution du chemin absolu vers la racine du dépôt est une responsabilité exclusive du serveur MCP Java (au démarrage, via git rev-parse). Le skill n'a pas à passer de path dans ses appels MCP. Reformulation des AC-1/2/3 et ajout AC-5.",
+      "affectedItems": ["REQ-002"]
+    },
+    {
+      "date": "2026-04-18T23:50:00Z",
+      "type": "clarification",
+      "description": "REQ-001 étendu à state.json : le MCP Java gère aussi state.json (outil dédié mahi_update_state), au même titre que active.json et registry.md. AC-1/2/4/5 mis à jour. REQ-004 élargi : périmètre des fichiers à modifier est minimal mais ouvert — la phase design peut identifier d'autres fichiers (ex. skills/adr/SKILL.md, tests). AC-7 ajouté. Tableau de synthèse et contexte codebase mis à jour.",
+      "affectedItems": ["REQ-001", "REQ-004"]
+    }
+  ]
+}

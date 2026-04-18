@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-04-18T23:58:00Z",
+  "total": 57,
+  "passed": 57,
+  "failed": 0,
+  "skipped": 0,
+  "modules": [
+    { "module": "mahi-mcp", "total": 57, "passed": 57, "failed": 0, "skipped": 0 }
+  ]
+}

@@ -38,9 +38,9 @@ When advancing from phase X to phase Y:
 1. Call `mahi_fire_event(workflowId, event="approve")` — the server handles the transition
 2. If the server returns an error: display the error message in French and stop
 3. The server response confirms the new currentPhase — use this for further instructions
-4. Update `Statut` column in `.sdd/specs/registry.md` to reflect the new phase
+4. Call `mahi_update_registry(workflowId, status: <newPhase>)` to reflect the new phase — do not write `registry.md` directly.
 
-Do NOT update `state.json` locally — all state is managed server-side.
+Do NOT update `state.json` or `registry.md` locally — all state is managed server-side.
 
 ## Reading Current Phase
 

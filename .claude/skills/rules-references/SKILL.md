@@ -17,6 +17,8 @@ Cet index permet le chargement paresseux : les agents lisent cette liste pour d�
 | Fichier | Domaine | Charger quand |
 |---------|---------|---------------|
 | `references/rules.md` | Transversal | Toujours (règles de base) |
+| `references/rules-service.md` | Services | Sous-tâches service, résolution de chemins, gestion de fichiers côté MCP |
+| `references/rules-test.md` | Tests | Sous-tâches test, services utilisant `@PostConstruct`, opérations fichier |
 
 Cet index s'enrichit automatiquement via la rétrospective à la fin de chaque spec.
 Exemples de fichiers ajoutés au fil du temps :
