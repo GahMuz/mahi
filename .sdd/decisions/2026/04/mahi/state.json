@@ -1,0 +1,16 @@
+{
+  "id": "mahi",
+  "adrNumber": "ADR-001",
+  "title": "mahi",
+  "currentPhase": "completed",
+  "createdAt": "2026-04-18T00:00:00Z",
+  "updatedAt": "2026-04-18T00:00:00Z",
+  "phases": {
+    "framing":       { "status": "approved",  "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "exploration":   { "status": "approved",  "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "discussion":    { "status": "approved",  "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "decision":      { "status": "approved",  "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "retrospective": { "status": "approved",  "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "completed":     { "status": "in-progress", "startedAt": "2026-04-18T00:00:00Z" }
+  }
+}

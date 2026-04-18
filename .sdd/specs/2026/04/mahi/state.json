@@ -1,0 +1,20 @@
+{
+  "id": "mahi",
+  "title": "mahi",
+  "currentPhase": "finishing",
+  "createdAt": "2026-04-18T00:00:00Z",
+  "updatedAt": "2026-04-18T00:00:00Z",
+  "phases": {
+    "requirements":    { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "design":          { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "worktree":        { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "planning":        { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "implementation":  { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "finishing":       { "status": "in-progress", "startedAt": "2026-04-18T00:00:00Z" },
+    "retrospective":   { "status": "pending" },
+    "completed":       { "status": "pending" }
+  },
+  "totalTasks": 12,
+  "totalSubtasks": 26,
+  "completedSubtasks": 26
+}

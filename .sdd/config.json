@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "0.41.0",
+  "languages": ["java"],
+  "pipelineReviews": true,
+  "parallelTaskLimit": 0,
+  "models": {
+    "orchestrator": "sonnet",
+    "task-implementer": "sonnet",
+    "code-reviewer": "opus",
+    "deep-dive": "opus",
+    "planner": "haiku",
+    "design-validator": "sonnet",
+    "spec-reviewer": "sonnet",
+    "doc-generator": "haiku",
+    "analyse-quality": "sonnet",
+    "analyse-architecture": "opus",
+    "analyse-compliance": "sonnet",
+    "graph-builder": "haiku",
+    "graph-query": "haiku"
+  },
+  "graph": {
+    "enabled": false,
+    "stacks": [],
+    "sourcePaths": {},
+    "stalenessThresholdDays": 7
+  },
+  "createdAt": "2026-04-18T00:00:00Z"
+}

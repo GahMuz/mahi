@@ -1,0 +1,4 @@
+.worktrees/
+.sdd/local/
+.idea/
+mahi-mcp/build/classes/
