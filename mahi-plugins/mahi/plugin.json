@@ -1,0 +1,9 @@
+{
+  "name": "mahi",
+  "version": "0.1.0",
+  "description": "Mahi MCP server — deterministic state machine for AI-driven workflows. Exposes state machine management (spec, adr, debug, find-bug) via MCP tools and resources. Compiled as a fat jar (Spring Boot 3.4, Java 21).",
+  "author": {
+    "name": "vincent-bailly"
+  },
+  "keywords": ["state-machine", "workflow", "mcp", "spec", "adr", "debug", "sdd", "java"]
+}

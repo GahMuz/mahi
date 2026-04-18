@@ -1,0 +1,44 @@
+{
+  "id": "mahi-workflow",
+  "title": "mahi-workflow — Migration fonctionnelle de sdd-spec vers Mahi",
+  "currentPhase": "finishing",
+  "branch": "spec/vincent-bailly/mahi-workflow",
+  "worktreePath": ".worktrees/mahi-workflow",
+  "phases": {
+    "requirements": "completed",
+    "design": "completed",
+    "worktree": "completed",
+    "planning": "completed",
+    "implementation": "completed",
+    "finishing": "in-progress",
+    "retrospective": "pending"
+  },
+  "createdAt": "2026-04-18T00:00:00Z",
+  "updatedAt": "2026-04-18T19:00:00Z",
+  "changelog": [
+    {
+      "date": "2026-04-18T12:00:00Z",
+      "type": "clarification",
+      "description": "Option A retenue : même repo, plugin dans mahi-plugins/mahi-workflow/. Le plugin configure automatiquement .mcp.json à l'installation avec référence au jar.",
+      "affectedItems": ["REQ-001", "REQ-002", "REQ-003", "REQ-004"]
+    },
+    {
+      "date": "2026-04-18T14:00:00Z",
+      "type": "clarification",
+      "description": "Le script d'installation est déclenché via Claude Code — hook PostInstall ou commande slash dédiée (ex. /mahi-setup). Pas de script shell/PowerShell manuel. Glossaire, REQ-002, REQ-003, REQ-004, REQ-005 mis à jour en conséquence.",
+      "affectedItems": ["REQ-002", "REQ-003", "REQ-004", "REQ-005"]
+    },
+    {
+      "date": "2026-04-18T16:00:00Z",
+      "type": "clarification",
+      "description": "REQ-002 (build automatique) supprimé. Le fat jar est un artefact de release commité dans mahi-plugins/mahi/mahi-mcp-server.jar. /mahi-setup configure uniquement .mcp.json avec le chemin absolu du jar pré-compilé. Java runtime suffit, pas Gradle. Choix DES-002 : Option C (/mahi-setup commande slash + plugin.local.md). REQ-003 à REQ-NF-001 mis à jour.",
+      "affectedItems": ["REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-NF-001"]
+    },
+    {
+      "date": "2026-04-18T17:00:00Z",
+      "type": "clarification",
+      "description": "Recentrage total du périmètre. Le spec couvre uniquement la migration fonctionnelle de sdd-spec vers mahi-workflow : copier le plugin sdd-spec dans mahi-plugins/mahi-workflow/ puis adapter skills et agents pour remplacer la gestion d'état LLM (state.json, active.json, transitions implicites) par les appels MCP Mahi (mahi_create_workflow, mahi_fire_event, mahi_get_workflow, mahi_write_artifact, mahi_add_requirement_info, etc.). La FSM stricte du serveur Mahi remplace les transitions implicites gérées par le LLM. Hors périmètre : installation du jar, configuration .mcp.json, /mahi-setup — ces sujets restent dans mahi-plugins/mahi/. Requirements et design entièrement réécrits.",
+      "affectedItems": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007", "REQ-NF-001", "REQ-NF-002", "REQ-NF-003", "DES-001", "DES-002", "DES-003", "DES-004", "DES-005", "DES-006", "DES-007"]
+    }
+  ]
+}

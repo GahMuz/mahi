@@ -1,0 +1,24 @@
+{
+  "name": "mahi-marketplace",
+  "owner": {
+    "name": "vincent-bailly",
+    "email": "vincent.bailly@preconys.com"
+  },
+  "metadata": {
+    "description": "Mahi — MCP State Machine Server and plugins for deterministic AI-driven workflows",
+    "author": {
+      "name": "vincent-bailly"
+    }
+  },
+  "plugins": [
+    {
+      "name": "mahi",
+      "source": "../mahi-plugins/mahi",
+      "description": "Mahi MCP server — deterministic state machine for AI-driven workflows (spec, adr, debug, find-bug). Replaces LLM-managed state with a strict Java state machine compiled as a fat jar.",
+      "version": "0.1.0",
+      "author": { "name": "vincent-bailly" },
+      "keywords": ["state-machine", "workflow", "mcp", "spec", "adr", "debug", "sdd", "java"],
+      "category": "development"
+    }
+  ]
+}
