@@ -1,8 +1,11 @@
 package ia.mahi.workflow.definitions.spec;
 
-import ia.mahi.workflow.core.Action;
 import ia.mahi.workflow.core.ArtifactDefinition;
+import ia.mahi.workflow.core.CoherenceChecker;
+import ia.mahi.workflow.core.CoherenceViolation;
+import ia.mahi.workflow.core.DesignArtifact;
 import ia.mahi.workflow.core.Guard;
+import ia.mahi.workflow.core.RequirementsArtifact;
 import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
@@ -11,6 +14,7 @@ import ia.mahi.workflow.core.WorkflowState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ia.mahi.workflow.definitions.spec.SpecEvent.*;
 import static ia.mahi.workflow.definitions.spec.SpecState.*;
@@ -30,12 +34,12 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "scenario",       new ArtifactDefinition("scenario"),
-                "rules",          new ArtifactDefinition("rules"),
-                "requirements",   new ArtifactDefinition("requirements"),
-                "design",         new ArtifactDefinition("design"),
-                "plan",           new ArtifactDefinition("plan"),
-                "retrospective",  new ArtifactDefinition("retrospective")
+                "scenario",      ArtifactDefinition.file("scenario"),
+                "rules",         ArtifactDefinition.file("rules"),
+                "requirements",  new ArtifactDefinition("requirements", () -> new RequirementsArtifact("requirements")),
+                "design",        new ArtifactDefinition("design",       () -> new DesignArtifact("design")),
+                "plan",          ArtifactDefinition.file("plan"),
+                "retrospective", ArtifactDefinition.file("retrospective")
         );
     }
 
@@ -55,9 +59,10 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
                 new TransitionDefinition(PROJECT_RULES_LOADED, DEFINE_REQUIREMENTS, REQUIREMENTS_DEFINED,
                         List.of(requireValid("rules")), List.of()));
 
+        // Guard: requireValid + coherence check before entering design phase
         t.put(key(REQUIREMENTS_DEFINED, DEFINE_DESIGN),
                 new TransitionDefinition(REQUIREMENTS_DEFINED, DEFINE_DESIGN, DESIGN_DEFINED,
-                        List.of(requireValid("requirements")), List.of()));
+                        List.of(requireValid("requirements"), coherenceGuard()), List.of()));
 
         t.put(key(DESIGN_DEFINED, DEFINE_PLAN),
                 new TransitionDefinition(DESIGN_DEFINED, DEFINE_PLAN, IMPLEMENTATION_PLAN_DEFINED,
@@ -104,6 +109,18 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     }
 
     @Override
+    public Map<String, String> getStateToPhaseMapping() {
+        return Map.of(
+                "REQUIREMENTS_DEFINED",       "requirements",
+                "DESIGN_DEFINED",             "design",
+                "IMPLEMENTATION_PLAN_DEFINED","planning",
+                "IMPLEMENTING",               "implementation",
+                "FINALIZING",                 "finishing",
+                "RETROSPECTIVE_DONE",         "retrospective"
+        );
+    }
+
+    @Override
     public Map<String, List<String>> getInvalidationGraph() {
         return Map.of(
                 "scenario",      List.of("requirements", "design", "plan"),
@@ -122,6 +139,28 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
             if (artifact == null || !artifact.isValid()) {
                 throw new IllegalStateException(
                         "Artifact '" + artifactName + "' must be VALID before this transition");
+            }
+        };
+    }
+
+    /**
+     * Guard that runs coherence checks before entering design phase.
+     * Delegates to CoherenceChecker to avoid logic duplication with WorkflowService.
+     */
+    private static Guard coherenceGuard() {
+        return (WorkflowContext context) -> {
+            if (!(context.getArtifacts().get("requirements") instanceof RequirementsArtifact reqs)) return;
+
+            DesignArtifact des = context.getArtifacts().get("design") instanceof DesignArtifact d ? d : null;
+
+            List<CoherenceViolation> violations = CoherenceChecker.check(reqs, des);
+
+            if (!violations.isEmpty()) {
+                String violationSummary = violations.stream()
+                        .map(v -> v.type() + ": " + v.message())
+                        .collect(Collectors.joining("; "));
+                throw new IllegalStateException(
+                        "Violations de cohérence détectées — corriger avant d'approuver: " + violationSummary);
             }
         };
     }

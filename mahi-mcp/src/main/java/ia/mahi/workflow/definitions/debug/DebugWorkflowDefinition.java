@@ -29,11 +29,11 @@ public class DebugWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "bug-report",   new ArtifactDefinition("bug-report"),
-                "reproduction", new ArtifactDefinition("reproduction"),
-                "root-cause",   new ArtifactDefinition("root-cause"),
-                "fix",          new ArtifactDefinition("fix"),
-                "test-report",  new ArtifactDefinition("test-report")
+                "bug-report",   ArtifactDefinition.file("bug-report"),
+                "reproduction", ArtifactDefinition.file("reproduction"),
+                "root-cause",   ArtifactDefinition.file("root-cause"),
+                "fix",          ArtifactDefinition.file("fix"),
+                "test-report",  ArtifactDefinition.file("test-report")
         );
     }
 

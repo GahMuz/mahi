@@ -1,6 +1,7 @@
 package ia.mahi.definitions;
 
 import ia.mahi.store.WorkflowStore;
+import ia.mahi.workflow.core.Artifact;
 import ia.mahi.workflow.core.ArtifactStatus;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
@@ -132,7 +133,7 @@ class SpecWorkflowDefinitionTest {
 
     private void markAndSave(String flowId, String artifactName) {
         WorkflowContext ctx = store.load(flowId);
-        var artifact = ctx.getArtifacts().get(artifactName);
+        Artifact artifact = ctx.getArtifacts().get(artifactName);
         artifact.markDraft("/tmp/" + artifactName + ".md");
         artifact.markValid();
         store.save(ctx);

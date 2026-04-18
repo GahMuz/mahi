@@ -29,10 +29,10 @@ public class AdrWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "framing",       new ArtifactDefinition("framing"),
-                "options",       new ArtifactDefinition("options"),
-                "adr",           new ArtifactDefinition("adr"),
-                "retrospective", new ArtifactDefinition("retrospective")
+                "framing",       ArtifactDefinition.file("framing"),
+                "options",       ArtifactDefinition.file("options"),
+                "adr",           ArtifactDefinition.file("adr"),
+                "retrospective", ArtifactDefinition.file("retrospective")
         );
     }
 

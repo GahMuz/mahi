@@ -27,9 +27,9 @@ public class FindBugWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "scan-report", new ArtifactDefinition("scan-report"),
-                "triage",      new ArtifactDefinition("triage"),
-                "bug-list",    new ArtifactDefinition("bug-list")
+                "scan-report", ArtifactDefinition.file("scan-report"),
+                "triage",      ArtifactDefinition.file("triage"),
+                "bug-list",    ArtifactDefinition.file("bug-list")
         );
     }
 

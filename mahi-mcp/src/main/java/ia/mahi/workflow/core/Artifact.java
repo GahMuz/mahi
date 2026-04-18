@@ -1,12 +1,26 @@
 package ia.mahi.workflow.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 import java.time.Instant;
 
 /**
- * Tracks the lifecycle state of a workflow artifact.
- * Lifecycle: MISSING → DRAFT → VALID → STALE (if invalidated)
+ * Abstract base class for all workflow artifacts.
+ * Unifies artifact lifecycle (MISSING → DRAFT → VALID ⇄ STALE) with optional structured content.
+ *
+ * Replaces ArtifactState — same lifecycle methods, same field names for backward-compatibility.
+ *
+ * Jackson polymorphic discriminator: "artifactType"
  */
-public class ArtifactState {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "artifactType")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = FileArtifact.class,         name = "file"),
+        @JsonSubTypes.Type(value = RequirementsArtifact.class, name = "requirements"),
+        @JsonSubTypes.Type(value = DesignArtifact.class,       name = "design")
+})
+public abstract class Artifact {
 
     private String name;
     private ArtifactStatus status;
@@ -15,10 +29,10 @@ public class ArtifactState {
     private Instant updatedAt;
 
     /** Default constructor for JSON deserialization. */
-    public ArtifactState() {
+    protected Artifact() {
     }
 
-    public ArtifactState(String name) {
+    protected Artifact(String name) {
         this.name = name;
         this.status = ArtifactStatus.MISSING;
         this.version = 0;
@@ -44,6 +58,7 @@ public class ArtifactState {
         }
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return this.status == ArtifactStatus.VALID;
     }

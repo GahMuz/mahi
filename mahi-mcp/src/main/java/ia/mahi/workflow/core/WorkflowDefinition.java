@@ -30,4 +30,14 @@ public interface WorkflowDefinition {
      * Key = artifact name, Value = list of dependent artifact names.
      */
     Map<String, List<String>> getInvalidationGraph();
+
+    /**
+     * Maps FSM state names to human-readable phase names for duration metrics.
+     * Default implementation returns an empty map (no phase tracking for non-spec workflows).
+     * Override in spec workflows to enable phaseDurations calculation.
+     * Key = state name (e.g., "REQUIREMENTS_DEFINED"), Value = phase name (e.g., "requirements").
+     */
+    default Map<String, String> getStateToPhaseMapping() {
+        return Map.of();
+    }
 }

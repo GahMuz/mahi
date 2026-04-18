@@ -1,18 +1,18 @@
 {
   "id": "mcp-for-spec",
   "title": "mcp-for-spec — Extension du serveur Mahi MCP",
-  "currentPhase": "implementation",
+  "currentPhase": "finishing",
   "branch": "spec/vincent-bailly/mcp-for-spec",
   "worktreePath": ".worktrees/mcp-for-spec",
   "createdAt": "2026-04-18T00:00:00Z",
-  "updatedAt": "2026-04-18T14:00:00Z",
+  "updatedAt": "2026-04-18T21:00:00Z",
   "phases": {
-    "requirements":    { "status": "approved",   "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
-    "design":          { "status": "approved",   "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
-    "worktree":        { "status": "completed",  "startedAt": "2026-04-18T00:00:00Z", "completedAt": "2026-04-18T00:00:00Z" },
-    "planning":        { "status": "approved",   "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T14:00:00Z" },
-    "implementation":  { "status": "in_progress","startedAt": "2026-04-18T14:00:00Z" },
-    "finishing":       { "status": "pending" },
-    "retrospective":   { "status": "pending" }
+    "requirements":   { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "design":         { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T00:00:00Z" },
+    "worktree":       { "status": "completed",   "startedAt": "2026-04-18T00:00:00Z", "completedAt": "2026-04-18T00:00:00Z" },
+    "planning":       { "status": "approved",    "startedAt": "2026-04-18T00:00:00Z", "approvedAt": "2026-04-18T14:00:00Z" },
+    "implementation": { "status": "completed",   "startedAt": "2026-04-18T14:00:00Z", "completedAt": "2026-04-18T21:00:00Z" },
+    "finishing":      { "status": "in_progress", "startedAt": "2026-04-18T21:00:00Z" },
+    "retrospective":  { "status": "pending" }
   }
 }
