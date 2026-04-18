@@ -41,7 +41,7 @@ Extract subcommand from user input:
 ## CHECK_STATE
 
 1. Check `.sdd/config.json` exists. If not: "Lancez `/sdd-init` d'abord pour configurer le projet."
-2. Read `.sdd/local/active.json`. If present: show that spec prominently with its current phase (retrieved via `mahi_get_workflow(workflowId)`). If absent: "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
+2. Read `.sdd/local/active.json`. If present: call `mahi_get_workflow(workflowId)` to retrieve current phase — if the call fails, display: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. Show that spec prominently with its current phase. If absent: "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
 
 ## START_NEW
 
@@ -63,7 +63,7 @@ Extract subcommand from user input:
 2. Read `.sdd/local/active.json`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
 3. Write `.sdd/local/active.json` with this spec's ID, path, activatedAt, and **workflowId** (no currentPhase field).
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
-5. Call `mahi_get_workflow(workflowId)` → currentPhase. If in implementation → follow `references/protocol-resume.md`.
+5. Call `mahi_get_workflow(workflowId)` → currentPhase. If the call fails: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. If in implementation → follow `references/protocol-resume.md`.
 6. Report state (in French) and resume.
 
 ## RECAP
