@@ -106,6 +106,18 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     }
 
     @Override
+    public Map<String, String> getStateToPhaseMapping() {
+        return Map.of(
+                "REQUIREMENTS_DEFINED",      "requirements",
+                "DESIGN_DEFINED",            "design",
+                "IMPLEMENTATION_PLAN_DEFINED","planning",
+                "IMPLEMENTING",              "implementation",
+                "FINALIZING",                "finishing",
+                "RETROSPECTIVE_DONE",        "retrospective"
+        );
+    }
+
+    @Override
     public Map<String, List<String>> getInvalidationGraph() {
         return Map.of(
                 "scenario",      List.of("requirements", "design", "plan"),
