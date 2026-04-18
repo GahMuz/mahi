@@ -1,0 +1,94 @@
+package ia.mahi.mcp;
+
+import ia.mahi.service.ActiveStateService;
+import ia.mahi.service.StateFileService;
+import ia.mahi.workflow.core.ActiveState;
+import ia.mahi.workflow.core.ChangelogEntry;
+import ia.mahi.workflow.core.StateSnapshot;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * TASK-001.3 [RED] — Tests pour les 4 nouvelles méthodes MCP dans WorkflowTools.
+ * Ces tests sont écrits avant l'implémentation (TDD RED).
+ */
+@ExtendWith(MockitoExtension.class)
+class WorkflowToolsActivationTest {
+
+    @Mock
+    private ActiveStateService activeStateService;
+
+    @Mock
+    private StateFileService stateFileService;
+
+    private WorkflowTools workflowTools;
+
+    @BeforeEach
+    void setUp() {
+        // WorkflowTools needs to accept ActiveStateService and StateFileService
+        workflowTools = new WorkflowTools(null, activeStateService, stateFileService);
+    }
+
+    @Test
+    void activate_shouldDelegateToActiveStateService() {
+        ActiveState expected = new ActiveState("spec", "my-spec", "wf-uuid",
+                ".sdd/specs/2026/04/my-spec", Instant.now());
+        when(activeStateService.activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "wf-uuid"))
+                .thenReturn(expected);
+
+        ActiveState result = workflowTools.activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "wf-uuid");
+
+        verify(activeStateService).activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "wf-uuid");
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void deactivate_shouldDelegateToActiveStateService() {
+        workflowTools.deactivate();
+
+        verify(activeStateService).deactivate();
+    }
+
+    @Test
+    void updateRegistry_shouldDelegateToActiveStateService() {
+        workflowTools.updateRegistry("my-spec", "design", "My Spec Title", "2026/04");
+
+        verify(activeStateService).updateRegistry("my-spec", "design", "My Spec Title", "2026/04");
+    }
+
+    @Test
+    void updateState_shouldDelegateToStateFileServiceAndReturnSnapshot() {
+        StateSnapshot expected = new StateSnapshot("my-spec", "design", Instant.now(), List.of());
+        when(stateFileService.updateState("/absolute/path/my-spec", "design", null))
+                .thenReturn(expected);
+
+        StateSnapshot result = workflowTools.updateState("/absolute/path/my-spec", "design", null);
+
+        verify(stateFileService).updateState("/absolute/path/my-spec", "design", null);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void updateState_withChangelogEntry_shouldPassEntryToService() {
+        ChangelogEntry entry = new ChangelogEntry(Instant.now(), "transition",
+                "Phase approved", List.of("REQ-001"));
+        StateSnapshot expected = new StateSnapshot("my-spec", "design", Instant.now(), List.of(entry));
+        when(stateFileService.updateState("/absolute/path/my-spec", "design", entry))
+                .thenReturn(expected);
+
+        StateSnapshot result = workflowTools.updateState("/absolute/path/my-spec", "design", entry);
+
+        verify(stateFileService).updateState("/absolute/path/my-spec", "design", entry);
+        assertThat(result).isEqualTo(expected);
+    }
+}

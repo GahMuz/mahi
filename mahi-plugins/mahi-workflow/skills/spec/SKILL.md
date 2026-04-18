@@ -51,9 +51,10 @@ Extract subcommand from user input:
 3. Create `.sdd/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
 4. Create empty `rule-candidates.md` in the spec directory (header only: `# Règles candidates`).
 5. Call `mahi_create_workflow(type="spec", title="<titre>")` — store the returned `workflowId`.
+   Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to create the branch and enter the worktree.
 6. Write initial log.md with creation entry: date, title, "Spec créé".
-7. Add a row to `.sdd/specs/registry.md` with statut `requirements` and links to the three doc files.
-8. Write `.sdd/local/active.json` with new spec ID, path, activatedAt, and **workflowId** (no currentPhase field).
+7. Call `mahi_update_registry(specId, "requirements", title, period)` to add the spec row in registry.
+8. Call `mahi_activate(specId, "spec", path, workflowId)` to write `.sdd/local/active.json` on the main branch.
 9. Enter requirements phase — read and follow `references/phase-requirements.md`.
 
 ## OPEN
@@ -61,7 +62,7 @@ Extract subcommand from user input:
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
 1. Read `.sdd/specs/registry.md`. Title given → find matching row. No title → list non-completed rows, ask user (in French).
 2. Read `.sdd/local/active.json`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
-3. Write `.sdd/local/active.json` with this spec's ID, path, activatedAt, and **workflowId** (no currentPhase field).
+3. Call `mahi_activate(specId, "spec", path, workflowId)` to write `.sdd/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
 5. Call `mahi_get_workflow(workflowId)` → currentPhase. If the call fails: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. If in implementation → follow `references/protocol-resume.md`.
 6. Report state (in French) and resume.
@@ -89,7 +90,8 @@ Read and follow `references/phase-recap.md`.
      - planning → implementation: follow `references/phase-execution.md`
      - finishing → retrospective: follow `references/phase-retro.md`
      - retrospective → completed: follow `references/phase-retro.md`
-4. Update `Statut` column in `.sdd/specs/registry.md`.
+4. Call `mahi_update_registry(specId, <newPhase>)` to update the status column in registry.
+   Call `mahi_update_state(specPath, <newPhase>, changelogEntry)` to update state.json for the spec.
 
 ## CLARIFY
 
@@ -104,8 +106,8 @@ Read and follow `references/protocol-clarify.md`.
    - Call `mahi_remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
    - Call `mahi_fire_event(workflowId, event="discard")` — marks the workflow as discarded on the server.
    - Remove `.sdd/specs/YYYY/MM/<id>/`.
-3. Remove row from `.sdd/specs/registry.md`.
-4. Delete `.sdd/local/active.json`.
+3. Call `mahi_update_registry(specId, "discarded")` to mark the row as discarded in registry.
+4. Call `ExitWorktree()` to return to the main branch, then call `mahi_deactivate()` to delete `.sdd/local/active.json`.
 5. Confirm completion.
 
 ## SPLIT

@@ -191,8 +191,8 @@ Préoccupation `<concern B label>` extraite vers la spec `<new-spec-id>`.
 ```
 
 ### Step 8: Update Registry
-Add a new row to `.sdd/specs/registry.md` for the new spec with its phase and doc links.
-Update the original spec row's `Statut` if it changed.
+Call `mahi_update_registry(<new-spec-id>, <phase>, title, period)` to add the new spec row.
+If the original spec's status changed: call `mahi_update_registry(<original-spec-id>, <phase>)` to update it.
 
 ### Step 8b: Split Memory Entry
 Follow the **Impact sur SPLIT** section in `references/protocol-context.md` to distribute the memory entry between the two specs.
@@ -213,7 +213,8 @@ Quelle spec souhaitez-vous continuer ? (A / B)
 ```
 
 Once the user answers:
-- Write `.sdd/local/active.json` for the chosen spec (with `workflowId`).
+- Call `mahi_activate(specId, "spec", path, workflowId)` for the chosen spec.
+- Call `mahi_update_state(specPath, <initialPhase>, null)` to initialize state.json for the new derived spec.
 - The other spec is ready to open later with `/spec open <titre>`.
 
 ## Cross-Reference Integrity Rules
