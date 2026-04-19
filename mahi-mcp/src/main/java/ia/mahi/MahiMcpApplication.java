@@ -10,8 +10,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Spring AI 1.1.x : l'auto-configuration MCP scanne automatiquement les beans @Service
- * portant des méthodes @Tool (annotation-scanner activé par défaut).
+ * Spring AI 1.1.x : l'auto-configuration MCP scanne automatiquement les beans Spring
+ * portant des méthodes @McpTool / @McpResource (annotation-scanner activé par défaut).
  * WorkflowTools et ArtifactResources sont enregistrés sans déclaration explicite.
  */
 @SpringBootApplication

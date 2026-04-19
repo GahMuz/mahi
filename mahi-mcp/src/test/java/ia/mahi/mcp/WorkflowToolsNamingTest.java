@@ -1,7 +1,7 @@
 package ia.mahi.mcp;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.tool.annotation.Tool;
+import org.springaicommunity.mcp.annotation.McpTool;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * TASK-008.1 — Convention de nommage des outils MCP (REQ-NF-001).
- * Vérifie par réflexion que tous les @Tool(name=...) de WorkflowTools
+ * Vérifie par réflexion que tous les @McpTool(name=...) de WorkflowTools
  * respectent le pattern mahi_[a-z]+(_[a-z]+)*.
  */
 class WorkflowToolsNamingTest {
@@ -24,7 +24,7 @@ class WorkflowToolsNamingTest {
         List<String> violations = new ArrayList<>();
 
         for (Method method : WorkflowTools.class.getMethods()) {
-            Tool toolAnnotation = method.getAnnotation(Tool.class);
+            McpTool toolAnnotation = method.getAnnotation(McpTool.class);
             if (toolAnnotation != null) {
                 String toolName = toolAnnotation.name();
                 if (!TOOL_NAME_PATTERN.matcher(toolName).matches()) {
@@ -34,7 +34,7 @@ class WorkflowToolsNamingTest {
         }
 
         assertThat(violations)
-                .as("All @Tool names in WorkflowTools must match pattern mahi_[a-z]+(_[a-z]+)*\n" +
+                .as("All @McpTool names in WorkflowTools must match pattern mahi_[a-z]+(_[a-z]+)*\n" +
                         "Violations found:\n" + String.join("\n", violations))
                 .isEmpty();
     }
@@ -43,7 +43,7 @@ class WorkflowToolsNamingTest {
     void shouldHaveAtLeastTenMahiTools() {
         long toolCount = 0;
         for (Method method : WorkflowTools.class.getMethods()) {
-            if (method.isAnnotationPresent(Tool.class)) {
+            if (method.isAnnotationPresent(McpTool.class)) {
                 toolCount++;
             }
         }
