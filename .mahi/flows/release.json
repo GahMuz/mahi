@@ -1,0 +1,351 @@
+{
+  "flowId" : "release",
+  "workflowType" : "spec",
+  "state" : "COMPLETED",
+  "artifacts" : {
+    "requirements" : {
+      "artifactType" : "requirements",
+      "name" : "requirements",
+      "status" : "VALID",
+      "version" : 1,
+      "path" : ".mahi\\artifacts\\release\\requirements.md",
+      "updatedAt" : "2026-04-19T13:55:32.857032800Z",
+      "items" : {
+        "REQ-001" : {
+          "id" : "REQ-001",
+          "title" : "Vérification des pré-conditions avant release",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-001.AC-1",
+            "description" : "QUAND l'utilisateur invoque /release ALORS LA commande DOIT vérifier que la branche git courante est main"
+          }, {
+            "id" : "REQ-001.AC-2",
+            "description" : "QUAND la branche courante n'est pas main ALORS LA commande DOIT refuser avec le message : \"Release impossible : vous n'êtes pas sur la branche main (branche courante : <nom>).\""
+          }, {
+            "id" : "REQ-001.AC-3",
+            "description" : "QUAND le fichier .sdd/local/active.json existe ALORS LA commande DOIT refuser avec le message : \"Release impossible : un spec ou ADR est actuellement actif. Fermez-le d'abord.\""
+          }, {
+            "id" : "REQ-001.AC-4",
+            "description" : "QUAND le repo git contient des fichiers modifiés non commités ALORS LA commande DOIT afficher un avertissement et demander confirmation avant de continuer"
+          }, {
+            "id" : "REQ-001.AC-5",
+            "description" : "QUAND toutes les pré-conditions sont satisfaites ALORS LA commande DOIT afficher : \"Pré-conditions vérifiées — prêt pour la release.\""
+          } ],
+          "content" : "En tant que mainteneur du projet Mahi, je veux que la commande /release vérifie les pré-conditions avant de démarrer afin d'éviter de publier une version depuis un état incohérent du repo."
+        },
+        "REQ-002" : {
+          "id" : "REQ-002",
+          "title" : "Saisie et validation de la version cible",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-002.AC-1",
+            "description" : "QUAND les pré-conditions sont validées ALORS LA commande DOIT lire la version courante depuis mahi-mcp/build.gradle.kts et calculer la version patch par défaut en incrémentant le PATCH de 1 et en supprimant le suffixe -SNAPSHOT"
+          }, {
+            "id" : "REQ-002.AC-2",
+            "description" : "LA commande DOIT proposer cette version par défaut : \"Numéro de version pour cette release [X.Y.Z] ? (Entrée = valider, ou saisir major/minor/patch)\""
+          }, {
+            "id" : "REQ-002.AC-3",
+            "description" : "QUAND l'utilisateur appuie sur Entrée sans saisir ALORS LA commande DOIT utiliser la version patch proposée par défaut"
+          }, {
+            "id" : "REQ-002.AC-4",
+            "description" : "QUAND l'utilisateur saisit major, minor ou patch ALORS LA commande DOIT calculer et proposer la version correspondante avant confirmation"
+          }, {
+            "id" : "REQ-002.AC-5",
+            "description" : "LE format de la version finale DOIT respecter le pattern MAJOR.MINOR.PATCH (uniquement des chiffres séparés par des points, sans suffixe)"
+          }, {
+            "id" : "REQ-002.AC-6",
+            "description" : "QUAND la version saisie ne respecte pas le format ALORS LA commande DOIT rejeter la saisie et redemander"
+          }, {
+            "id" : "REQ-002.AC-7",
+            "description" : "QUAND la version est validée ALORS LA commande DOIT afficher un récapitulatif : \"Release v<version> — confirmer ? (oui / annuler)\""
+          } ],
+          "content" : "En tant que mainteneur, je veux saisir le numéro de version cible de la release afin que le processus de publication utilise la version correcte dans tous les artefacts."
+        },
+        "REQ-003" : {
+          "id" : "REQ-003",
+          "title" : "Mise à jour des fichiers de version",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-003.AC-1",
+            "description" : "QUAND la release est confirmée ALORS LA commande DOIT mettre à jour la version dans mahi-mcp/build.gradle.kts (version = \"X.Y.Z-SNAPSHOT\" → version = \"X.Y.Z\")"
+          }, {
+            "id" : "REQ-003.AC-2",
+            "description" : "LA commande DOIT mettre à jour le champ \"version\" dans mahi-plugins/mahi/.claude-plugin/plugin.json"
+          }, {
+            "id" : "REQ-003.AC-3",
+            "description" : "LA commande DOIT mettre à jour le champ \"version\" correspondant à mahi dans .claude-plugin/marketplace.json"
+          }, {
+            "id" : "REQ-003.AC-4",
+            "description" : "QUAND un fichier à modifier n'existe pas ou ne contient pas la version attendue ALORS LA commande DOIT signaler l'incohérence et s'arrêter avant toute modification"
+          }, {
+            "id" : "REQ-003.AC-5",
+            "description" : "LES trois fichiers DOIVENT être mis à jour atomiquement (tous ou aucun) — stratégie Option A : vérification stricte en amont avant toute écriture"
+          } ],
+          "content" : "En tant que mainteneur, je veux que la commande mette à jour automatiquement tous les fichiers contenant le numéro de version afin que la release soit cohérente à travers tous les artefacts du projet."
+        },
+        "REQ-004" : {
+          "id" : "REQ-004",
+          "title" : "Build du jar via Gradle",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-004.AC-1",
+            "description" : "QUAND les versions sont mises à jour ALORS LA commande DOIT exécuter le build Gradle depuis le répertoire mahi-mcp/"
+          }, {
+            "id" : "REQ-004.AC-2",
+            "description" : "SUR Windows, LE build DOIT utiliser gradlew.bat bootJar"
+          }, {
+            "id" : "REQ-004.AC-3",
+            "description" : "SUR Unix/macOS, LE build DOIT utiliser ./gradlew bootJar"
+          }, {
+            "id" : "REQ-004.AC-4",
+            "description" : "LA détection de l'OS DOIT être automatique — la commande ne DOIT PAS demander à l'utilisateur de choisir la plateforme"
+          }, {
+            "id" : "REQ-004.AC-5",
+            "description" : "QUAND le build échoue ALORS LA commande DOIT afficher la sortie d'erreur Gradle et proposer de corriger avant de continuer"
+          }, {
+            "id" : "REQ-004.AC-6",
+            "description" : "QUAND le build réussit ALORS LA commande DOIT vérifier que mahi-plugins/mahi/mahi-mcp-server.jar a bien été mis à jour"
+          } ],
+          "content" : "En tant que mainteneur, je veux que la commande déclenche automatiquement le build Gradle afin que le jar mahi-mcp-server.jar soit recompilé et copié dans le plugin avec la bonne version."
+        },
+        "REQ-005" : {
+          "id" : "REQ-005",
+          "title" : "Commit et tag git de la release",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-005.AC-1",
+            "description" : "QUAND le build réussit ALORS LA commande DOIT stager : mahi-mcp/build.gradle.kts, mahi-plugins/mahi/.claude-plugin/plugin.json, mahi-plugins/mahi/mahi-mcp-server.jar, .claude-plugin/marketplace.json"
+          }, {
+            "id" : "REQ-005.AC-2",
+            "description" : "LE message de commit DOIT suivre le format : chore(release): release v<version>"
+          }, {
+            "id" : "REQ-005.AC-3",
+            "description" : "LA commande DOIT créer un tag git annoté v<version> sur le commit de release"
+          }, {
+            "id" : "REQ-005.AC-4",
+            "description" : "LE tag DOIT inclure le message : Release v<version>"
+          }, {
+            "id" : "REQ-005.AC-5",
+            "description" : "QUAND le commit ou le tag échoue ALORS LA commande DOIT afficher l'erreur et informer l'utilisateur que les fichiers ont déjà été modifiés"
+          }, {
+            "id" : "REQ-005.AC-6",
+            "description" : "QUAND le commit et le tag sont créés ALORS LA commande DOIT pousser vers le remote : git push origin main --tags"
+          }, {
+            "id" : "REQ-005.AC-7",
+            "description" : "QUAND le push réussit ALORS LA commande DOIT afficher : \"Release v<version> publiée (commit <hash>, tag v<version>).\""
+          }, {
+            "id" : "REQ-005.AC-8",
+            "description" : "QUAND le push échoue ALORS LA commande DOIT afficher l'erreur et informer l'utilisateur que le commit et le tag sont créés localement"
+          } ],
+          "content" : "En tant que mainteneur, je veux que la commande crée automatiquement le commit et le tag git de la release afin que la version soit traçable dans l'historique git."
+        },
+        "REQ-006" : {
+          "id" : "REQ-006",
+          "title" : "Remise en version SNAPSHOT après release",
+          "priority" : "souhaitable",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-006.AC-1",
+            "description" : "QUAND le tag de release est créé ALORS LA commande DOIT mettre à jour build.gradle.kts en incrémentant le patch et ajoutant -SNAPSHOT (ex. 0.2.0 → 0.2.1-SNAPSHOT)"
+          }, {
+            "id" : "REQ-006.AC-2",
+            "description" : "LA commande DOIT committer ce changement avec le message : chore(release): bump to <version>-SNAPSHOT"
+          }, {
+            "id" : "REQ-006.AC-3",
+            "description" : "LE fichier plugin.json et marketplace.json NE DOIVENT PAS être modifiés lors de ce bump"
+          }, {
+            "id" : "REQ-006.AC-4",
+            "description" : "QUAND le bump échoue ALORS LA commande DOIT informer l'utilisateur et ne pas bloquer"
+          } ],
+          "content" : "En tant que mainteneur, je veux que la commande remette automatiquement build.gradle.kts en version SNAPSHOT après la release afin que le développement suivant reparte sur une version de développement correcte."
+        },
+        "REQ-NF-001" : {
+          "id" : "REQ-NF-001",
+          "title" : "Implémentation en tant que slash command du repo",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-NF-001.AC-1",
+            "description" : "LA commande DOIT être définie dans .claude/commands/release.md à la racine du repo"
+          }, {
+            "id" : "REQ-NF-001.AC-2",
+            "description" : "LA commande NE DOIT PAS être placée dans mahi-plugins/ ni déclarée dans plugin.json"
+          }, {
+            "id" : "REQ-NF-001.AC-3",
+            "description" : "LA commande NE DOIT PAS être publiée dans marketplace.json"
+          }, {
+            "id" : "REQ-NF-001.AC-4",
+            "description" : "LA commande DOIT être accessible via /release dans Claude Code quand la session est ouverte à la racine du repo Mahi"
+          } ],
+          "content" : "En tant que mainteneur, je veux que /release soit une commande définie dans .claude/commands/ du repo afin qu'elle soit disponible uniquement dans ce projet et non publiée comme un plugin marketplace."
+        },
+        "REQ-NF-002" : {
+          "id" : "REQ-NF-002",
+          "title" : "Compatibilité cross-plateforme Windows / Unix",
+          "priority" : "obligatoire",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-NF-002.AC-1",
+            "description" : "LA commande DOIT détecter automatiquement l'OS pour choisir gradlew.bat ou gradlew"
+          }, {
+            "id" : "REQ-NF-002.AC-2",
+            "description" : "LA commande NE DOIT PAS requérir d'adaptation manuelle selon la plateforme"
+          }, {
+            "id" : "REQ-NF-002.AC-3",
+            "description" : "LES chemins de fichiers utilisés par la commande DOIVENT être compatibles avec les deux systèmes de fichiers"
+          } ],
+          "content" : "En tant que mainteneur travaillant sur Windows ou Unix, je veux que le script de release fonctionne sans modification sur les deux plateformes afin de ne pas maintenir deux versions de la commande."
+        },
+        "REQ-NF-003" : {
+          "id" : "REQ-NF-003",
+          "title" : "Idempotence et sécurité des modifications",
+          "priority" : "souhaitable",
+          "status" : "VALID",
+          "acceptanceCriteria" : [ {
+            "id" : "REQ-NF-003.AC-1",
+            "description" : "QUAND la commande est annulée avant le commit ALORS LE repo DOIT pouvoir être restauré à son état initial via git restore ."
+          }, {
+            "id" : "REQ-NF-003.AC-2",
+            "description" : "LA commande DOIT informer l'utilisateur des actions déjà effectuées si elle est interrompue après le commit"
+          }, {
+            "id" : "REQ-NF-003.AC-3",
+            "description" : "LA commande NE DOIT PAS supprimer ni écraser des données sans confirmation préalable"
+          } ],
+          "content" : "En tant que mainteneur, je veux que la commande soit sûre à annuler en cas d'erreur afin de ne pas laisser le repo dans un état incohérent si la release échoue à mi-chemin."
+        }
+      }
+    },
+    "design" : {
+      "artifactType" : "design",
+      "name" : "design",
+      "status" : "VALID",
+      "version" : 1,
+      "path" : ".mahi\\artifacts\\release\\design.md",
+      "updatedAt" : "2026-04-19T14:09:22.036952Z",
+      "items" : {
+        "DES-003" : {
+          "id" : "DES-003",
+          "title" : "Saisie et validation de la version cible",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-002.AC-1", "REQ-002.AC-2", "REQ-002.AC-3", "REQ-002.AC-4", "REQ-002.AC-5", "REQ-002.AC-6", "REQ-002.AC-7" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Lecture build.gradle.kts, calcul 3 variantes (patch/minor/major), boucle de saisie avec validation format MAJOR.MINOR.PATCH, confirmation finale. Aucune écriture dans cette étape."
+        },
+        "DES-007" : {
+          "id" : "DES-007",
+          "title" : "Bump SNAPSHOT post-release",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-006.AC-1", "REQ-006.AC-2", "REQ-006.AC-3", "REQ-006.AC-4" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Modification unique de build.gradle.kts : version release PATCH+1 + -SNAPSHOT. Commit dédié : chore(release): bump to <patch+1>-SNAPSHOT. plugin.json et marketplace.json non touchés — conservent la version de release. Échec non bloquant."
+        },
+        "DES-001" : {
+          "id" : "DES-001",
+          "title" : "Structure de la slash command /release",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-001.AC-1" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Slash command Markdown dans .claude/commands/release.md avec frontmatter allowed-tools: [Read, Bash, Edit]. Structure en 6 étapes séquentielles. Couvre REQ-NF-001 (slash command du repo uniquement, pas dans plugin.json ni marketplace.json)."
+        },
+        "DES-002" : {
+          "id" : "DES-002",
+          "title" : "Vérification des pré-conditions",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-001.AC-1", "REQ-001.AC-2", "REQ-001.AC-3", "REQ-001.AC-4", "REQ-001.AC-5" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "3 vérifications séquentielles : branche=main, absence active.json, repo git propre (confirmation si sale). Arrêt immédiat sur les deux premières. Confirmation optionnelle pour la troisième. Couvre REQ-NF-003 (sécurité : pas de suppression sans confirmation)."
+        },
+        "DES-004" : {
+          "id" : "DES-004",
+          "title" : "Mise à jour atomique des fichiers de version (Option A)",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-003.AC-1", "REQ-003.AC-2", "REQ-003.AC-3", "REQ-003.AC-4", "REQ-003.AC-5" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Phase vérification parallèle (Read) : build.gradle.kts, mahi-plugins/mahi/.claude-plugin/plugin.json, .claude-plugin/marketplace.json. Si cohérents → mise à jour (Edit séquentiel). Arrêt si incohérence. Chemins corrigés vs requirements. Couvre REQ-NF-003 (git restore . possible avant commit)."
+        },
+        "DES-005" : {
+          "id" : "DES-005",
+          "title" : "Build Gradle cross-plateforme",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-004.AC-1", "REQ-004.AC-2", "REQ-004.AC-3", "REQ-004.AC-4", "REQ-004.AC-5", "REQ-004.AC-6" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Détection OS via uname -s. Windows (MINGW/CYGWIN) : powershell.exe -Command Set-Location mahi-mcp; .\\gradlew.bat bootJar. Unix/macOS : cd mahi-mcp && ./gradlew bootJar. Vérification jar dans mahi-plugins/mahi/. Couvre REQ-NF-002 (cross-plateforme automatique)."
+        },
+        "DES-006" : {
+          "id" : "DES-006",
+          "title" : "Commit, tag git et push",
+          "status" : "VALID",
+          "coversAC" : [ "REQ-005.AC-1", "REQ-005.AC-2", "REQ-005.AC-3", "REQ-005.AC-4", "REQ-005.AC-5", "REQ-005.AC-6", "REQ-005.AC-7", "REQ-005.AC-8" ],
+          "implementedBy" : [ ".claude/commands/release.md" ],
+          "content" : "Staging explicite des 4 fichiers. Commit : chore(release): release v<version>. Tag annoté v<version>. Push : git push origin main --tags. Gestion erreurs : échec push → message informatif. Couvre REQ-NF-003 (information sur les actions déjà effectuées)."
+        }
+      }
+    },
+    "retrospective" : {
+      "artifactType" : "file",
+      "name" : "retrospective",
+      "status" : "MISSING",
+      "version" : 0,
+      "path" : null,
+      "updatedAt" : "2026-04-19T13:53:02.501011500Z"
+    },
+    "plan" : {
+      "artifactType" : "file",
+      "name" : "plan",
+      "status" : "VALID",
+      "version" : 1,
+      "path" : ".mahi\\artifacts\\release\\plan.md",
+      "updatedAt" : "2026-04-19T14:12:34.398501100Z"
+    }
+  },
+  "metadata" : { },
+  "history" : [ {
+    "fromState" : "REQUIREMENTS",
+    "event" : "APPROVE_REQUIREMENTS",
+    "toState" : "DESIGN",
+    "occurredAt" : "2026-04-19T13:55:45.049317500Z"
+  }, {
+    "fromState" : "DESIGN",
+    "event" : "APPROVE_DESIGN",
+    "toState" : "WORKTREE",
+    "occurredAt" : "2026-04-19T14:10:22.419901300Z"
+  }, {
+    "fromState" : "WORKTREE",
+    "event" : "APPROVE_WORKTREE",
+    "toState" : "PLANNING",
+    "occurredAt" : "2026-04-19T14:11:30.220101100Z"
+  }, {
+    "fromState" : "PLANNING",
+    "event" : "APPROVE_PLANNING",
+    "toState" : "IMPLEMENTATION",
+    "occurredAt" : "2026-04-19T14:14:03.485460700Z"
+  }, {
+    "fromState" : "IMPLEMENTATION",
+    "event" : "APPROVE_IMPLEMENTATION",
+    "toState" : "FINISHING",
+    "occurredAt" : "2026-04-19T14:40:27.621862300Z"
+  }, {
+    "fromState" : "FINISHING",
+    "event" : "APPROVE_FINISHING",
+    "toState" : "RETROSPECTIVE",
+    "occurredAt" : "2026-04-19T14:41:50.504702100Z"
+  }, {
+    "fromState" : "RETROSPECTIVE",
+    "event" : "APPROVE_RETROSPECTIVE",
+    "toState" : "COMPLETED",
+    "occurredAt" : "2026-04-19T14:45:02.057956600Z"
+  } ],
+  "updatedAt" : "2026-04-19T14:45:02.057956600Z",
+  "sessionContext" : {
+    "savedAt" : "2026-04-19T14:45:31.343427100Z",
+    "lastAction" : "Rétrospective terminée — spec complété sans règles candidates à ajouter",
+    "keyDecisions" : [ "REQ-NF-001 : /release est une slash command dans .claude/commands/ (pas dans le plugin ni marketplace)", "REQ-003 Option A : vérification stricte des 3 fichiers de version en amont avant toute modification (atomicité)", "DES-005 : détection OS automatique via uname -s — gradlew.bat sur Windows, ./gradlew sur Unix", "REQ-006 : bump SNAPSHOT post-release souhaitable mais non bloquant" ],
+    "openQuestions" : [ ],
+    "nextStep" : "Spec complété — fusionner la branche spec/vincent-bailly/release dans main si nécessaire"
+  }
+}

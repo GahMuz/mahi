@@ -1,0 +1,21 @@
+{
+  "id" : "release",
+  "currentPhase" : "finishing",
+  "updatedAt" : "2026-04-19T14:40:33.754795600Z",
+  "changelog" : [ {
+    "date" : "2026-04-19T14:10:22Z",
+    "type" : "phase_transition",
+    "description" : "Design approuvé — passage en phase worktree",
+    "affectedItems" : [ "DES-001", "DES-002", "DES-003", "DES-004", "DES-005", "DES-006", "DES-007" ]
+  }, {
+    "date" : "2026-04-19T14:14:03Z",
+    "type" : "transition",
+    "description" : "Phase planning approuvée — passage en implémentation",
+    "affectedItems" : [ "TASK-001", "TASK-002", "TASK-003", "TASK-004" ]
+  }, {
+    "date" : "2026-04-19T14:40:27Z",
+    "type" : "phase-transition",
+    "description" : "Passage implementation → finishing : toutes les sous-tâches complètes (8/8), worktree propre.",
+    "affectedItems" : [ "TASK-001.1", "TASK-002.1", "TASK-002.2", "TASK-003.1", "TASK-003.2", "TASK-003.3", "TASK-003.4", "TASK-004.1", "TASK-004.2" ]
+  } ]
+}

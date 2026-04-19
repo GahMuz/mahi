@@ -68,7 +68,6 @@ refuse si un worktree est actif, et est réservée au mainteneur.
 | Fonctionnalité | Raison |
 |----------------|--------|
 | Publication vers un registry externe | Pas de registry npm/Maven cible dans ce projet |
-| Publication vers un registry externe | Pas de registry npm/Maven cible dans ce projet |
 | Rollback automatique | Hors périmètre initial — opération rare traitée manuellement |
 | Gestion de changelog | Hors périmètre — les messages de commit servent d'historique |
 | Versioning multi-plugin | Un seul plugin (`mahi-workflow`) pour l'instant |
@@ -149,11 +148,7 @@ tous les artefacts du projet.
    dans `.claude-plugin/marketplace.json`
 4. QUAND un fichier à modifier n'existe pas ou ne contient pas la version attendue ALORS
    LA commande DOIT signaler l'incohérence et s'arrêter avant toute modification
-5. AVANT toute modification, LA commande DOIT vérifier les 3 fichiers (`build.gradle.kts`,
-   `plugin.json`, `marketplace.json`) : existence et présence de la version courante attendue.
-   Si l'un des 3 fichiers échoue à la vérification, LA commande DOIT s'arrêter immédiatement
-   sans modifier aucun fichier. Aucun rollback automatique n'est prévu — la vérification stricte
-   en amont est la seule garantie d'atomicité.
+5. LES trois fichiers DOIVENT être mis à jour atomiquement (tous ou aucun) avant le build
 
 **Priorité :** obligatoire
 **Statut :** brouillon
