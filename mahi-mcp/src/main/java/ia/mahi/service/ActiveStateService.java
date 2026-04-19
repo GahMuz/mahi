@@ -2,6 +2,8 @@ package ia.mahi.service;
 
 import ia.mahi.workflow.core.ActiveState;
 
+import java.util.Optional;
+
 /**
  * Contract for managing .sdd/local/active.json and .sdd/specs/registry.md.
  * Resolves paths relative to the git repository root — never the LLM working directory.
@@ -19,6 +21,14 @@ public interface ActiveStateService {
      * @return the written ActiveState
      */
     ActiveState activate(String specId, String type, String path, String workflowId);
+
+    /**
+     * Read .sdd/local/active.json from the git repository root.
+     * Returns empty if the file is absent.
+     * Use this instead of reading the file directly — path resolution is always relative
+     * to the repo root, not the LLM working directory (which may be a worktree).
+     */
+    Optional<ActiveState> getActive();
 
     /**
      * Delete .sdd/local/active.json. Idempotent — no exception if the file is absent.

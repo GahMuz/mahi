@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +61,20 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         }
 
         return state;
+    }
+
+    @Override
+    public Optional<ActiveState> getActive() {
+        Path activeJson = repoRoot.resolve(".sdd").resolve("local").resolve("active.json");
+        if (!Files.exists(activeJson)) {
+            return Optional.empty();
+        }
+        try {
+            ActiveState state = mapper.readValue(activeJson.toFile(), ActiveState.class);
+            return Optional.of(state);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read active.json at: " + activeJson, e);
+        }
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * MCP tools exposed to the LLM for workflow management.
@@ -195,6 +196,12 @@ public class WorkflowTools {
             @ToolParam(description = "Relative path to spec directory (e.g., .sdd/specs/2026/04/my-spec)", required = true) String path,
             @ToolParam(description = "Workflow identifier (UUID)", required = true) String workflowId) {
         return activeStateService.activate(specId, type, path, workflowId);
+    }
+
+    @Tool(name = "mahi_get_active",
+          description = "Read .sdd/local/active.json from the git repository root. Returns the active spec/ADR state, or null if no item is currently active. Always use this tool instead of reading the file directly — it resolves the correct path regardless of the current working directory (worktree-safe).")
+    public ActiveState getActive() {
+        return activeStateService.getActive().orElse(null);
     }
 
     @Tool(name = "mahi_deactivate",

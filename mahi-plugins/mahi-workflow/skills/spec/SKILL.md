@@ -12,7 +12,7 @@ All communication with the user MUST be in French.
 
 ## Local Active Item
 
-The currently active item (spec or ADR) is tracked in `.sdd/local/active.json` — gitignored, machine-local, never committed.
+The currently active item (spec or ADR) is tracked in `.sdd/local/active.json` — gitignored, machine-local, never committed. **Always read it via `mahi_get_active()` — never with the `Read` tool directly** (the file lives in the repo root, not in the current working directory which may be a worktree).
 
 ```json
 { "type": "spec", "id": "mon-spec", "path": ".sdd/specs/2026/04/mon-spec", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
@@ -20,9 +20,9 @@ The currently active item (spec or ADR) is tracked in `.sdd/local/active.json` �
 
 **Rules:**
 - Only one item (spec or ADR) can be active at a time on this machine. This single file enforces the constraint.
-- `new`, `open`, `switch` are the only commands that write this file.
-- All other commands fail immediately if this file is absent or has `type != "spec"`: "Aucun spec actif. Lancez `/spec open <titre>` pour en ouvrir un."
-- `new` and `open` check `active.json`: if present with any type, execute the appropriate CLOSE (spec or ADR) before continuing.
+- `new`, `open`, `switch` are the only commands that write this file (via `mahi_activate`).
+- All other commands fail immediately if `mahi_get_active()` returns null or has `type != "spec"`: "Aucun spec actif. Lancez `/spec open <titre>` pour en ouvrir un."
+- `new` and `open` call `mahi_get_active()`: if present with any type, execute the appropriate CLOSE (spec or ADR) before continuing.
 
 ## Parse Arguments
 
@@ -41,11 +41,11 @@ Extract subcommand from user input:
 ## CHECK_STATE
 
 1. Check `.sdd/config.json` exists. If not: "Lancez `/sdd-init` d'abord pour configurer le projet."
-2. Read `.sdd/local/active.json`. If present: call `mahi_get_workflow(workflowId)` to retrieve current phase — if the call fails, display: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. Show that spec prominently with its current phase. If absent: "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
+2. Call `mahi_get_active()`. If present: call `mahi_get_workflow(workflowId)` to retrieve current phase — if the call fails, display: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. Show that spec prominently with its current phase. If null: "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
 
 ## START_NEW
 
-0. Read `.sdd/local/active.json`. If present: execute CLOSE (full context save), then continue.
+0. Call `mahi_get_active()`. If present: execute CLOSE (full context save), then continue.
 1. Verify `.sdd/config.json` exists.
 2. Convert title to kebab-case for directory name. Note current `YYYY/MM` from today's date.
 3. Create `.sdd/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
@@ -61,7 +61,7 @@ Extract subcommand from user input:
 
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
 1. Read `.sdd/specs/registry.md`. Title given → find matching row. No title → list non-completed rows, ask user (in French).
-2. Read `.sdd/local/active.json`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
+2. Call `mahi_get_active()`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
 3. Call `mahi_activate(specId, "spec", path, workflowId)` to write `.sdd/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
 5. Call `mahi_get_workflow(workflowId)` → currentPhase. If the call fails: "Le serveur Mahi n'est pas démarré. Vérifiez votre configuration `.mcp.json` et que le serveur Mahi est actif (java -jar mahi-mcp-server.jar)." and stop. If in implementation → follow `references/protocol-resume.md`.
@@ -69,12 +69,12 @@ Extract subcommand from user input:
 
 ## RECAP
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail.
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail.
 Read and follow `references/phase-recap.md`.
 
 ## APPROVE
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail.
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail.
 1. Call `mahi_get_workflow(workflowId)` → currentPhase.
 2. Validate current phase output:
    - requirements: requirement.md has >= 1 REQ
@@ -94,12 +94,12 @@ Read and follow `references/phase-recap.md`.
 
 ## CLARIFY
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail.
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail.
 Read and follow `references/protocol-clarify.md`.
 
 ## DISCARD
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail.
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail.
 1. **Ask explicit confirmation** (destructive).
 2. If confirmed:
    - Call `mahi_remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
@@ -111,12 +111,12 @@ Read and follow `references/protocol-clarify.md`.
 
 ## SPLIT
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail.
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail.
 Read and follow `references/protocol-split.md`.
 
 ## CLOSE
 
-0. Read `.sdd/local/active.json`. If absent or `type != "spec"`: fail — "Aucun spec actif. Utilisez `/adr close` si un ADR est actif."
+0. Call `mahi_get_active()`. If null or `type != "spec"`: fail — "Aucun spec actif. Utilisez `/adr close` si un ADR est actif."
 Read and follow `references/protocol-context.md` section **CLOSE**.
 
 ## SWITCH

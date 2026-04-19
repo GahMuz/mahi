@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
@@ -80,6 +82,35 @@ class ActiveStateServiceTest {
     void deactivate_whenFileAbsent_shouldNotThrow() {
         // File does not exist — should be idempotent
         assertThatNoException().isThrownBy(() -> service.deactivate());
+    }
+
+    @Test
+    void getActive_whenFileExists_shouldReturnActiveState() {
+        service.activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "workflow-uuid-123");
+
+        Optional<ActiveState> result = service.getActive();
+
+        assertThat(result).isPresent();
+        assertThat(result.get().id()).isEqualTo("my-spec");
+        assertThat(result.get().type()).isEqualTo("spec");
+        assertThat(result.get().workflowId()).isEqualTo("workflow-uuid-123");
+    }
+
+    @Test
+    void getActive_whenFileAbsent_shouldReturnEmpty() {
+        Optional<ActiveState> result = service.getActive();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getActive_afterDeactivate_shouldReturnEmpty() {
+        service.activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "wf-uuid");
+        service.deactivate();
+
+        Optional<ActiveState> result = service.getActive();
+
+        assertThat(result).isEmpty();
     }
 
     @Test

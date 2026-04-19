@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -50,6 +51,28 @@ class WorkflowToolsActivationTest {
 
         verify(activeStateService).activate("my-spec", "spec", ".sdd/specs/2026/04/my-spec", "wf-uuid");
         assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void getActive_whenActive_shouldReturnActiveState() {
+        ActiveState expected = new ActiveState("spec", "my-spec", "wf-uuid",
+                ".sdd/specs/2026/04/my-spec", Instant.now());
+        when(activeStateService.getActive()).thenReturn(Optional.of(expected));
+
+        ActiveState result = workflowTools.getActive();
+
+        verify(activeStateService).getActive();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void getActive_whenAbsent_shouldReturnNull() {
+        when(activeStateService.getActive()).thenReturn(Optional.empty());
+
+        ActiveState result = workflowTools.getActive();
+
+        verify(activeStateService).getActive();
+        assertThat(result).isNull();
     }
 
     @Test
