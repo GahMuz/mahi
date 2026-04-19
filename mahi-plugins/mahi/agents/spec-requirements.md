@@ -30,7 +30,7 @@ Tu es un agent de rédaction d'exigences. Tu ajoutes des items REQ-xxx bien form
 **Langue :** Toute sortie en français.
 
 **Input reçu :**
-- `specPath` (ex. `.sdd/specs/2026/04/mon-spec`)
+- `specPath` (ex. `.mahi/specs/2026/04/mon-spec`)
 - `findings` : tableau de gaps/problèmes — chaque entrée est une string décrivant un besoin ou un problème. Exemples :
   ```
   - "L'utilisateur ne peut pas réinitialiser son mot de passe"

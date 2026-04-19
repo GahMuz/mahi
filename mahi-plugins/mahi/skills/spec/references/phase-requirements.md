@@ -34,7 +34,7 @@ Avant de poser les questions de clarification, chercher du contexte dans le code
 
 0. **Graphe structurel (sdd-graph) — consulter en premier si disponible**
 
-   Si `.sdd/graph/manifest.json` existe :
+   Si `.mahi/graph/manifest.json` existe :
    - Si `module-dep.json` est `"fresh"` : lire le fichier, identifier les modules dont le nom correspond au domaine du spec (ex: "commande", "paiement", "user")
    - Si `entity-model.json` est `"fresh"` ET que la spec semble toucher des données : lire les entités des modules concernés
    - Si `service-call.json` est `"fresh"` : identifier les services du domaine et leurs dépendances directes
@@ -46,8 +46,8 @@ Avant de poser les questions de clarification, chercher du contexte dans le code
 
    Si le graphe est absent ou stale : passer directement au point 1 ci-dessous.
 
-1. Vérifier si `.sdd/docs/index.md` existe — si oui, identifier les modules potentiellement concernés par le titre et la description de la spec
-   - Pour chaque module pertinent : lire `.sdd/docs/modules/<nom>/module-<nom>.md`
+1. Vérifier si `.mahi/docs/index.md` existe — si oui, identifier les modules potentiellement concernés par le titre et la description de la spec
+   - Pour chaque module pertinent : lire `.mahi/docs/modules/<nom>/module-<nom>.md`
 2. Si les docs sont absents ou insuffisants pour les zones concernées : dispatcher `spec-deep-dive`
    ```
    Agent({ subagent_type: "sdd-spec:spec-deep-dive", model: "opus", prompt: "<question ciblée sur la zone concernée>" })
@@ -70,7 +70,7 @@ Si oui : signaler le problème de périmètre immédiatement, proposer un split 
 
 ### Step 1e: Specs passés liés
 
-Lire `.sdd/specs/registry.md`. Pour chaque spec avec statut `completed` ou `retrospective` :
+Lire `.mahi/specs/registry.md`. Pour chaque spec avec statut `completed` ou `retrospective` :
 - Comparer le titre et les mots-clés avec le titre et la description du spec courant
 - Si lien probable (même domaine fonctionnel, mêmes entités, même module) : lire son `requirement.md`
 

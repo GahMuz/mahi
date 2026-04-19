@@ -7,8 +7,8 @@
 
 ## Commande de vérification
 ```
-cat .sdd/local/active.json | grep 'workflowId'
-cat .sdd/local/active.json | grep -v 'currentPhase'
+cat .mahi/local/active.json | grep 'workflowId'
+cat .mahi/local/active.json | grep -v 'currentPhase'
 ```
 
 ## Format attendu
@@ -17,7 +17,7 @@ cat .sdd/local/active.json | grep -v 'currentPhase'
 {
   "type": "spec",
   "id": "<kebab-titre>",
-  "path": ".sdd/specs/YYYY/MM/<kebab-titre>",
+  "path": ".mahi/specs/YYYY/MM/<kebab-titre>",
   "activatedAt": "<ISO-8601>",
   "workflowId": "<uuid-retourné-par-mcp__plugin_mahi_mahi__create_workflow>"
 }
@@ -33,7 +33,7 @@ Les champs suivants NE DOIVENT PAS figurer dans active.json pour mahi :
 ## Vérification post-`/spec new`
 
 Après exécution de `/spec new <titre>` :
-1. active.json doit exister dans `.sdd/local/`
+1. active.json doit exister dans `.mahi/local/`
 2. `workflowId` doit être une valeur non vide (UUID retourné par `mcp__plugin_mahi_mahi__create_workflow`)
 3. Aucune référence à un état local de phase
 

@@ -4,7 +4,7 @@ All output in French.
 
 ## Purpose
 
-Extraire les règles apprises pendant le spec, mettre à jour la documentation `.sdd/docs/`, et persister les apprentissages dans les fichiers `rules-*.md` du projet.
+Extraire les règles apprises pendant le spec, mettre à jour la documentation `.mahi/docs/`, et persister les apprentissages dans les fichiers `rules-*.md` du projet.
 
 ## Process
 
@@ -26,13 +26,13 @@ Compiler la liste consolidée de candidats en dédupliquant les entrées qui cou
 ### Step 2: Update Module Documentation
 
 Identifier les modules touchés (depuis les chemins de fichiers dans plan.md).
-Pour chaque module ayant une doc existante dans `.sdd/docs/modules/<module>/` :
+Pour chaque module ayant une doc existante dans `.mahi/docs/modules/<module>/` :
 ```
 Agent({
   description: "Mettre à jour la doc du module <module>",
   subagent_type: "mahi:doc-generator",
   model: <from config.models.doc-generator, default "haiku">,
-  prompt: "Mettre à jour la doc du module <module>. Chemin source: <path>. Doc existante: .sdd/docs/modules/<module>/module-<module>.md"
+  prompt: "Mettre à jour la doc du module <module>. Chemin source: <path>. Doc existante: .mahi/docs/modules/<module>/module-<module>.md"
 })
 ```
 Si aucune doc existante pour un module touché : suggérer `/doc <module>` pour une génération initiale.
@@ -102,4 +102,4 @@ mcp__plugin_mahi_mahi__fire_event(
 > Note mahi : il n'y a pas de mise à jour de state.json.
 > La transition vers `completed` est déclenchée via `mcp__plugin_mahi_mahi__fire_event`.
 
-"Spec `<titre>` complété. Les fichiers sont conservés dans `.sdd/specs/<spec-path>/` pour référence future."
+"Spec `<titre>` complété. Les fichiers sont conservés dans `.mahi/specs/<spec-path>/` pour référence future."

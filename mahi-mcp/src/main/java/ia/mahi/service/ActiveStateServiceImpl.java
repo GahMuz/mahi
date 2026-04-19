@@ -61,7 +61,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         Instant now = Instant.now();
         ActiveState state = new ActiveState(type, specId, workflowId, path, now);
 
-        Path activeJson = repoRoot.resolve(".sdd").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
         try {
             Files.createDirectories(activeJson.getParent());
             mapper.writeValue(activeJson.toFile(), state);
@@ -74,7 +74,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public Optional<ActiveState> getActive() {
-        Path activeJson = repoRoot.resolve(".sdd").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
         if (!Files.exists(activeJson)) {
             return Optional.empty();
         }
@@ -88,7 +88,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public void deactivate() {
-        Path activeJson = repoRoot.resolve(".sdd").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
         try {
             Files.deleteIfExists(activeJson);
         } catch (IOException e) {
@@ -98,7 +98,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public void updateRegistry(String specId, String status, String title, String period) {
-        Path registryPath = repoRoot.resolve(".sdd").resolve("specs").resolve("registry.md");
+        Path registryPath = repoRoot.resolve(".mahi").resolve("specs").resolve("registry.md");
 
         try {
             if (!Files.exists(registryPath)) {
@@ -138,7 +138,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
             if (!found && title != null && period != null) {
                 String p = period;
                 String t = title;
-                String specPath = ".sdd/specs/" + p + "/" + specId;
+                String specPath = ".mahi/specs/" + p + "/" + specId;
                 String row = "| " + specId + " | " + t + " | " + p + " | " + status
                         + " | [requirement.md](" + specPath + "/requirement.md)"
                         + " | [design.md](" + specPath + "/design.md)"
@@ -154,6 +154,16 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to update registry.md", e);
         }
+    }
+
+    @Override
+    public Path resolveAbsPath(String relativePath) {
+        return repoRoot.resolve(relativePath);
+    }
+
+    @Override
+    public Path resolveWorktreePath(String specId, String specRelPath) {
+        return repoRoot.resolve(".worktrees").resolve(specId).resolve(specRelPath);
     }
 
     private Path resolveRepoRoot() {

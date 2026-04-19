@@ -5,7 +5,7 @@ All output in French.
 ## Process
 
 ### Step 1: Analyze Design
-Read `.sdd/specs/<spec-path>/design.md`. For each DES item, identify:
+Read `.mahi/specs/<spec-path>/design.md`. For each DES item, identify:
 - Code changes needed
 - Files to create/modify
 - Tests to write
@@ -45,7 +45,7 @@ Build dependency graph:
 
 ### Step 4b: Validation impact graphe (sdd-graph)
 
-Si `.sdd/graph/manifest.json` existe avec `service-call` ou `module-dep` frais :
+Si `.mahi/graph/manifest.json` existe avec `service-call` ou `module-dep` frais :
 
 Pour chaque DES mentionnant un service ou une entité modifiée, dispatcher :
 ```

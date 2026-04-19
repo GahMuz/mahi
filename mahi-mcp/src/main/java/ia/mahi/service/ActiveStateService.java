@@ -45,4 +45,23 @@ public interface ActiveStateService {
      * @param period the YYYY/MM period — used only when creating a new row (may be null)
      */
     void updateRegistry(String specId, String status, String title, String period);
+
+    /**
+     * Resolve a relative path to an absolute path using the git repository root.
+     *
+     * @param relativePath relative path, e.g. ".mahi/specs/2026/04/my-spec"
+     * @return absolute path
+     */
+    java.nio.file.Path resolveAbsPath(String relativePath);
+
+    /**
+     * Resolve the artifact directory for a spec workflow inside its worktree.
+     * Worktrees are located at &lt;repoRoot&gt;/.worktrees/&lt;specId&gt;/,
+     * and the spec directory mirrors the main branch structure inside the worktree.
+     *
+     * @param specId      spec identifier (e.g., "my-spec")
+     * @param specRelPath relative path of the spec directory (e.g., ".mahi/specs/2026/04/my-spec")
+     * @return absolute path to the spec directory inside the worktree
+     */
+    java.nio.file.Path resolveWorktreePath(String specId, String specRelPath);
 }

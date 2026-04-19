@@ -12,10 +12,10 @@ All communication with the user MUST be in French.
 
 ## Local Active Item
 
-The currently active item (spec or ADR) is tracked in `.sdd/local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly** (the file lives in the repo root, not in the current working directory which may be a worktree).
+The currently active item (spec or ADR) is tracked in `.mahi/local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly** (the file lives in the repo root, not in the current working directory which may be a worktree).
 
 ```json
-{ "type": "spec", "id": "mon-spec", "path": ".sdd/specs/2026/04/mon-spec", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
+{ "type": "spec", "id": "mon-spec", "path": ".mahi/specs/2026/04/mon-spec", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
 ```
 
 **Rules:**
@@ -40,29 +40,29 @@ Extract subcommand from user input:
 
 ## CHECK_STATE
 
-1. Check `.sdd/config.json` exists. If not: "Lancez `/sdd-init` d'abord pour configurer le projet."
+1. Check `.mahi/config.json` exists. If not: "Lancez `/sdd-init` d'abord pour configurer le projet."
 2. Call `mcp__plugin_mahi_mahi__get_active()`. If present: call `mcp__plugin_mahi_mahi__get_workflow(workflowId)` to retrieve current phase — if the call fails, display: "Le serveur Mahi n'est pas démarré ou ne répond pas. Vérifiez que le plugin `mahi` est actif (ou que `.mcp.json` contient la configuration du serveur Mahi) et que le processus Java est lancé." and stop. Show that spec prominently with its current phase. If null: "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
 
 ## START_NEW
 
 0. Call `mcp__plugin_mahi_mahi__get_active()`. If present: execute CLOSE (full context save), then continue.
-1. Verify `.sdd/config.json` exists.
+1. Verify `.mahi/config.json` exists.
 2. Convert title to kebab-case for directory name. Note current `YYYY/MM` from today's date.
-3. Create `.sdd/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
+3. Create `.mahi/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
 4. Create empty `rule-candidates.md` in the spec directory (header only: `# Règles candidates`).
 5. Call `mcp__plugin_mahi_mahi__create_workflow(flowId=<spec-id>, workflowType="spec")` — store the returned `workflowId`.
    Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to create the branch and enter the worktree.
 6. Write initial log.md with creation entry: date, title, "Spec créé".
 7. Call `mcp__plugin_mahi_mahi__update_registry(specId, "requirements", title, period)` to add the spec row in registry.
-8. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.sdd/local/active.json` on the main branch.
+8. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch.
 9. Enter requirements phase — read and follow `references/phase-requirements.md`.
 
 ## OPEN
 
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
-1. Read `.sdd/specs/registry.md`. Title given → find matching row. No title → list non-completed rows, ask user (in French).
+1. Read `.mahi/specs/registry.md`. Title given → find matching row. No title → list non-completed rows, ask user (in French).
 2. Call `mcp__plugin_mahi_mahi__get_active()`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
-3. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.sdd/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
+3. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
 5. Call `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → currentPhase. If the call fails: "Le serveur Mahi n'est pas démarré ou ne répond pas. Vérifiez que le plugin `mahi` est actif (ou que `.mcp.json` contient la configuration du serveur Mahi) et que le processus Java est lancé." and stop. If in implementation → follow `references/protocol-resume.md`.
 6. Report state (in French) and resume.
@@ -103,9 +103,9 @@ Read and follow `references/protocol-clarify.md`.
 1. **Ask explicit confirmation** (destructive).
 2. If confirmed:
    - Call `mcp__plugin_mahi_mahi__remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
-   - Remove `.sdd/specs/YYYY/MM/<id>/`.
+   - Remove `.mahi/specs/YYYY/MM/<id>/`.
 3. Call `mcp__plugin_mahi_mahi__update_registry(specId, "discarded")` to mark the row as discarded in registry.
-4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.sdd/local/active.json`.
+4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.mahi/local/active.json`.
 5. Confirm completion.
 
 ## SPLIT

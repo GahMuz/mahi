@@ -1,5 +1,6 @@
 package ia.mahi.service;
 
+import ia.mahi.workflow.core.ActiveState;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -8,29 +9,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Reads and writes artifact Markdown files in .mahi/artifacts/<flowId>/<artifactName>.md
+ * Reads and writes artifact Markdown files.
+ *
+ * <p>For spec workflows, artifacts are written inside the git worktree so they
+ * are committed on the spec branch (not the main branch):
+ * <pre>repoRoot/.worktrees/&lt;specId&gt;/&lt;specRelPath&gt;/&lt;artifactName&gt;.md</pre>
+ *
+ * <p>For all other workflow types (adr, debug, find-bug), artifacts are written
+ * under the server-internal store:
+ * <pre>.mahi/artifacts/&lt;flowId&gt;/&lt;artifactName&gt;.md</pre>
+ *
+ * <p>Throws {@link IllegalStateException} if no spec is active when a spec artifact
+ * is requested, or if the requested flowId does not match the active spec.
  */
 @Service
 public class ArtifactService {
 
-    private final Path artifactsRoot;
+    private final ActiveStateService activeStateService;
 
-    public ArtifactService() {
-        this(Path.of(".mahi", "artifacts"));
-    }
-
-    /** Package-visible constructor for testing. */
-    ArtifactService(Path artifactsRoot) {
-        this.artifactsRoot = artifactsRoot;
+    public ArtifactService(ActiveStateService activeStateService) {
+        this.activeStateService = activeStateService;
     }
 
     public String writeArtifact(String flowId, String artifactName, String content) {
+        Path dir = resolveArtifactDir(flowId);
         try {
-            Path dir = artifactsRoot.resolve(flowId);
             Files.createDirectories(dir);
             Path file = dir.resolve(artifactName + ".md");
             Files.writeString(file, content, StandardCharsets.UTF_8);
-            return file.toString();
+            return file.toAbsolutePath().toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to write artifact: " + artifactName, e);
         }
@@ -40,15 +47,42 @@ public class ArtifactService {
      * @throws IllegalArgumentException if the artifact file does not exist
      */
     public String readArtifact(String flowId, String artifactName) {
+        Path dir = resolveArtifactDir(flowId);
         try {
-            Path file = artifactsRoot.resolve(flowId).resolve(artifactName + ".md");
+            Path file = dir.resolve(artifactName + ".md");
             if (!Files.exists(file)) {
                 throw new IllegalArgumentException(
-                        "Artifact not found: " + artifactName + " for flow: " + flowId);
+                        "Artifact not found: " + artifactName + " at: " + file);
             }
             return Files.readString(file, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read artifact: " + artifactName, e);
         }
+    }
+
+    private Path resolveArtifactDir(String flowId) {
+        return activeStateService.getActive()
+                .map(active -> resolveForActive(flowId, active))
+                .orElseGet(() -> fallbackDir(flowId));
+    }
+
+    private Path resolveForActive(String flowId, ActiveState active) {
+        if (!active.id().equals(flowId)) {
+            throw new IllegalStateException(
+                    "Le spec actif est '" + active.id() + "' mais l'accès est demandé pour '" + flowId + "'");
+        }
+        if ("spec".equals(active.type())) {
+            // Spec artifacts go in the worktree (committed on spec branch, not main)
+            return activeStateService.resolveWorktreePath(active.id(), active.path());
+        }
+        // Other workflow types (adr, debug, find-bug): server-internal storage
+        return fallbackDir(flowId);
+    }
+
+    /**
+     * Non-spec workflows store artifacts in the server-internal .mahi/artifacts directory.
+     */
+    private Path fallbackDir(String flowId) {
+        return activeStateService.resolveAbsPath(".mahi/artifacts/" + flowId);
     }
 }

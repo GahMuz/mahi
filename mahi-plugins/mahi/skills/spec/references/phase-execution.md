@@ -5,13 +5,13 @@ Report all progress in French.
 ## Process
 
 ### Step 1: Read Configuration
-From `.sdd/config.json`:
+From `.mahi/config.json`:
 - `parallelTaskLimit`: max concurrent agents (0 = unlimited)
 - `pipelineReviews`: overlap reviews with next batch
 - `models`: model assignments per agent
 
 ### Step 2: Verify Baseline Exists
-Check that `.sdd/specs/<spec-path>/baseline-tests.json` exists (captured during worktree phase).
+Check that `.mahi/specs/<spec-path>/baseline-tests.json` exists (captured during worktree phase).
 - If missing: capture now (run test suite, save results)
 - If exists: read and report "Baseline existante : X tests."
 - Append log.md entry: "Phase d'implémentation démarrée."
@@ -36,10 +36,10 @@ Agent({
   model: <from config.models.orchestrator, default "sonnet">,
   prompt: "Spec: <spec-id>
     WorkflowId: <workflowId depuis active.json>
-    Plan: .sdd/specs/<spec-path>/plan.md
-    Design: .sdd/specs/<spec-path>/design.md
-    Requirements: .sdd/specs/<spec-path>/requirement.md
-    Config: .sdd/config.json
+    Plan: .mahi/specs/<spec-path>/plan.md
+    Design: .mahi/specs/<spec-path>/design.md
+    Requirements: .mahi/specs/<spec-path>/requirement.md
+    Config: .mahi/config.json
     Worktree: .worktrees/<spec-id>
     Rules: charger via sdd-rules protocol (Glob **/sdd-rules/SKILL.md)
     Execute all waves, update checkboxes, run phantom checks, dispatch reviews.

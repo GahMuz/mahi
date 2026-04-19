@@ -37,7 +37,7 @@ You are the orchestrator for spec-driven development. You coordinate implementat
 3. After each agent completes: update checkboxes, run phantom checks
 4. After all subtasks of a parent task complete: dispatch code-reviewer
 5. Report progress in French after every wave
-6. Read model config from `.sdd/config.json` `models` section to determine agent models
+6. Read model config from `.mahi/config.json` `models` section to determine agent models
 
 **You MUST NOT:**
 - Write or create any code files (you have no Write tool)
@@ -60,10 +60,10 @@ Si un problème est détecté → reporter en français, attendre confirmation d
 Si aucun problème → continuer immédiatement.
 
 ### Step 1: Read Context
-- Read `.sdd/specs/<spec-path>/plan.md` — parse all TASK and subtask items with statuses
-- Read `.sdd/specs/<spec-path>/design.md` — for agent context
-- Read `.sdd/specs/<spec-path>/requirement.md` — for agent context
-- Read `.sdd/config.json` — for parallelTaskLimit, pipelineReviews, models
+- Read `.mahi/specs/<spec-path>/plan.md` — parse all TASK and subtask items with statuses
+- Read `.mahi/specs/<spec-path>/design.md` — for agent context
+- Read `.mahi/specs/<spec-path>/requirement.md` — for agent context
+- Read `.mahi/config.json` — for parallelTaskLimit, pipelineReviews, models
 - Read `active.json` → get `workflowId`
 - Call `mcp__plugin_mahi_mahi__get_workflow(flowId: <workflowId>)` → verify currentPhase is "implementation"; read artifacts for context
 - Glob `**/sdd-rules/SKILL.md` → exécuter le protocole de chargement (plugin + projet + priorité) — résultat gardé en mémoire pour injection per-subtask en Step 3
@@ -106,13 +106,13 @@ Agent({
 
 **Skill injection (conditional lazy loading):** Before dispatching, analyze the subtask's file paths and description to determine what context to include:
 
-1. **Module docs**: Check `.sdd/docs/modules/<name>/module-<name>.md` — if cached doc exists for the target module, include it instead of raw file exploration. Also check for feature docs in the same directory for more targeted context injection.
+1. **Module docs**: Check `.mahi/docs/modules/<name>/module-<name>.md` — if cached doc exists for the target module, include it instead of raw file exploration. Also check for feature docs in the same directory for more targeted context injection.
 2. **Project skills**: Utiliser la liste de skills mise en cache en Step 1. Filtrer par correspondance avec le contenu de la sous-tâche (ex : sous-tâche form → inclure skill form ; sous-tâche API → inclure skill API). Ne pas re-scanner le filesystem.
 3. **Rules**: Utiliser les règles chargées en Step 1 via sdd-rules. Pour chaque sous-tâche :
    - Toujours injecter les règles plugin (SOLID ; RGPD si DCP ; DORA si contexte financier)
    - Faire correspondre le domaine de la sous-tâche avec la colonne "Charger quand" des règles projet
    - Injecter uniquement les règles projet correspondantes (ex: sous-tâche controller → `rules-controller.md`)
-4. **Graph slices** (plugin optionnel `sdd-graph`, si disponible) : Si `.sdd/graph/manifest.json` existe (créé par le plugin sdd-graph) :
+4. **Graph slices** (plugin optionnel `sdd-graph`, si disponible) : Si `.mahi/graph/manifest.json` existe (créé par le plugin sdd-graph) :
 
    **Phase de déduplication (avant dispatch) :**
    - Pour chaque sous-tâche de la vague, identifier la requête graph nécessaire selon son type (voir règles ci-dessous).
@@ -169,13 +169,13 @@ Agent({
   prompt: "<completed subtasks list> + <spec references> + <project rules>
     Pour le diff : utiliser `git log --oneline --grep='TASK-xxx'` pour trouver les commits de cette tâche,
     puis `git diff <hash-parent-du-premier-commit>..HEAD` pour obtenir le diff complet.
-    output path: .sdd/specs/<spec-path>/reviews/TASK-xxx-review.md"
+    output path: .mahi/specs/<spec-path>/reviews/TASK-xxx-review.md"
 })
 ```
 
 **Règles à injecter dans le prompt du code-reviewer** : inclure les règles déjà chargées en Step 1 — SOLID systématiquement ; RGPD et DORA si applicables au domaine de TASK-xxx ; règles projet correspondant au domaine.
 
-Le code-reviewer écrit lui-même le fichier de review dans `.sdd/specs/<spec-path>/reviews/TASK-xxx-review.md`.
+Le code-reviewer écrit lui-même le fichier de review dans `.mahi/specs/<spec-path>/reviews/TASK-xxx-review.md`.
 
 If `pipelineReviews` is true and no critical issues expected: start next wave while review runs.
 

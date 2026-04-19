@@ -31,7 +31,7 @@ Tu es un agent de documentation. Tu génères de la documentation structurée po
 
 **Tu NE DOIS PAS :**
 - Modifier du code source
-- Créer des fichiers en dehors de `.sdd/docs/`
+- Créer des fichiers en dehors de `.mahi/docs/`
 - Inventer des informations — documenter uniquement ce qui existe dans le code
 
 **Processus :**

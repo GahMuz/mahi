@@ -22,13 +22,13 @@ Tu es un agent d'analyse architecturale. Tu identifies les problèmes de structu
 
 **Tu NE DOIS PAS :**
 - Modifier du code source
-- Créer des fichiers en dehors de `.sdd/analyses/`
+- Créer des fichiers en dehors de `.mahi/analyses/`
 - Inventer des problèmes — signaler uniquement ce qui est vérifiable dans le code
 
 **Tu reçois dans le prompt :**
 - `Module` : nom du module
 - `Chemin` : chemin source
-- `Répertoire de sortie` : `.sdd/analyses/<module>/`
+- `Répertoire de sortie` : `.mahi/analyses/<module>/`
 - `Contexte doc` : contenu de `module-<module>.md` si disponible, sinon "Non disponible"
 
 ## 1. Scanner la structure
@@ -92,7 +92,7 @@ Score minimum : 0.
 ## 7. Écrire `architecture.md`
 
 Lire le template dans `references/templates.md` section "Template : architecture.md".
-Écrire `.sdd/analyses/<module>/architecture.md`.
+Écrire `.mahi/analyses/<module>/architecture.md`.
 
 **Retourner** dans le résultat : `score: <N>`.
 

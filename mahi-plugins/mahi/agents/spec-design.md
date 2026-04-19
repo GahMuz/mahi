@@ -30,7 +30,7 @@ Tu es un agent de conception. Tu ajoutes des items DES-xxx à `design.md` pour c
 **Langue :** Toute sortie en français.
 
 **Input reçu :**
-- `specPath` (ex. `.sdd/specs/2026/04/mon-spec`)
+- `specPath` (ex. `.mahi/specs/2026/04/mon-spec`)
 - `newREQIds` : liste des REQ-xxx à couvrir (ex. `["REQ-005", "REQ-006"]`)
 - `findings` : contexte brut de la revue (pour orienter les décisions architecturales)
 - `interactive` (boolean, défaut `true`) : si true, présente avant d'écrire
