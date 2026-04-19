@@ -42,7 +42,7 @@ tasks.bootJar {
     doLast {
         copy {
             from(archiveFile)
-            into("${projectDir}/../mahi-plugins/mahi-workflow")
+            into("${projectDir}/../mahi-plugins/mahi")
         }
     }
 }
