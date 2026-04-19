@@ -63,7 +63,9 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
         try {
             Files.createDirectories(activeJson.getParent());
-            mapper.writeValue(activeJson.toFile(), state);
+            Path tmp = activeJson.resolveSibling("active.json.tmp");
+            mapper.writeValue(tmp.toFile(), state);
+            Files.move(tmp, activeJson, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write active.json at: " + activeJson, e);
         }
@@ -132,7 +134,14 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         }
     }
 
+    private static final java.util.Set<String> KNOWN_TYPES =
+            java.util.Set.of("spec", "adr", "debug", "find-bug");
+
     private static String computePath(String type, String period, String id) {
+        if (!KNOWN_TYPES.contains(type)) {
+            throw new IllegalArgumentException("Unknown workflow type: '" + type
+                    + "'. Expected one of: " + KNOWN_TYPES);
+        }
         String base = switch (type) {
             case "adr"      -> ".mahi/decisions";
             case "spec"     -> ".mahi/specs";

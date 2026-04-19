@@ -64,6 +64,22 @@ mcp__plugin_mahi_mahi__get_workflow(workflowId)
 The response includes `currentPhase` (derived from server state via `getStateToPhaseMapping()`).
 Never read `state.json` to determine the current phase in mahi.
 
+## Internal States (server-managed, not visible to LLM)
+
+| State | Description |
+|-------|-------------|
+| `REANALYZING` | Transient state entered when `add_requirement_info` or `add_design_info` is called. The server re-evaluates coherence guards and returns to the previous stable phase. The LLM never sees this state directly — `get_workflow` always returns the stable phase. |
+
+## Non-FSM Operations (no fire_event)
+
+These operations do NOT fire an FSM event — they modify server-side data and return to the same phase:
+
+| Operation | MCP call | Effect |
+|-----------|----------|--------|
+| Clarify requirement | `add_requirement_info(flowId, info)` | Logs change, triggers coherence re-check |
+| Clarify design | `add_design_info(flowId, info)` | Logs change, triggers coherence re-check |
+| Discard spec | `remove_worktree` + `update_registry("spec", "discarded")` + `deactivate()` | No FSM event — bypasses state machine entirely |
+
 ## Error States
 
 | Error | Action |

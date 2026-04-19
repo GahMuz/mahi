@@ -3,8 +3,8 @@ package ia.mahi.workflow.core;
 import java.time.Instant;
 
 /**
- * Represents the content of .sdd/local/active.json — the currently active spec or ADR on this machine.
- * Returned by mahi_activate.
+ * Represents the content of .mahi/local/active.json — the currently active spec or ADR on this machine.
+ * Returned by mcp__plugin_mahi_mahi__activate.
  */
 public record ActiveState(
         String type,

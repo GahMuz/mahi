@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * TASK-001.1 [RED] — Tests JUnit 5 pour ActiveStateService.
@@ -191,6 +192,14 @@ class ActiveStateServiceTest {
         assertThat(content).contains("\"my-adr\"");
         assertThat(content).contains(".mahi/specs/2026/04/my-spec");
         assertThat(content).contains(".mahi/decisions/2026/04/my-adr");
+    }
+
+    @Test
+    void updateRegistry_unknownType_shouldThrowIllegalArgument() {
+        assertThatThrownBy(() ->
+                service.updateRegistry("wf-001", "unknown-type", "requirements", "Title", "2026/04"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Unknown workflow type");
     }
 
     @Test
