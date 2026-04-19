@@ -13,7 +13,7 @@
   "plugins": [
     {
       "name": "mahi-workflow",
-      "source": "../mahi-plugins/mahi-workflow",
+      "source": "./mahi-plugins/mahi-workflow",
       "description": "Mahi — deterministic SDD workflow via MCP state machine. Bundles the Mahi MCP server (Java 21, Spring Boot fat jar) and the spec/ADR/debug workflow plugin.",
       "version": "0.1.0",
       "author": { "name": "vincent-bailly" },
