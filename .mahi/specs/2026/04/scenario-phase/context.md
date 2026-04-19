@@ -17,8 +17,8 @@ Ajouter une phase `scenario` légère commune à tous les workflows Mahi (spec, 
 
 ## Fichiers identifiés
 
-- `.sdd/specs/2026/04/scenario-phase/requirement.md` — 6 REQ avec AC complets, phase requirements terminée
-- `.sdd/specs/2026/04/scenario-phase/log.md` — journal de création
+- `.mahi/specs/2026/04/scenario-phase/requirement.md` — 6 REQ avec AC complets, phase requirements terminée
+- `.mahi/specs/2026/04/scenario-phase/log.md` — journal de création
 - Côté serveur Mahi : machine d'état à modifier pour ajouter l'état `SCENARIO` en tête de chaque type de workflow
 - Côté plugin : `skills/spec/references/phase-requirements.md` et équivalents ADR à adapter pour démarrer après la phase scénario
 

@@ -29,7 +29,7 @@ Si le résultat est différent de `main`, afficher le message suivant et stopper
 
 **1.2 — Vérifier l'absence de spec ou ADR actif**
 
-Tenter de lire le fichier `.sdd/local/active.json` via Read.
+Tenter de lire le fichier `.mahi/local/active.json` via Read.
 
 Si le fichier existe, afficher le message suivant et stopper immédiatement :
 

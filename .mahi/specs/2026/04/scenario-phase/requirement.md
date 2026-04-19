@@ -19,7 +19,7 @@ Chaque workflow possède un fichier `scenario.md` créé et géré par le serveu
 **AC-1** : `scenario.md` est créé automatiquement à la création du workflow, avec le titre et l'input initial de l'utilisateur.  
 **AC-2** : Chaque échange (question Claude / réponse utilisateur) est appendé à `scenario.md` via un appel MCP explicite (pas d'écriture directe par le LLM).  
 **AC-3** : `scenario.md` est immuable une fois la phase `scenario` terminée (aucun append après `APPROVE_SCENARIO`).  
-**AC-4** : Le fichier est localisé dans le répertoire de la spec : `.sdd/specs/<période>/<spec-id>/scenario.md`.
+**AC-4** : Le fichier est localisé dans le répertoire de la spec : `.mahi/specs/<période>/<spec-id>/scenario.md`.
 
 ## REQ-003 — Commande `/scenario new` : point d'entrée sans type prédéfini
 
