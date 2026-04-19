@@ -67,7 +67,7 @@ refuse si un worktree est actif, et est réservée au mainteneur.
 
 | Fonctionnalité | Raison |
 |----------------|--------|
-| Publication vers un registry externe | Pas de registry npm/Maven cible dans ce projet |
+| Push vers remote | Le push reste manuel — décision du mainteneur |
 | Publication vers un registry externe | Pas de registry npm/Maven cible dans ce projet |
 | Rollback automatique | Hors périmètre initial — opération rare traitée manuellement |
 | Gestion de changelog | Hors périmètre — les messages de commit servent d'historique |
@@ -149,11 +149,7 @@ tous les artefacts du projet.
    dans `.claude-plugin/marketplace.json`
 4. QUAND un fichier à modifier n'existe pas ou ne contient pas la version attendue ALORS
    LA commande DOIT signaler l'incohérence et s'arrêter avant toute modification
-5. AVANT toute modification, LA commande DOIT vérifier les 3 fichiers (`build.gradle.kts`,
-   `plugin.json`, `marketplace.json`) : existence et présence de la version courante attendue.
-   Si l'un des 3 fichiers échoue à la vérification, LA commande DOIT s'arrêter immédiatement
-   sans modifier aucun fichier. Aucun rollback automatique n'est prévu — la vérification stricte
-   en amont est la seule garantie d'atomicité.
+5. LES trois fichiers DOIVENT être mis à jour atomiquement (tous ou aucun) avant le build
 
 **Priorité :** obligatoire
 **Statut :** brouillon
@@ -204,12 +200,8 @@ git de la release afin que la version soit traçable dans l'historique git.
 4. LE tag DOIT inclure le message : `Release v<version>`
 5. QUAND le commit ou le tag échoue ALORS LA commande DOIT afficher l'erreur et
    informer l'utilisateur que les fichiers ont déjà été modifiés
-6. QUAND le commit et le tag sont créés ALORS LA commande DOIT pousser vers le remote :
-   `git push origin main --tags`
-7. QUAND le push réussit ALORS LA commande DOIT afficher :
-   "Release v<version> publiée (commit <hash>, tag v<version>)."
-8. QUAND le push échoue ALORS LA commande DOIT afficher l'erreur et informer l'utilisateur
-   que le commit et le tag sont créés localement — le push peut être rejoué manuellement
+6. QUAND la release est complète ALORS LA commande DOIT afficher :
+   "Release v<version> créée (commit <hash>, tag v<version>). Pour publier : `git push origin main --tags`"
 
 **Priorité :** obligatoire
 **Statut :** brouillon
