@@ -13,11 +13,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * TASK-008.1 — Convention de nommage des outils MCP (REQ-NF-001).
  * Vérifie par réflexion que tous les @McpTool(name=...) de WorkflowTools
- * respectent le pattern mahi_[a-z]+(_[a-z]+)*.
+ * respectent le pattern snake_case (sans préfixe mahi_).
  */
 class WorkflowToolsNamingTest {
 
-    private static final Pattern TOOL_NAME_PATTERN = Pattern.compile("^mahi_[a-z]+(_[a-z]+)*$");
+    private static final Pattern TOOL_NAME_PATTERN = Pattern.compile("^[a-z]+(_[a-z]+)*$");
 
     @Test
     void allToolNamesShouldFollowMahiSnakeCaseConvention() {
@@ -34,7 +34,7 @@ class WorkflowToolsNamingTest {
         }
 
         assertThat(violations)
-                .as("All @McpTool names in WorkflowTools must match pattern mahi_[a-z]+(_[a-z]+)*\n" +
+                .as("All @McpTool names in WorkflowTools must match snake_case pattern [a-z]+(_[a-z]+)*\n" +
                         "Violations found:\n" + String.join("\n", violations))
                 .isEmpty();
     }
@@ -47,11 +47,11 @@ class WorkflowToolsNamingTest {
                 toolCount++;
             }
         }
-        // At minimum: mahi_create_workflow, mahi_get_workflow, mahi_fire_event, mahi_write_artifact,
-        // mahi_add_requirement_info, mahi_add_design_info, mahi_create_worktree, mahi_remove_worktree,
-        // mahi_add_requirement, mahi_update_requirement, mahi_list_requirements, mahi_get_requirement,
-        // mahi_add_design_element, mahi_update_design_element, mahi_list_design_elements, mahi_get_design_element,
-        // mahi_check_coherence, mahi_save_context = 18 tools
+        // At minimum: create_workflow, get_workflow, fire_event, write_artifact,
+        // add_requirement_info, add_design_info, create_worktree, remove_worktree,
+        // add_requirement, update_requirement, list_requirements, get_requirement,
+        // add_design_element, update_design_element, list_design_elements, get_design_element,
+        // check_coherence, save_context = 18 tools
         assertThat(toolCount).isGreaterThanOrEqualTo(10);
     }
 }

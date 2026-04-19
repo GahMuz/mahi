@@ -26,6 +26,7 @@ dependencyManagement {
 
 dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-server")
+    implementation("io.projectreactor:reactor-core")
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.fasterxml.jackson.core:jackson-databind")
