@@ -211,13 +211,14 @@ public class WorkflowTools {
     }
 
     @McpTool(name = "update_registry",
-          description = "Update the status of a spec entry in .mahi/specs/registry.json. Creates the entry if absent.")
+          description = "Update the status of a workflow entry in .mahi/registry.json (unified registry for all workflow types). Creates the entry if absent.")
     public void updateRegistry(
-            @McpToolParam(description = "Spec identifier", required = true) String specId,
-            @McpToolParam(description = "New status (requirements | design | worktree | planning | implementation | finishing | retrospective | completed | discarded)", required = true) String status,
-            @McpToolParam(description = "Spec title (used only when creating a new row)", required = false) String title,
-            @McpToolParam(description = "Period YYYY/MM (used only when creating a new row)", required = false) String period) {
-        activeStateService.updateRegistry(specId, status, title, period);
+            @McpToolParam(description = "Workflow identifier (kebab-case)", required = true) String id,
+            @McpToolParam(description = "Workflow type: spec | adr | debug | find-bug", required = true) String type,
+            @McpToolParam(description = "New status (requirements | design | worktree | planning | implementation | finishing | retrospective | completed | discarded | abandoned)", required = true) String status,
+            @McpToolParam(description = "Workflow title — used only when creating a new entry", required = false) String title,
+            @McpToolParam(description = "Period YYYY/MM — used only when creating a new entry", required = false) String period) {
+        activeStateService.updateRegistry(id, type, status, title, period);
     }
 
     @McpTool(name = "update_state",

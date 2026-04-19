@@ -129,22 +129,23 @@ class ActiveStateServiceTest {
 
     @Test
     void updateRegistry_whenRegistryDoesNotExist_shouldCreateItAsJson() throws IOException {
-        service.updateRegistry("spec-001", "requirements", "My Feature", "2026/04");
+        service.updateRegistry("spec-001", "spec", "requirements", "My Feature", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.json");
+        Path registry = tempDir.resolve(".mahi/registry.json");
         assertThat(registry).exists();
         String content = Files.readString(registry);
         assertThat(content).contains("\"spec-001\"");
+        assertThat(content).contains("\"spec\"");
         assertThat(content).contains("\"My Feature\"");
         assertThat(content).contains("\"requirements\"");
     }
 
     @Test
-    void updateRegistry_shouldUpdateStatusForExistingSpec() throws IOException {
-        service.updateRegistry("spec-002", "requirements", "Another Feature", "2026/04");
-        service.updateRegistry("spec-002", "design", null, null);
+    void updateRegistry_shouldUpdateStatusForExistingEntry() throws IOException {
+        service.updateRegistry("spec-002", "spec", "requirements", "Another Feature", "2026/04");
+        service.updateRegistry("spec-002", "spec", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.json");
+        Path registry = tempDir.resolve(".mahi/registry.json");
         String content = Files.readString(registry);
         // Only one entry for spec-002, status must be "design"
         long designCount = content.lines()
@@ -157,11 +158,10 @@ class ActiveStateServiceTest {
 
     @Test
     void updateRegistry_shouldHandleTitleContainingPipeCharacter() throws IOException {
-        // Title with '|' must serialize and round-trip correctly in JSON
-        service.updateRegistry("spec-003", "requirements", "Feature | Edge Case", "2026/04");
-        service.updateRegistry("spec-003", "design", null, null);
+        service.updateRegistry("spec-003", "spec", "requirements", "Feature | Edge Case", "2026/04");
+        service.updateRegistry("spec-003", "spec", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.json");
+        Path registry = tempDir.resolve(".mahi/registry.json");
         String content = Files.readString(registry);
         assertThat(content).contains("Feature | Edge Case");
         assertThat(content).contains("\"design\"");
@@ -169,11 +169,11 @@ class ActiveStateServiceTest {
     }
 
     @Test
-    void updateRegistry_shouldAddNewEntryWhenSpecIdNotFound() throws IOException {
-        service.updateRegistry("spec-001", "requirements", "Spec One", "2026/04");
-        service.updateRegistry("spec-002", "requirements", "Spec Two", "2026/04");
+    void updateRegistry_shouldAddNewEntryWhenIdNotFound() throws IOException {
+        service.updateRegistry("spec-001", "spec", "requirements", "Spec One", "2026/04");
+        service.updateRegistry("spec-002", "spec", "requirements", "Spec Two", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.json");
+        Path registry = tempDir.resolve(".mahi/registry.json");
         String content = Files.readString(registry);
         assertThat(content).contains("\"spec-001\"");
         assertThat(content).contains("\"spec-002\"");
@@ -181,10 +181,23 @@ class ActiveStateServiceTest {
     }
 
     @Test
-    void updateRegistry_atomicWrite_shouldNotLeaveTemporaryFile() throws IOException {
-        service.updateRegistry("spec-001", "requirements", "Feature", "2026/04");
+    void updateRegistry_shouldSupportMultipleWorkflowTypes() throws IOException {
+        service.updateRegistry("my-spec", "spec", "requirements", "A Spec", "2026/04");
+        service.updateRegistry("my-adr", "adr", "open", "An ADR", "2026/04");
 
-        Path tmpFile = tempDir.resolve(".mahi/specs/registry.json.tmp");
+        Path registry = tempDir.resolve(".mahi/registry.json");
+        String content = Files.readString(registry);
+        assertThat(content).contains("\"my-spec\"");
+        assertThat(content).contains("\"my-adr\"");
+        assertThat(content).contains(".mahi/specs/2026/04/my-spec");
+        assertThat(content).contains(".mahi/decisions/2026/04/my-adr");
+    }
+
+    @Test
+    void updateRegistry_atomicWrite_shouldNotLeaveTemporaryFile() throws IOException {
+        service.updateRegistry("spec-001", "spec", "requirements", "Feature", "2026/04");
+
+        Path tmpFile = tempDir.resolve(".mahi/registry.json.tmp");
         assertThat(tmpFile).doesNotExist();
     }
 }

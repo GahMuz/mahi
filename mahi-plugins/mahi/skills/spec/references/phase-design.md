@@ -11,7 +11,7 @@ Load `.mahi/specs/<spec-path>/requirement.md`. Extraire :
 
 ### Step 1b: Specs passés liés
 
-Lire `.mahi/specs/registry.json`. Pour chaque spec avec statut `completed` ou `retrospective` :
+Lire `.mahi/registry.json`. Pour chaque spec avec statut `completed` ou `retrospective` :
 - Comparer le titre et les mots-clés avec le spec courant
 - Si lien probable : lire son `design.md`
 

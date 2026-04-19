@@ -12,7 +12,7 @@ Not recommended during `implementation` — finish the current wave first, then 
 ## Process
 
 ### Step 1: Identify Active Spec
-Read `.mahi/specs/registry.json`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
+Read `.mahi/registry.json`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
 
 ### Step 2: Load All Artifacts
 Read the spec's documents based on current phase:
@@ -191,8 +191,8 @@ Préoccupation `<concern B label>` extraite vers la spec `<new-spec-id>`.
 ```
 
 ### Step 8: Update Registry
-Call `mcp__plugin_mahi_mahi__update_registry(<new-spec-id>, <phase>, title, period)` to add the new spec row.
-If the original spec's status changed: call `mcp__plugin_mahi_mahi__update_registry(<original-spec-id>, <phase>)` to update it.
+Call `mcp__plugin_mahi_mahi__update_registry(<new-spec-id>, "spec", <phase>, title, period)` to add the new spec entry.
+If the original spec's status changed: call `mcp__plugin_mahi_mahi__update_registry(<original-spec-id>, "spec", <phase>)` to update it.
 
 ### Step 8b: Split Memory Entry
 Follow the **Impact sur SPLIT** section in `references/protocol-context.md` to distribute the memory entry between the two specs.

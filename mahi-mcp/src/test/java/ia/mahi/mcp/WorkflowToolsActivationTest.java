@@ -84,9 +84,9 @@ class WorkflowToolsActivationTest {
 
     @Test
     void updateRegistry_shouldDelegateToActiveStateService() {
-        workflowTools.updateRegistry("my-spec", "design", "My Spec Title", "2026/04");
+        workflowTools.updateRegistry("my-spec", "spec", "design", "My Spec Title", "2026/04");
 
-        verify(activeStateService).updateRegistry("my-spec", "design", "My Spec Title", "2026/04");
+        verify(activeStateService).updateRegistry("my-spec", "spec", "design", "My Spec Title", "2026/04");
     }
 
     @Test

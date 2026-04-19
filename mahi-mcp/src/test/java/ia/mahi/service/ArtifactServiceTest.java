@@ -164,7 +164,7 @@ class ArtifactServiceTest {
         }
 
         @Override
-        public void updateRegistry(String specId, String status, String title, String period) {
+        public void updateRegistry(String id, String type, String status, String title, String period) {
             throw new UnsupportedOperationException();
         }
 

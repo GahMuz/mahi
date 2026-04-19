@@ -36,15 +36,16 @@ public interface ActiveStateService {
     void deactivate();
 
     /**
-     * Update the status of the given spec entry in .mahi/specs/registry.json.
-     * Creates a new entry if the spec is not already present.
+     * Update the status of the given workflow entry in .mahi/registry.json.
+     * Creates a new entry if the id is not already present.
      *
-     * @param specId the spec identifier
+     * @param id     workflow identifier (kebab-case)
+     * @param type   workflow type: "spec" | "adr" | "debug" | "find-bug" | …
      * @param status the new status string
-     * @param title  spec title — used only when creating a new row (may be null)
-     * @param period the YYYY/MM period — used only when creating a new row (may be null)
+     * @param title  workflow title — used only when creating a new entry (may be null)
+     * @param period the YYYY/MM period — used only when creating a new entry (may be null)
      */
-    void updateRegistry(String specId, String status, String title, String period);
+    void updateRegistry(String id, String type, String status, String title, String period);
 
     /**
      * Resolve a relative path to an absolute path using the git repository root.

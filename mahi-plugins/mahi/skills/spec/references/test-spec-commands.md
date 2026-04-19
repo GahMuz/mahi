@@ -13,7 +13,7 @@ Aucune transition de phase ne doit être gérée localement par le LLM.
 ```
 mcp__plugin_mahi_mahi__create_workflow(type="spec", title="<titre>")
 EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")
-mcp__plugin_mahi_mahi__update_registry(specId, "requirements", title, period)
+mcp__plugin_mahi_mahi__update_registry(specId, "spec", "requirements", title, period)
 mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)
 ```
 
@@ -21,7 +21,7 @@ mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)
 - [ ] `mcp__plugin_mahi_mahi__create_workflow` est appelé avec `type="spec"`
 - [ ] Le `workflowId` retourné est stocké dans `active.json`
 - [ ] `EnterWorktree` est appelé avec `branch="spec/<username>/<spec-id>"` et `path=".worktrees/<spec-id>"`
-- [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `specId`, `"requirements"`, `title`, `period`
+- [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `specId`, `"spec"`, `"requirements"`, `title`, `period`
 - [ ] `mcp__plugin_mahi_mahi__activate` est appelé avec `specId`, `type="spec"`, `path`, `workflowId`
 - [ ] Le LLM n'écrit PAS `active.json` directement
 - [ ] Le LLM n'écrit PAS de ligne dans `registry.json` directement
@@ -72,7 +72,7 @@ mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_FINISHING")
 # retrospective → completed
 mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_RETROSPECTIVE")
 
-mcp__plugin_mahi_mahi__update_registry(specId, <newPhase>)
+mcp__plugin_mahi_mahi__update_registry(specId, "spec", <newPhase>)
 mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)
 ```
 
@@ -111,7 +111,7 @@ mcp__plugin_mahi_mahi__deactivate()
 **Appels MCP attendus (dans cet ordre) :**
 ```
 mcp__plugin_mahi_mahi__remove_worktree(workflowId)
-mcp__plugin_mahi_mahi__update_registry(specId, "discarded")
+mcp__plugin_mahi_mahi__update_registry(specId, "spec", "discarded")
 ExitWorktree()
 mcp__plugin_mahi_mahi__deactivate()
 ```
@@ -119,7 +119,7 @@ mcp__plugin_mahi_mahi__deactivate()
 **Critères :**
 - [ ] Confirmation explicite demandée à l'utilisateur avant tout appel MCP
 - [ ] `mcp__plugin_mahi_mahi__remove_worktree` est appelé pour supprimer le worktree côté serveur
-- [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `"discarded"` pour marquer la ligne en registry
+- [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `specId`, `"spec"`, `"discarded"` pour marquer l'entrée en registry
 - [ ] Le répertoire `.mahi/specs/YYYY/MM/<id>/` est supprimé localement
 - [ ] `ExitWorktree()` est appelé avant la désactivation
 - [ ] `mcp__plugin_mahi_mahi__deactivate()` est appelé pour supprimer `active.json`
@@ -172,7 +172,7 @@ mcp__plugin_mahi_mahi__add_design_info(flowId, info: "<résumé>")
 ```
 # Crée un nouveau workflow pour le sous-spec
 mcp__plugin_mahi_mahi__create_workflow(flowId=<new-spec-id>, workflowType="spec")
-mcp__plugin_mahi_mahi__update_registry(newSpecId, "requirements", newTitle, period)
+mcp__plugin_mahi_mahi__update_registry(newSpecId, "spec", "requirements", newTitle, period)
 mcp__plugin_mahi_mahi__activate(newSpecId, "spec", newPath, newWorkflowId)
 ```
 

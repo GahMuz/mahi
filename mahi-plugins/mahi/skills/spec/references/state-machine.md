@@ -38,7 +38,7 @@ When advancing from phase X to phase Y:
 1. Call `mcp__plugin_mahi_mahi__fire_event(workflowId, event="<APPROVE_X>")` — the server handles the transition
 2. If the server returns an error: display the error message in French and stop
 3. The server response confirms the new currentPhase — use this for further instructions
-4. Call `mcp__plugin_mahi_mahi__update_registry(specId, <newPhase>)` to reflect the new phase
+4. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", <newPhase>)` to reflect the new phase
 5. Call `mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)` to persist state.json
 
 Do NOT update `state.json` or `registry.json` locally — all state is managed server-side.

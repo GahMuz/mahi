@@ -96,30 +96,30 @@ public class ActiveStateServiceImpl implements ActiveStateService {
     }
 
     @Override
-    public void updateRegistry(String specId, String status, String title, String period) {
-        Path registryPath = repoRoot.resolve(".mahi").resolve("specs").resolve("registry.json");
+    public void updateRegistry(String id, String type, String status, String title, String period) {
+        Path registryPath = repoRoot.resolve(".mahi").resolve("registry.json");
 
         try {
             Files.createDirectories(registryPath.getParent());
 
-            SpecRegistry registry = Files.exists(registryPath)
-                    ? mapper.readValue(registryPath.toFile(), SpecRegistry.class)
-                    : new SpecRegistry();
+            Registry registry = Files.exists(registryPath)
+                    ? mapper.readValue(registryPath.toFile(), Registry.class)
+                    : new Registry();
 
             boolean found = false;
-            for (int i = 0; i < registry.specs.size(); i++) {
-                SpecRegistryEntry e = registry.specs.get(i);
-                if (e.id.equals(specId)) {
-                    registry.specs.set(i, new SpecRegistryEntry(e.id, e.title, e.period, status, e.path));
+            for (int i = 0; i < registry.workflows.size(); i++) {
+                RegistryEntry e = registry.workflows.get(i);
+                if (e.id.equals(id)) {
+                    registry.workflows.set(i, new RegistryEntry(e.id, e.type, e.title, e.period, status, e.path));
                     found = true;
                     break;
                 }
             }
 
             if (!found && title != null && period != null) {
-                registry.specs.add(new SpecRegistryEntry(
-                        specId, title, period, status,
-                        ".mahi/specs/" + period + "/" + specId));
+                registry.workflows.add(new RegistryEntry(
+                        id, type, title, period, status,
+                        computePath(type, period, id)));
             }
 
             // Atomic write: temp file + rename to prevent partial writes
@@ -132,19 +132,29 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         }
     }
 
-    // --- Registry model ---
-
-    static class SpecRegistry {
-        public List<SpecRegistryEntry> specs = new ArrayList<>();
+    private static String computePath(String type, String period, String id) {
+        String base = switch (type) {
+            case "adr"      -> ".mahi/decisions";
+            case "spec"     -> ".mahi/specs";
+            default         -> ".mahi/" + type;
+        };
+        return base + "/" + period + "/" + id;
     }
 
-    static class SpecRegistryEntry {
-        public String id, title, period, status, path;
+    // --- Registry model ---
 
-        SpecRegistryEntry() {}
+    static class Registry {
+        public List<RegistryEntry> workflows = new ArrayList<>();
+    }
 
-        SpecRegistryEntry(String id, String title, String period, String status, String path) {
+    static class RegistryEntry {
+        public String id, type, title, period, status, path;
+
+        RegistryEntry() {}
+
+        RegistryEntry(String id, String type, String title, String period, String status, String path) {
             this.id = id;
+            this.type = type;
             this.title = title;
             this.period = period;
             this.status = status;

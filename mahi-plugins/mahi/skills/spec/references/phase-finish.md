@@ -80,7 +80,7 @@ mcp__plugin_mahi_mahi__remove_worktree(workflowId: <lire depuis active.json>)
 
 Mettre à jour le registre :
 ```
-mcp__plugin_mahi_mahi__update_registry(specId, "abandoned")
+mcp__plugin_mahi_mahi__update_registry(specId, "spec", "abandoned")
 ```
 Puis désactiver le spec :
 ```

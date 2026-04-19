@@ -53,14 +53,14 @@ Extract subcommand from user input:
 5. Call `mcp__plugin_mahi_mahi__create_workflow(flowId=<spec-id>, workflowType="spec")` — store the returned `workflowId`.
    Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to create the branch and enter the worktree.
 6. Write initial log.md with creation entry: date, title, "Spec créé".
-7. Call `mcp__plugin_mahi_mahi__update_registry(specId, "requirements", title, period)` to add the spec row in registry.
+7. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", "requirements", title, period)` to add the spec entry in registry.
 8. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch.
 9. Enter requirements phase — read and follow `references/phase-requirements.md`.
 
 ## OPEN
 
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
-1. Read `.mahi/specs/registry.json`. Title given → find matching entry. No title → list non-completed entries, ask user (in French).
+1. Read `.mahi/registry.json`. Title given → find matching entry. No title → list non-completed entries, ask user (in French).
 2. Call `mcp__plugin_mahi_mahi__get_active()`. If present with `type="adr"`: execute ADR CLOSE. If `type="spec"` with different id: execute spec CLOSE. If same id: skip to step 4.
 3. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
@@ -89,7 +89,7 @@ Read and follow `references/phase-recap.md`.
    - finishing → fire `APPROVE_FINISHING` → retrospective: follow `references/phase-retro.md`
    - retrospective → fire `APPROVE_RETROSPECTIVE` → completed: follow `references/phase-retro.md`
    If the server returns an error: display the error message in French — do not attempt a local transition.
-4. Call `mcp__plugin_mahi_mahi__update_registry(specId, <newPhase>)` to update the status column in registry.
+4. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", <newPhase>)` to update the status in registry.
    Call `mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)` to update state.json for the spec.
 
 ## CLARIFY
@@ -104,7 +104,7 @@ Read and follow `references/protocol-clarify.md`.
 2. If confirmed:
    - Call `mcp__plugin_mahi_mahi__remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
    - Remove `.mahi/specs/YYYY/MM/<id>/`.
-3. Call `mcp__plugin_mahi_mahi__update_registry(specId, "discarded")` to mark the row as discarded in registry.
+3. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", "discarded")` to mark the entry as discarded in registry.
 4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.mahi/local/active.json`.
 5. Confirm completion.
 
