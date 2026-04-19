@@ -3,5 +3,11 @@
   "version": "0.1.0",
   "description": "Mahi — deterministic SDD workflow via MCP state machine. Bundles the Mahi MCP server (Java 21, Spring Boot fat jar) and the spec/ADR/debug workflow plugin.",
   "author": { "name": "vincent-bailly" },
-  "keywords": ["workflow", "mcp", "sdd", "mahi", "spec", "state-machine", "fsm", "java"]
+  "keywords": ["workflow", "mcp", "sdd", "mahi", "spec", "state-machine", "fsm", "java"],
+  "mcpServers": {
+    "mahi": {
+      "command": "java",
+      "args": ["-jar", "${CLAUDE_PLUGIN_ROOT}/mahi-mcp-server.jar"]
+    }
+  }
 }
