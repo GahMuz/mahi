@@ -83,7 +83,7 @@ Dispatcher spec-planner pour vérification automatique de couverture et structur
 ```
 Agent({
   description: "Vérifier le plan <spec-id>",
-  subagent_type: "sdd-spec:spec-planner",
+  subagent_type: "mahi:spec-planner",
   model: <from config.models.planner, default "haiku">,
   prompt: "Spec path: <spec-path>"
 })
@@ -128,7 +128,7 @@ Present plan.md:
 Write plan.md using template.
 Après écriture du fichier, appeler :
 ```
-mcp__plugin_mahi_mahi__write_artifact(workflowId: <depuis active.json>, artifactKey: "plan.md", content: <contenu complet>)
+mcp__plugin_mahi_mahi__write_artifact(flowId: <depuis active.json>, artifactName: "plan", content: <contenu complet>)
 ```
 Append log.md entry: date, "Phase planification", X tâches et Y sous-tâches créées, dépendances identifiées.
 

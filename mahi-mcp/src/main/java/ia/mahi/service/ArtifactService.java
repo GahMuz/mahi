@@ -3,6 +3,7 @@ package ia.mahi.service;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -28,7 +29,7 @@ public class ArtifactService {
             Path dir = artifactsRoot.resolve(flowId);
             Files.createDirectories(dir);
             Path file = dir.resolve(artifactName + ".md");
-            Files.writeString(file, content);
+            Files.writeString(file, content, StandardCharsets.UTF_8);
             return file.toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to write artifact: " + artifactName, e);
@@ -45,7 +46,7 @@ public class ArtifactService {
                 throw new IllegalArgumentException(
                         "Artifact not found: " + artifactName + " for flow: " + flowId);
             }
-            return Files.readString(file);
+            return Files.readString(file, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read artifact: " + artifactName, e);
         }

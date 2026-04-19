@@ -1,5 +1,6 @@
 package ia.mahi.workflow.definitions.spec;
 
+import ia.mahi.workflow.core.Artifact;
 import ia.mahi.workflow.core.ArtifactDefinition;
 import ia.mahi.workflow.core.CoherenceChecker;
 import ia.mahi.workflow.core.CoherenceViolation;
@@ -126,7 +127,11 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
 
     private static Guard coherenceGuard() {
         return (WorkflowContext context) -> {
-            if (!(context.getArtifacts().get("requirements") instanceof RequirementsArtifact reqs)) return;
+            Artifact reqArtifact = context.getArtifacts().get("requirements");
+            if (!(reqArtifact instanceof RequirementsArtifact reqs)) {
+                throw new IllegalStateException(
+                        "L'artifact 'requirements' est absent ou invalide — impossible de vérifier la cohérence avant la transition");
+            }
 
             DesignArtifact des = context.getArtifacts().get("design") instanceof DesignArtifact d ? d : null;
 

@@ -58,7 +58,7 @@ public class WorkflowTools {
           description = "Apply a transition event to a workflow. Guards are checked before the transition is applied.")
     public WorkflowContext fireEvent(
             @McpToolParam(description = "Workflow identifier", required = true) String flowId,
-            @McpToolParam(description = "Event name (e.g., DEFINE_SCENARIO, LOAD_RULES, DEFINE_REQUIREMENTS)", required = true) String event) {
+            @McpToolParam(description = "Event name (e.g., APPROVE_REQUIREMENTS, APPROVE_DESIGN, APPROVE_WORKTREE, APPROVE_PLANNING, APPROVE_IMPLEMENTATION, APPROVE_FINISHING, APPROVE_RETROSPECTIVE)", required = true) String event) {
         return workflowService.fire(flowId, event);
     }
 

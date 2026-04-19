@@ -55,7 +55,7 @@ git push -u origin spec/<username>/<spec-id>
 ```
 mcp__plugin_mahi_mahi__fire_event(
   workflowId: <lire depuis active.json>,
-  event: "approve"
+  event: "APPROVE_FINISHING"
 )
 ```
 5. Mettre à jour registry.md : statut → `retrospective`.
@@ -78,13 +78,12 @@ mcp__plugin_mahi_mahi__remove_worktree(workflowId: <lire depuis active.json>)
 ```
 > Note mahi : `mcp__plugin_mahi_mahi__remove_worktree` remplace les commandes git manuelles.
 
-Ensuite déclencher l'événement discard :
+Mettre à jour le registre :
 ```
-mcp__plugin_mahi_mahi__fire_event(
-  workflowId: <lire depuis active.json>,
-  event: "discard"
-)
+mcp__plugin_mahi_mahi__update_registry(specId, "abandoned")
 ```
-- Mettre à jour registry.md : statut → `abandoned`.
-- Supprimer `.sdd/local/active.json`.
+Puis désactiver le spec :
+```
+mcp__plugin_mahi_mahi__deactivate()
+```
 - "Spec abandonné."

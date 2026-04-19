@@ -52,16 +52,33 @@ mcp__plugin_mahi_mahi__get_workflow(workflowId)
 
 ## `/spec approve`
 
-**Appels MCP attendus :**
+**Appels MCP attendus (selon la phase courante) :**
 ```
-mcp__plugin_mahi_mahi__fire_event(workflowId, event="approve")
+# requirements → design
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_REQUIREMENTS")
+
+# design → worktree
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_DESIGN")
+
+# planning → implementation
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_PLANNING")
+
+# implementation → finishing
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_IMPLEMENTATION")
+
+# finishing → retrospective
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_FINISHING")
+
+# retrospective → completed
+mcp__plugin_mahi_mahi__fire_event(workflowId, event="APPROVE_RETROSPECTIVE")
+
 mcp__plugin_mahi_mahi__update_registry(specId, <newPhase>)
 mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)
 ```
 
 **Critères :**
 - [ ] `mcp__plugin_mahi_mahi__get_workflow(workflowId)` est appelé pour lire la phase courante avant validation
-- [ ] `mcp__plugin_mahi_mahi__fire_event` est appelé avec `event="approve"` pour déclencher la transition
+- [ ] `mcp__plugin_mahi_mahi__fire_event` est appelé avec l'événement spécifique à la phase (ex. `APPROVE_REQUIREMENTS`, pas `approve`)
 - [ ] Si le serveur retourne une erreur (transition invalide), elle est affichée en français
 - [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec le nouveau statut après transition réussie
 - [ ] `mcp__plugin_mahi_mahi__update_state` est appelé pour mettre à jour la phase dans `state.json`
@@ -94,7 +111,6 @@ mcp__plugin_mahi_mahi__deactivate()
 **Appels MCP attendus (dans cet ordre) :**
 ```
 mcp__plugin_mahi_mahi__remove_worktree(workflowId)
-mcp__plugin_mahi_mahi__fire_event(workflowId, event="discard")
 mcp__plugin_mahi_mahi__update_registry(specId, "discarded")
 ExitWorktree()
 mcp__plugin_mahi_mahi__deactivate()
@@ -103,13 +119,93 @@ mcp__plugin_mahi_mahi__deactivate()
 **Critères :**
 - [ ] Confirmation explicite demandée à l'utilisateur avant tout appel MCP
 - [ ] `mcp__plugin_mahi_mahi__remove_worktree` est appelé pour supprimer le worktree côté serveur
-- [ ] `mcp__plugin_mahi_mahi__fire_event` avec `event="discard"` est appelé pour marquer le workflow comme annulé
 - [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `"discarded"` pour marquer la ligne en registry
 - [ ] Le répertoire `.sdd/specs/YYYY/MM/<id>/` est supprimé localement
-- [ ] `ExitWorktree()` est appelé avant la suppression
+- [ ] `ExitWorktree()` est appelé avant la désactivation
 - [ ] `mcp__plugin_mahi_mahi__deactivate()` est appelé pour supprimer `active.json`
 - [ ] Le LLM ne supprime PAS `active.json` directement
 - [ ] Le LLM n'écrit PAS dans `registry.md` directement
+- [ ] Aucun `fire_event` n'est appelé pour "discard" (événement inexistant dans le FSM)
+
+---
+
+## `/spec recap`
+
+**Appels MCP attendus :**
+```
+mcp__plugin_mahi_mahi__get_active()
+mcp__plugin_mahi_mahi__get_workflow(workflowId)
+```
+
+**Critères :**
+- [ ] `mcp__plugin_mahi_mahi__get_active()` est appelé pour vérifier qu'un spec est actif
+- [ ] `mcp__plugin_mahi_mahi__get_workflow(workflowId)` est appelé pour récupérer la phase et les artifacts
+- [ ] Le briefing complet (phase, REQs, DESs, tasks en cours) est construit depuis la réponse serveur
+- [ ] Aucune lecture directe de `state.json`
+
+---
+
+## `/spec clarify`
+
+**Appels MCP attendus :**
+```
+# Pour un changement de requirement :
+mcp__plugin_mahi_mahi__add_requirement_info(flowId, info: "<résumé>")
+
+# Pour un changement de design :
+mcp__plugin_mahi_mahi__add_design_info(flowId, info: "<résumé>")
+```
+
+**Critères :**
+- [ ] `mcp__plugin_mahi_mahi__get_active()` est appelé pour vérifier qu'un spec est actif
+- [ ] Les documents impactés (requirement.md / design.md / plan.md) sont modifiés en place
+- [ ] `mcp__plugin_mahi_mahi__add_requirement_info` ou `mcp__plugin_mahi_mahi__add_design_info` est appelé selon le type de changement
+- [ ] Aucun `fire_event` n'est appelé (pas d'événement "clarify" dans le FSM)
+- [ ] La propagation en cascade est effectuée (REQ → DES → TASK)
+- [ ] Un rapport de propagation est présenté en français
+
+---
+
+## `/spec split`
+
+**Appels MCP attendus :**
+```
+# Crée un nouveau workflow pour le sous-spec
+mcp__plugin_mahi_mahi__create_workflow(flowId=<new-spec-id>, workflowType="spec")
+mcp__plugin_mahi_mahi__update_registry(newSpecId, "requirements", newTitle, period)
+mcp__plugin_mahi_mahi__activate(newSpecId, "spec", newPath, newWorkflowId)
+```
+
+**Critères :**
+- [ ] `mcp__plugin_mahi_mahi__get_active()` est appelé pour vérifier qu'un spec est actif
+- [ ] `references/protocol-split.md` est suivi pour la logique de découpage
+- [ ] Le spec parent est mis à jour (tâches extraites retirées ou marquées)
+- [ ] Un nouveau workflow est créé pour le sous-spec via `mcp__plugin_mahi_mahi__create_workflow`
+- [ ] Le registre est mis à jour avec la nouvelle entrée
+
+---
+
+## `/spec switch <titre>`
+
+**Appels MCP attendus :**
+```
+# Fermeture du spec courant (comme /spec close)
+mcp__plugin_mahi_mahi__save_context(flowId, context)
+ExitWorktree()
+mcp__plugin_mahi_mahi__deactivate()
+
+# Ouverture du nouveau spec (comme /spec open)
+mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)
+EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")
+mcp__plugin_mahi_mahi__get_workflow(workflowId)
+```
+
+**Critères :**
+- [ ] Le spec courant est correctement fermé (contexte sauvegardé) avant ouverture du nouveau
+- [ ] `mcp__plugin_mahi_mahi__deactivate()` est appelé pour le spec courant
+- [ ] `mcp__plugin_mahi_mahi__activate` est appelé pour le nouveau spec
+- [ ] `EnterWorktree` est appelé pour entrer dans le worktree du nouveau spec
+- [ ] Le briefing est présenté après le switch
 
 ---
 

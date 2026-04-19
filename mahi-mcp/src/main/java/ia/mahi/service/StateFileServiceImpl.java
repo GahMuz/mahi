@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,8 @@ import java.util.List;
  */
 @Service
 public class StateFileServiceImpl implements StateFileService {
+
+    private static final int MAX_CHANGELOG = 200;
 
     private final ObjectMapper mapper;
 
@@ -64,6 +67,12 @@ public class StateFileServiceImpl implements StateFileService {
                 existingChangelog.add(changelogEntry);
             }
 
+            // Cap changelog to prevent unbounded growth
+            if (existingChangelog.size() > MAX_CHANGELOG) {
+                existingChangelog = new ArrayList<>(
+                        existingChangelog.subList(existingChangelog.size() - MAX_CHANGELOG, existingChangelog.size()));
+            }
+
             ArrayNode changelogNode = mapper.createArrayNode();
             for (ChangelogEntry entry : existingChangelog) {
                 changelogNode.add(mapper.valueToTree(entry));
@@ -71,7 +80,10 @@ public class StateFileServiceImpl implements StateFileService {
             root.set("changelog", changelogNode);
 
             Files.createDirectories(specDir);
-            mapper.writerWithDefaultPrettyPrinter().writeValue(stateJson.toFile(), root);
+            // Atomic write: write to temp file then rename to prevent partial writes on crash
+            Path tmp = stateJson.resolveSibling("state.tmp");
+            mapper.writerWithDefaultPrettyPrinter().writeValue(tmp.toFile(), root);
+            Files.move(tmp, stateJson, StandardCopyOption.REPLACE_EXISTING);
 
             String specId = root.has("id") ? root.get("id").asText() : specDir.getFileName().toString();
             return new StateSnapshot(specId, currentPhase, now, existingChangelog);

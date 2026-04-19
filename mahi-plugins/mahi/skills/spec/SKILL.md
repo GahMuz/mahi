@@ -103,7 +103,6 @@ Read and follow `references/protocol-clarify.md`.
 1. **Ask explicit confirmation** (destructive).
 2. If confirmed:
    - Call `mcp__plugin_mahi_mahi__remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
-   - Call `mcp__plugin_mahi_mahi__fire_event(workflowId, event="discard")` — marks the workflow as discarded on the server.
    - Remove `.sdd/specs/YYYY/MM/<id>/`.
 3. Call `mcp__plugin_mahi_mahi__update_registry(specId, "discarded")` to mark the row as discarded in registry.
 4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.sdd/local/active.json`.

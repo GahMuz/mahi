@@ -3,6 +3,8 @@ package ia.mahi.definitions;
 import ia.mahi.store.WorkflowStore;
 import ia.mahi.workflow.core.Artifact;
 import ia.mahi.workflow.core.ArtifactStatus;
+import ia.mahi.workflow.core.RequirementItem;
+import ia.mahi.workflow.core.RequirementsArtifact;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.spec.SpecWorkflowDefinition;
@@ -83,6 +85,39 @@ class SpecWorkflowDefinitionTest {
     }
 
     @Test
+    void coherenceGuard_shouldBlockApproveRequirementsWhenReqHasNoAC() {
+        engine.create("spec-005", "spec");
+
+        // Add a REQ without any acceptance criteria — this violates coherence
+        WorkflowContext ctx = store.load("spec-005");
+        RequirementsArtifact reqs = (RequirementsArtifact) ctx.getArtifacts().get("requirements");
+        RequirementItem req = new RequirementItem();
+        req.setId("REQ-001");
+        req.setTitle("Some requirement");
+        req.setPriority("must");
+        // No acceptance criteria added → violation REQ_NO_AC
+        reqs.getItems().put("REQ-001", req);
+        reqs.markDraft("/tmp/requirement.md");
+        reqs.markValid();
+        store.save(ctx);
+
+        // coherenceGuard detects REQ_NO_AC → must block transition
+        assertThatThrownBy(() -> engine.fire("spec-005", "APPROVE_REQUIREMENTS"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Violations de cohérence");
+    }
+
+    @Test
+    void coherenceGuard_shouldPassWhenRequirementsAreEmpty() {
+        engine.create("spec-006", "spec");
+
+        // Mark requirements valid with no items — guard passes (nothing to violate)
+        markAndSave("spec-006", "requirements");
+        WorkflowContext ctx = engine.fire("spec-006", "APPROVE_REQUIREMENTS");
+        assertThat(ctx.getState()).isEqualTo("DESIGN");
+    }
+
+    @Test
     void shouldMarkDesignAndPlanStaleWhenRequirementsInvalidated() {
         engine.create("spec-004", "spec");
 
@@ -98,6 +133,20 @@ class SpecWorkflowDefinitionTest {
         WorkflowContext ctx = engine.get("spec-004");
         assertThat(ctx.getArtifacts().get("design").getStatus()).isEqualTo(ArtifactStatus.STALE);
         assertThat(ctx.getArtifacts().get("plan").getStatus()).isEqualTo(ArtifactStatus.STALE);
+    }
+
+    @Test
+    void historyPruning_shouldCapAt100Entries() {
+        engine.create("spec-history", "spec");
+
+        // Repeatedly add transitions by going through the re-entry cycle via REANALYZING
+        // Easier approach: directly manipulate WorkflowContext history
+        WorkflowContext ctx = store.load("spec-history");
+        for (int i = 0; i < 120; i++) {
+            ctx.addTransition("STATE_A", "EVENT_X", "STATE_B");
+        }
+
+        assertThat(ctx.getHistory()).hasSize(100);
     }
 
     // --- Helpers ---

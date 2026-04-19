@@ -7,18 +7,27 @@ import ia.mahi.workflow.core.WorkflowContext;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Persists workflow contexts as JSON files in .mahi/flows/<flowId>.json
- * Writes are synchronous — the file is only written on successful transition.
+ *
+ * Guarantees:
+ * - Atomic writes: content is written to a temp file then renamed, preventing partial writes on crash.
+ * - Optimistic concurrency: version field is checked before each save. If another writer saved
+ *   between our load and save, the save is rejected with IllegalStateException.
+ * - Per-flowId synchronization: within the same JVM, concurrent saves for the same flow are serialized.
  */
 @Component
 public class WorkflowStore {
 
     private final ObjectMapper objectMapper;
     private final Path root;
+    private final ConcurrentHashMap<String, Object> flowLocks = new ConcurrentHashMap<>();
 
     public WorkflowStore() {
         this(Path.of(".mahi", "flows"));
@@ -43,19 +52,53 @@ public class WorkflowStore {
             if (!Files.exists(file)) {
                 throw new IllegalArgumentException("Workflow not found: " + flowId);
             }
-            return objectMapper.readValue(Files.readString(file), WorkflowContext.class);
+            return objectMapper.readValue(Files.readString(file, StandardCharsets.UTF_8), WorkflowContext.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load workflow: " + flowId, e);
         }
     }
 
+    /**
+     * Saves a workflow context atomically.
+     *
+     * <p>Checks the on-disk version against the context's current version before writing.
+     * If they differ, another writer modified the flow concurrently — throws IllegalStateException.
+     * On success, increments the version and writes via a temp-file rename.
+     *
+     * @throws IllegalStateException if a concurrent modification is detected
+     */
     public WorkflowContext save(WorkflowContext context) {
-        try {
-            Files.createDirectories(root);
-            Files.writeString(file(context.getFlowId()), objectMapper.writeValueAsString(context));
-            return context;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save workflow: " + context.getFlowId(), e);
+        Object lock = flowLocks.computeIfAbsent(context.getFlowId(), k -> new Object());
+        synchronized (lock) {
+            try {
+                Files.createDirectories(root);
+                Path target = file(context.getFlowId());
+
+                // Optimistic concurrency: check on-disk version before writing
+                if (Files.exists(target)) {
+                    WorkflowContext onDisk = objectMapper.readValue(
+                            Files.readString(target, StandardCharsets.UTF_8), WorkflowContext.class);
+                    if (onDisk.getVersion() != context.getVersion()) {
+                        throw new IllegalStateException(
+                                "Concurrent modification of workflow '" + context.getFlowId()
+                                + "': expected version " + context.getVersion()
+                                + " but found " + onDisk.getVersion()
+                                + " on disk. Reload and retry.");
+                    }
+                }
+
+                // Increment version, then write atomically via temp file + rename
+                context.setVersion(context.getVersion() + 1);
+                Path tmp = target.resolveSibling(context.getFlowId() + ".tmp");
+                Files.writeString(tmp, objectMapper.writeValueAsString(context), StandardCharsets.UTF_8);
+                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+
+                return context;
+            } catch (IllegalStateException e) {
+                throw e;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save workflow: " + context.getFlowId(), e);
+            }
         }
     }
 

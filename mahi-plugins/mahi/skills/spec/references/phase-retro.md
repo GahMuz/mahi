@@ -93,7 +93,7 @@ Si aucune règle approuvée : skip.
 ```
 mcp__plugin_mahi_mahi__fire_event(
   workflowId: <lire depuis active.json>,
-  event: "approve"
+  event: "APPROVE_RETROSPECTIVE"
 )
 ```
 2. Mettre à jour registry.md : statut → `completed`.

@@ -124,4 +124,70 @@ class ActiveStateServiceTest {
         // Must NOT be in a nested subdirectory
         assertThat(activeJson.getParent()).isEqualTo(tempDir.resolve(".sdd/local"));
     }
+
+    // --- Registry parser tests ---
+
+    @Test
+    void updateRegistry_whenRegistryDoesNotExist_shouldCreateItWithHeader() throws IOException {
+        service.updateRegistry("spec-001", "requirements", "My Feature", "2026/04");
+
+        Path registry = tempDir.resolve(".sdd/specs/registry.md");
+        assertThat(registry).exists();
+        String content = Files.readString(registry);
+        assertThat(content).contains("# Registre des specs");
+        assertThat(content).contains("spec-001");
+        assertThat(content).contains("My Feature");
+        assertThat(content).contains("requirements");
+    }
+
+    @Test
+    void updateRegistry_shouldUpdateStatusForExistingSpec() throws IOException {
+        service.updateRegistry("spec-002", "requirements", "Another Feature", "2026/04");
+        service.updateRegistry("spec-002", "design", null, null);
+
+        Path registry = tempDir.resolve(".sdd/specs/registry.md");
+        String content = Files.readString(registry);
+        assertThat(content).contains("design");
+        // requirements status should no longer be present for this spec
+        long designCount = content.lines()
+                .filter(l -> l.contains("spec-002") && l.contains("design"))
+                .count();
+        assertThat(designCount).isEqualTo(1);
+    }
+
+    @Test
+    void updateRegistry_shouldHandleTitleContainingPipeCharacter() throws IOException {
+        // Title with '|' must not break the pipe-counting parser
+        service.updateRegistry("spec-003", "requirements", "Feature | Edge Case", "2026/04");
+        service.updateRegistry("spec-003", "design", null, null);
+
+        Path registry = tempDir.resolve(".sdd/specs/registry.md");
+        String content = Files.readString(registry);
+        // Status should have been updated to design despite the pipe in the title
+        assertThat(content.lines()
+                .filter(l -> l.startsWith("| spec-003 |") && l.contains("| design |"))
+                .findFirst()).isPresent();
+    }
+
+    @Test
+    void updateRegistry_shouldAddNewRowWhenSpecIdNotFound() throws IOException {
+        // Create registry with one entry
+        service.updateRegistry("spec-001", "requirements", "Spec One", "2026/04");
+        // Add a second one
+        service.updateRegistry("spec-002", "requirements", "Spec Two", "2026/04");
+
+        Path registry = tempDir.resolve(".sdd/specs/registry.md");
+        String content = Files.readString(registry);
+        assertThat(content).contains("spec-001");
+        assertThat(content).contains("spec-002");
+        assertThat(content).contains("Spec Two");
+    }
+
+    @Test
+    void updateRegistry_atomicWrite_shouldNotLeaveTemporaryFile() throws IOException {
+        service.updateRegistry("spec-001", "requirements", "Feature", "2026/04");
+
+        Path tmpFile = tempDir.resolve(".sdd/specs/registry.md.tmp");
+        assertThat(tmpFile).doesNotExist();
+    }
 }

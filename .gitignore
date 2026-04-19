@@ -1,6 +1,11 @@
 .worktrees/
 .sdd/local/
 .idea/
-mahi-mcp/build/classes/
+mahi-mcp/build/
+mahi-mcp/.gradle/
 sdd-spec/
 .claude/settings.local.json
+*.class
+*.log
+.DS_Store
+.vscode/

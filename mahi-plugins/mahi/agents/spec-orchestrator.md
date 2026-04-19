@@ -65,14 +65,14 @@ Si aucun problème → continuer immédiatement.
 - Read `.sdd/specs/<spec-path>/requirement.md` — for agent context
 - Read `.sdd/config.json` — for parallelTaskLimit, pipelineReviews, models
 - Read `active.json` → get `workflowId`
-- Call `mahi_get_workflow(workflowId)` → verify currentPhase is "implementation"; read artifacts for context
+- Call `mcp__plugin_mahi_mahi__get_workflow(flowId: <workflowId>)` → verify currentPhase is "implementation"; read artifacts for context
 - Glob `**/sdd-rules/SKILL.md` → exécuter le protocole de chargement (plugin + projet + priorité) — résultat gardé en mémoire pour injection per-subtask en Step 3
 - Glob `.claude/skills/*/SKILL.md` → pour chaque fichier trouvé, lire uniquement le frontmatter (`name` + `description`). Conserver la liste `[{name, description, path}]` en mémoire. **Ne pas re-scanner à chaque sous-tâche** — cette liste est réutilisée pour toute la session d'orchestration.
 
 ### Step 2: Build Waves (with resume awareness)
 Read all subtask statuses from plan.md:
 - **Skip** subtasks marked `[x]` (already completed)
-- **Re-dispatch** subtasks marked `[~]` or `[!]` (in-progress or failed — needs retry); for `[!]` subtasks, include the debugging-process skill content in the agent prompt. **Si plusieurs `[!]` existent :**
+- **Re-dispatch** subtasks marked `[~]` or `[!]` (in-progress or failed — needs retry); for `[!]` subtasks, add to the agent prompt: "Debug protocol: read the error carefully before touching any code; form one hypothesis at a time and test it; after 3 failed attempts stop and report `[!]` with a summary of what was tried and why each hypothesis failed." **Si plusieurs `[!]` existent :**
   - Failures dans des fichiers/domaines clairement distincts → dispatcher en parallèle (gains de temps)
   - Failures dans la même zone du code ou avec le même type d'erreur → dispatcher un seul agent d'investigation d'abord ; paralléliser seulement si l'investigation confirme l'indépendance
 - **Queue** subtasks marked `[ ]` (pending)
@@ -112,7 +112,7 @@ Agent({
    - Toujours injecter les règles plugin (SOLID ; RGPD si DCP ; DORA si contexte financier)
    - Faire correspondre le domaine de la sous-tâche avec la colonne "Charger quand" des règles projet
    - Injecter uniquement les règles projet correspondantes (ex: sous-tâche controller → `rules-controller.md`)
-4. **Graph slices** (sdd-graph, si disponible) : Si `.sdd/graph/manifest.json` existe :
+4. **Graph slices** (plugin optionnel `sdd-graph`, si disponible) : Si `.sdd/graph/manifest.json` existe (créé par le plugin sdd-graph) :
 
    **Phase de déduplication (avant dispatch) :**
    - Pour chaque sous-tâche de la vague, identifier la requête graph nécessaire selon son type (voir règles ci-dessous).

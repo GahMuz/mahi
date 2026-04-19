@@ -25,8 +25,9 @@ public class GitWorktreeService {
     }
 
     private void run(String... command) {
+        Process process = null;
         try {
-            Process process = new ProcessBuilder(command)
+            process = new ProcessBuilder(command)
                     .redirectErrorStream(true)
                     .start();
 
@@ -43,8 +44,15 @@ public class GitWorktreeService {
             }
         } catch (IllegalStateException e) {
             throw e;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while executing git command", e);
         } catch (Exception e) {
             throw new RuntimeException("Failed to execute git command", e);
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
         }
     }
 }

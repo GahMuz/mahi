@@ -34,6 +34,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
+    testImplementation("org.mockito:mockito-core")
 }
 
 tasks.bootJar {

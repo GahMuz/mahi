@@ -113,7 +113,7 @@ Via Edit sur plan.md :
 
 Après écriture du fichier plan.md, synchroniser l'artefact avec le serveur :
 ```
-mahi_write_artifact(workflowId: <depuis active.json>, artifactKey: "plan.md", content: <contenu complet du fichier>)
+mcp__plugin_mahi_mahi__write_artifact(flowId: <depuis active.json>, artifactName: "plan", content: <contenu complet du fichier>)
 ```
 
 ### 5. Identifier les back-pressures

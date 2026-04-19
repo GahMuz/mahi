@@ -117,7 +117,7 @@ Mettre à jour la table de couverture REQ → DES en fin de design.md (ajouter l
 
 Appeler pour chaque DES finalisé :
 ```
-mahi_add_design_element(flowId: <depuis active.json>, des: {
+mcp__plugin_mahi_mahi__add_design_element(flowId: <depuis active.json>, des: {
   id: "DES-xxx",
   title: "<titre>",
   status: "VALID",
@@ -128,12 +128,12 @@ mahi_add_design_element(flowId: <depuis active.json>, des: {
 
 Après écriture du fichier, synchroniser l'artefact avec le serveur :
 ```
-mahi_write_artifact(flowId: <depuis active.json>, artifactName: "design", content: <contenu complet du fichier>)
+mcp__plugin_mahi_mahi__write_artifact(flowId: <depuis active.json>, artifactName: "design", content: <contenu complet du fichier>)
 ```
 
 Vérifier la cohérence REQ/DES :
 ```
-mahi_check_coherence(flowId: <depuis active.json>)
+mcp__plugin_mahi_mahi__check_coherence(flowId: <depuis active.json>)
 ```
 Si violations → corriger avant d'appeler spec-design-validator.
 

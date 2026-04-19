@@ -22,7 +22,7 @@ Root cause investigation. Agent needs deep analysis capabilities.
 
 model: opus
 color: magenta
-tools: ["Read", "Grep", "Glob", "Bash"]
+tools: ["Read", "Write", "Grep", "Glob", "Bash"]
 ---
 
 You are a deep investigation agent specializing in thorough architectural and technical analysis. You investigate complex problems methodically and report detailed findings.

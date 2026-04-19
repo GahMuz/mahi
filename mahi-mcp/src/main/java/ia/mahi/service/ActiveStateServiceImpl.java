@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Default implementation of ActiveStateService.
  * Resolves the git repository root at startup and operates relative to it.
+ * If git is not available, falls back to the current working directory and logs a warning.
  */
 @Service
 public class ActiveStateServiceImpl implements ActiveStateService {
@@ -43,7 +45,14 @@ public class ActiveStateServiceImpl implements ActiveStateService {
     @PostConstruct
     void init() {
         if (repoRoot == null) {
-            repoRoot = resolveRepoRoot();
+            try {
+                repoRoot = resolveRepoRoot();
+            } catch (Exception e) {
+                repoRoot = Path.of("").toAbsolutePath();
+                System.err.println("[mahi] Warning: could not resolve git repository root: " + e.getMessage()
+                        + " — falling back to working directory: " + repoRoot
+                        + ". Git-based features (create_worktree, remove_worktree) will fail if invoked.");
+            }
         }
     }
 
@@ -93,7 +102,6 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
         try {
             if (!Files.exists(registryPath)) {
-                // Create new registry file
                 Files.createDirectories(registryPath.getParent());
                 String header = "# Registre des specs\n\n"
                         + "| Identifiant | Titre | Période | Statut | Requirement | Design | Plan |\n"
@@ -107,21 +115,29 @@ public class ActiveStateServiceImpl implements ActiveStateService {
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
                 if (line.startsWith("| " + specId + " |")) {
-                    // Update status column (index 3, pipe-separated)
-                    String[] parts = line.split("\\|", -1);
-                    if (parts.length >= 5) {
-                        parts[4] = " " + status + " ";
-                        lines.set(i, String.join("|", parts));
-                        found = true;
-                        break;
+                    // Locate the 4th and 5th pipe characters to find the status column.
+                    // This approach is robust against | characters in other cells (e.g., title field).
+                    int pipeCount = 0;
+                    int statusStart = -1, statusEnd = -1;
+                    for (int j = 0; j < line.length(); j++) {
+                        if (line.charAt(j) == '|') {
+                            pipeCount++;
+                            if (pipeCount == 4) statusStart = j + 1;
+                            if (pipeCount == 5) { statusEnd = j; break; }
+                        }
                     }
+                    if (statusStart != -1 && statusEnd != -1) {
+                        String newLine = line.substring(0, statusStart) + " " + status + " " + line.substring(statusEnd);
+                        lines.set(i, newLine);
+                        found = true;
+                    }
+                    break;
                 }
             }
 
             if (!found && title != null && period != null) {
-                // Append a new row
-                String p = period != null ? period : "";
-                String t = title != null ? title : specId;
+                String p = period;
+                String t = title;
                 String specPath = ".sdd/specs/" + p + "/" + specId;
                 String row = "| " + specId + " | " + t + " | " + p + " | " + status
                         + " | [requirement.md](" + specPath + "/requirement.md)"
@@ -130,7 +146,11 @@ public class ActiveStateServiceImpl implements ActiveStateService {
                 lines.add(row);
             }
 
-            Files.write(registryPath, lines, StandardCharsets.UTF_8);
+            // Atomic write: temp file + rename to prevent partial writes
+            Path tmp = registryPath.resolveSibling("registry.md.tmp");
+            Files.write(tmp, lines, StandardCharsets.UTF_8);
+            Files.move(tmp, registryPath, StandardCopyOption.REPLACE_EXISTING);
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to update registry.md", e);
         }

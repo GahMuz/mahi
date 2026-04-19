@@ -33,13 +33,15 @@ Ajouter une entrée dans `log.md` (journal local conservé pour l'historique) :
 Éléments impactés : REQ-xxx, DES-xxx
 ```
 
-Notifier le serveur Mahi :
-```
-mcp__plugin_mahi_mahi__fire_event(workflowId: <depuis active.json>, event="clarify", data={
-  summary: "<summary of change>",
-  affectedItems: ["REQ-xxx", "DES-xxx"]
-})
-```
+Notifier le serveur Mahi selon le type de clarification :
+- Changement de requirement :
+  ```
+  mcp__plugin_mahi_mahi__add_requirement_info(flowId: <depuis active.json>, info: "<summary of change> — impacte REQ-xxx")
+  ```
+- Changement de design :
+  ```
+  mcp__plugin_mahi_mahi__add_design_info(flowId: <depuis active.json>, info: "<summary of change> — impacte DES-xxx")
+  ```
 
 ### Step 4: Propagate Downstream
 

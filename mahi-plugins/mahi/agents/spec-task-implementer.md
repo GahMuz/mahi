@@ -112,4 +112,4 @@ When dispatched to fix issues from a `spec-code-reviewer` report:
 **Error Handling:**
 - Test framework missing → report and fail
 - Dependencies unavailable → report and fail
-- Tests fail after implementation → apply the debugging-process skill: investigate root cause (Phase 1) before attempting any fix, one hypothesis at a time; after 3 failed attempts stop and report `[!]` with a summary of what was tried
+- Tests fail after implementation → debug protocol: read the error carefully, understand the failure before touching any code, form one hypothesis at a time and test it; after 3 failed attempts stop and report `[!]` with a summary of what was tried and why each hypothesis failed

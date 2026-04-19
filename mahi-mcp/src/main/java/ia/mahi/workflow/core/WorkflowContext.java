@@ -14,9 +14,13 @@ import java.util.Map;
  */
 public class WorkflowContext {
 
+    /** Maximum number of transition records kept (older ones are pruned on addTransition). */
+    private static final int MAX_HISTORY = 100;
+
     private String flowId;
     private String workflowType;
     private String state;
+    private long version = 0;
     private Map<String, Artifact> artifacts = new HashMap<>();
     private Map<String, Object> metadata = new HashMap<>();
     private List<TransitionRecord> history = new ArrayList<>();
@@ -39,9 +43,13 @@ public class WorkflowContext {
 
     /**
      * Records a completed transition in the history.
+     * Caps the history at MAX_HISTORY entries to prevent unbounded growth.
      */
     public void addTransition(String fromState, String event, String toState) {
         this.history.add(new TransitionRecord(fromState, event, toState, Instant.now()));
+        if (this.history.size() > MAX_HISTORY) {
+            this.history = new ArrayList<>(this.history.subList(this.history.size() - MAX_HISTORY, this.history.size()));
+        }
     }
 
     // --- Getters and setters ---
@@ -58,6 +66,9 @@ public class WorkflowContext {
         this.state = state;
         this.updatedAt = Instant.now();
     }
+
+    public long getVersion() { return version; }
+    public void setVersion(long version) { this.version = version; }
 
     public Map<String, Artifact> getArtifacts() { return artifacts; }
     public void setArtifacts(Map<String, Artifact> artifacts) { this.artifacts = artifacts; }
