@@ -3,7 +3,7 @@ name: spec
 description: "This skill should be used when the user invokes '/spec' to manage spec-driven development workflow. Handles 'new spec', 'open spec' (loads context + resumes workflow), 'recap' (briefing complet avec contexte), 'approve phase', 'clarify spec documents (requirements, design, or plan)', 'discard spec', 'split spec', 'close spec', 'switch spec'. Orchestrates the full lifecycle from requirements through tested, reviewed code."
 argument-hint: "new <titre> | open [titre] | recap | clarify | approve | discard | split [<new-titre>] | close | switch <titre>"
 context: fork
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Agent"]
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Agent", "EnterWorktree", "ExitWorktree"]
 ---
 
 # Spec Workflow Orchestrator
@@ -50,7 +50,7 @@ Extract subcommand from user input:
 2. Convert title to kebab-case for directory name. Note current `YYYY/MM` from today's date.
 3. Create `.sdd/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
 4. Create empty `rule-candidates.md` in the spec directory (header only: `# Règles candidates`).
-5. Call `mahi_create_workflow(type="spec", title="<titre>")` — store the returned `workflowId`.
+5. Call `mahi_create_workflow(flowId=<spec-id>, workflowType="spec")` — store the returned `workflowId`.
    Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to create the branch and enter the worktree.
 6. Write initial log.md with creation entry: date, title, "Spec créé".
 7. Call `mahi_update_registry(specId, "requirements", title, period)` to add the spec row in registry.
@@ -81,15 +81,14 @@ Read and follow `references/phase-recap.md`.
    - design: design.md has >= 1 DES
    - planning: plan.md has >= 1 TASK with subtasks
    - finishing: all tests pass, all subtasks [x], no uncommitted changes in worktree
-3. Advance per state machine (`references/state-machine.md`):
-   - Call `mahi_fire_event(workflowId, event="approve")` to trigger the transition.
-   - If the server returns an error: display the error message in French — do not attempt a local transition.
-   - After successful event:
-     - requirements → design: follow `references/phase-design.md`
-     - design → worktree + planning: follow `references/phase-worktree.md` then `references/phase-planning.md`
-     - planning → implementation: follow `references/phase-execution.md`
-     - finishing → retrospective: follow `references/phase-retro.md`
-     - retrospective → completed: follow `references/phase-retro.md`
+3. Advance per state machine (`references/state-machine.md`) — fire the event matching the current phase:
+   - requirements → fire `APPROVE_REQUIREMENTS` → design: follow `references/phase-design.md`
+   - design → fire `APPROVE_DESIGN` → worktree: follow `references/phase-worktree.md` then `references/phase-planning.md`
+   - planning → fire `APPROVE_PLANNING` → implementation: follow `references/phase-execution.md`
+   - implementation → fire `APPROVE_IMPLEMENTATION` → finishing: follow `references/phase-finish.md`
+   - finishing → fire `APPROVE_FINISHING` → retrospective: follow `references/phase-retro.md`
+   - retrospective → fire `APPROVE_RETROSPECTIVE` → completed: follow `references/phase-retro.md`
+   If the server returns an error: display the error message in French — do not attempt a local transition.
 4. Call `mahi_update_registry(specId, <newPhase>)` to update the status column in registry.
    Call `mahi_update_state(specPath, <newPhase>, changelogEntry)` to update state.json for the spec.
 

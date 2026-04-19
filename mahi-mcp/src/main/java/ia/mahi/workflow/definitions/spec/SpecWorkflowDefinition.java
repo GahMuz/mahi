@@ -28,14 +28,12 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
 
     @Override
     public WorkflowState getInitialState() {
-        return DRAFT;
+        return REQUIREMENTS;
     }
 
     @Override
     public Map<String, ArtifactDefinition> getArtifacts() {
         return Map.of(
-                "scenario",      ArtifactDefinition.file("scenario"),
-                "rules",         ArtifactDefinition.file("rules"),
                 "requirements",  new ArtifactDefinition("requirements", () -> new RequirementsArtifact("requirements")),
                 "design",        new ArtifactDefinition("design",       () -> new DesignArtifact("design")),
                 "plan",          ArtifactDefinition.file("plan"),
@@ -47,62 +45,45 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     public Map<String, TransitionDefinition> getTransitions() {
         Map<String, TransitionDefinition> t = new HashMap<>();
 
-        t.put(key(DRAFT, DEFINE_SCENARIO),
-                new TransitionDefinition(DRAFT, DEFINE_SCENARIO, SCENARIO_DEFINED,
-                        List.of(), List.of()));
-
-        t.put(key(SCENARIO_DEFINED, LOAD_RULES),
-                new TransitionDefinition(SCENARIO_DEFINED, LOAD_RULES, PROJECT_RULES_LOADED,
-                        List.of(requireValid("scenario")), List.of()));
-
-        t.put(key(PROJECT_RULES_LOADED, DEFINE_REQUIREMENTS),
-                new TransitionDefinition(PROJECT_RULES_LOADED, DEFINE_REQUIREMENTS, REQUIREMENTS_DEFINED,
-                        List.of(requireValid("rules")), List.of()));
-
-        // Guard: requireValid + coherence check before entering design phase
-        t.put(key(REQUIREMENTS_DEFINED, DEFINE_DESIGN),
-                new TransitionDefinition(REQUIREMENTS_DEFINED, DEFINE_DESIGN, DESIGN_DEFINED,
+        t.put(key(REQUIREMENTS, APPROVE_REQUIREMENTS),
+                new TransitionDefinition(REQUIREMENTS, APPROVE_REQUIREMENTS, DESIGN,
                         List.of(requireValid("requirements"), coherenceGuard()), List.of()));
 
-        t.put(key(DESIGN_DEFINED, DEFINE_PLAN),
-                new TransitionDefinition(DESIGN_DEFINED, DEFINE_PLAN, IMPLEMENTATION_PLAN_DEFINED,
+        t.put(key(DESIGN, APPROVE_DESIGN),
+                new TransitionDefinition(DESIGN, APPROVE_DESIGN, WORKTREE,
                         List.of(requireValid("design")), List.of()));
 
-        t.put(key(IMPLEMENTATION_PLAN_DEFINED, CREATE_WORKTREE),
-                new TransitionDefinition(IMPLEMENTATION_PLAN_DEFINED, CREATE_WORKTREE, WORKTREE_CREATED,
+        t.put(key(WORKTREE, APPROVE_WORKTREE),
+                new TransitionDefinition(WORKTREE, APPROVE_WORKTREE, PLANNING,
+                        List.of(), List.of()));
+
+        t.put(key(PLANNING, APPROVE_PLANNING),
+                new TransitionDefinition(PLANNING, APPROVE_PLANNING, IMPLEMENTATION,
                         List.of(requireValid("plan")), List.of()));
 
-        t.put(key(WORKTREE_CREATED, START_IMPLEMENTATION),
-                new TransitionDefinition(WORKTREE_CREATED, START_IMPLEMENTATION, IMPLEMENTING,
+        t.put(key(IMPLEMENTATION, APPROVE_IMPLEMENTATION),
+                new TransitionDefinition(IMPLEMENTATION, APPROVE_IMPLEMENTATION, FINISHING,
                         List.of(), List.of()));
 
-        t.put(key(IMPLEMENTING, VALIDATE),
-                new TransitionDefinition(IMPLEMENTING, VALIDATE, VALIDATING,
+        t.put(key(FINISHING, APPROVE_FINISHING),
+                new TransitionDefinition(FINISHING, APPROVE_FINISHING, RETROSPECTIVE,
                         List.of(), List.of()));
 
-        t.put(key(VALIDATING, FINALIZE),
-                new TransitionDefinition(VALIDATING, FINALIZE, FINALIZING,
+        t.put(key(RETROSPECTIVE, APPROVE_RETROSPECTIVE),
+                new TransitionDefinition(RETROSPECTIVE, APPROVE_RETROSPECTIVE, COMPLETED,
                         List.of(), List.of()));
 
-        t.put(key(FINALIZING, WRITE_RETROSPECTIVE),
-                new TransitionDefinition(FINALIZING, WRITE_RETROSPECTIVE, RETROSPECTIVE_DONE,
+        // Re-entry transitions from REANALYZING (triggered by mahi_add_requirement_info / mahi_add_design_info)
+        t.put(key(REANALYZING, APPROVE_REQUIREMENTS),
+                new TransitionDefinition(REANALYZING, APPROVE_REQUIREMENTS, REQUIREMENTS,
                         List.of(), List.of()));
 
-        t.put(key(RETROSPECTIVE_DONE, COMPLETE),
-                new TransitionDefinition(RETROSPECTIVE_DONE, COMPLETE, DONE,
+        t.put(key(REANALYZING, APPROVE_DESIGN),
+                new TransitionDefinition(REANALYZING, APPROVE_DESIGN, DESIGN,
                         List.of(), List.of()));
 
-        // Re-entry transitions from REANALYZING
-        t.put(key(REANALYZING, DEFINE_REQUIREMENTS),
-                new TransitionDefinition(REANALYZING, DEFINE_REQUIREMENTS, REQUIREMENTS_DEFINED,
-                        List.of(), List.of()));
-
-        t.put(key(REANALYZING, DEFINE_DESIGN),
-                new TransitionDefinition(REANALYZING, DEFINE_DESIGN, DESIGN_DEFINED,
-                        List.of(), List.of()));
-
-        t.put(key(REANALYZING, DEFINE_PLAN),
-                new TransitionDefinition(REANALYZING, DEFINE_PLAN, IMPLEMENTATION_PLAN_DEFINED,
+        t.put(key(REANALYZING, APPROVE_PLANNING),
+                new TransitionDefinition(REANALYZING, APPROVE_PLANNING, PLANNING,
                         List.of(), List.of()));
 
         return t;
@@ -111,19 +92,19 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     @Override
     public Map<String, String> getStateToPhaseMapping() {
         return Map.of(
-                "REQUIREMENTS_DEFINED",       "requirements",
-                "DESIGN_DEFINED",             "design",
-                "IMPLEMENTATION_PLAN_DEFINED","planning",
-                "IMPLEMENTING",               "implementation",
-                "FINALIZING",                 "finishing",
-                "RETROSPECTIVE_DONE",         "retrospective"
+                "REQUIREMENTS",  "requirements",
+                "DESIGN",        "design",
+                "WORKTREE",      "worktree",
+                "PLANNING",      "planning",
+                "IMPLEMENTATION","implementation",
+                "FINISHING",     "finishing",
+                "RETROSPECTIVE", "retrospective"
         );
     }
 
     @Override
     public Map<String, List<String>> getInvalidationGraph() {
         return Map.of(
-                "scenario",      List.of("requirements", "design", "plan"),
                 "requirements",  List.of("design", "plan"),
                 "design",        List.of("plan")
         );
@@ -143,10 +124,6 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
         };
     }
 
-    /**
-     * Guard that runs coherence checks before entering design phase.
-     * Delegates to CoherenceChecker to avoid logic duplication with WorkflowService.
-     */
     private static Guard coherenceGuard() {
         return (WorkflowContext context) -> {
             if (!(context.getArtifacts().get("requirements") instanceof RequirementsArtifact reqs)) return;

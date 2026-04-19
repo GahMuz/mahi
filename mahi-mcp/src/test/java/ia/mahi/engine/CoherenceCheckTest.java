@@ -165,18 +165,12 @@ class CoherenceCheckTest {
     }
 
     /**
-     * fire("approve") avec violations présentes → IllegalStateException (REQ-004.AC-3)
-     * The guard on REQUIREMENTS_DEFINED::DEFINE_DESIGN calls checkCoherence
+     * APPROVE_REQUIREMENTS avec violations présentes → IllegalStateException (REQ-004.AC-3)
+     * The guard on REQUIREMENTS::APPROVE_REQUIREMENTS calls checkCoherence
      */
     @Test
     void shouldBlockDesignTransitionWhenCoherenceViolationsExist() {
-        // Setup workflow to REQUIREMENTS_DEFINED state
-        workflowService.fire("spec-coherence-test", "DEFINE_SCENARIO");
-        // Mark scenario as valid
-        markArtifactValid("spec-coherence-test", "scenario");
-        workflowService.fire("spec-coherence-test", "LOAD_RULES");
-        markArtifactValid("spec-coherence-test", "rules");
-        workflowService.fire("spec-coherence-test", "DEFINE_REQUIREMENTS");
+        // Workflow starts in REQUIREMENTS state — mark artifact valid
         markArtifactValid("spec-coherence-test", "requirements");
 
         // Add REQ with orphan AC (no DES covers it) — coherence violation
@@ -186,8 +180,8 @@ class CoherenceCheckTest {
         workflowService.addRequirement("spec-coherence-test", req);
         // No DES added — so REQ-001.AC-1 is orphan
 
-        // Fire DEFINE_DESIGN — should fail because of coherence violations
-        assertThatThrownBy(() -> workflowService.fire("spec-coherence-test", "DEFINE_DESIGN"))
+        // Fire APPROVE_REQUIREMENTS — should fail because of coherence violations
+        assertThatThrownBy(() -> workflowService.fire("spec-coherence-test", "APPROVE_REQUIREMENTS"))
                 .isInstanceOf(IllegalStateException.class);
     }
 

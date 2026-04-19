@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mahi": {
+      "type": "stdio",
+      "command": "java",
+      "args": ["-jar", "mahi-plugins/mahi-workflow/mahi-mcp-server.jar"]
+    }
+  }
+}

@@ -20,13 +20,13 @@
 ## Valid Transitions
 
 ```
-requirements → design              (user approval → mahi_fire_event(workflowId, "approve"))
-design → worktree                  (user approval → mahi_fire_event(workflowId, "approve"), auto-chain)
-worktree → planning                (automatic after setup → mahi_fire_event(workflowId, "approve"))
-planning → implementation          (user approval → mahi_fire_event(workflowId, "approve"))
-implementation → finishing          (all subtasks [x] + /spec approve → mahi_fire_event(workflowId, "approve"))
-finishing → retrospective          (user chooses "Valider" → mahi_fire_event(workflowId, "approve"))
-retrospective → completed          (retro complete → mahi_fire_event(workflowId, "approve"))
+requirements → design          (APPROVE_REQUIREMENTS — guards: requirements artifact VALID + coherence)
+design → worktree              (APPROVE_DESIGN — guard: design artifact VALID)
+worktree → planning            (APPROVE_WORKTREE — automatic after setup)
+planning → implementation      (APPROVE_PLANNING — guard: plan artifact VALID)
+implementation → finishing      (APPROVE_IMPLEMENTATION — all subtasks done)
+finishing → retrospective      (APPROVE_FINISHING)
+retrospective → completed      (APPROVE_RETROSPECTIVE)
 ```
 
 No other transitions are valid. Phases cannot be skipped.
@@ -35,29 +35,41 @@ The server enforces these constraints — any invalid transition attempt will re
 ## Transition Procedure
 
 When advancing from phase X to phase Y:
-1. Call `mahi_fire_event(workflowId, event="approve")` — the server handles the transition
+1. Call `mahi_fire_event(workflowId, event="<APPROVE_X>")` — the server handles the transition
 2. If the server returns an error: display the error message in French and stop
 3. The server response confirms the new currentPhase — use this for further instructions
-4. Call `mahi_update_registry(workflowId, status: <newPhase>)` to reflect the new phase — do not write `registry.md` directly.
+4. Call `mahi_update_registry(specId, <newPhase>)` to reflect the new phase
+5. Call `mahi_update_state(specPath, <newPhase>, changelogEntry)` to persist state.json
 
 Do NOT update `state.json` or `registry.md` locally — all state is managed server-side.
 
+## Event Names per Phase
+
+| Current phase | Event to fire |
+|--------------|---------------|
+| `requirements` | `APPROVE_REQUIREMENTS` |
+| `design` | `APPROVE_DESIGN` |
+| `worktree` | `APPROVE_WORKTREE` |
+| `planning` | `APPROVE_PLANNING` |
+| `implementation` | `APPROVE_IMPLEMENTATION` |
+| `finishing` | `APPROVE_FINISHING` |
+| `retrospective` | `APPROVE_RETROSPECTIVE` |
+
 ## Reading Current Phase
 
-To read the current phase of the active workflow:
 ```
 mahi_get_workflow(workflowId)
 ```
 
-The response includes `currentPhase`, `artifacts`, and any other server-managed state.
+The response includes `currentPhase` (derived from server state via `getStateToPhaseMapping()`).
 Never read `state.json` to determine the current phase in mahi-workflow.
 
 ## Error States
 
 | Error | Action |
 |-------|--------|
-| Worktree creation fails | Call `mahi_fire_event(workflowId, "error")`, report git error |
-| Test baseline fails | Stay in worktree phase (server rejects transition), report failing tests |
+| Worktree creation fails | Report git error to user |
+| Test baseline fails | Stay in worktree phase (fire APPROVE_WORKTREE only when tests pass), report failing tests |
 | Subtask fails | Mark `[!]` in plan.md, continue others, report after batch |
 | Critical review issue | Block next batch, report to user |
 | All subtasks in batch fail | Pause implementation, wait for user |

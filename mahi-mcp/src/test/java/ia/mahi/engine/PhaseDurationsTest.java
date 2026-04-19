@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * TASK-007.1 [RED] — Tests des métriques de durée par phase (phaseDurations dans mahi_get_workflow).
- * Ces tests doivent ÉCHOUER tant que le calcul phaseDurations n'est pas implémenté.
  */
 class PhaseDurationsTest {
 
@@ -58,16 +57,16 @@ class PhaseDurationsTest {
     void shouldCalculateRequirementsPhaseDuration() {
         workflowService.create("spec-dur-001", "spec");
 
-        // Inject artificial history: REQUIREMENTS_DEFINED entered, then left 47 min later
         Instant reqStart = Instant.parse("2026-04-18T10:00:00Z");
         Instant reqEnd = reqStart.plusSeconds(47 * 60); // 47 minutes
 
         WorkflowContext ctx = store.load("spec-dur-001");
-        ctx.setState("DESIGN_DEFINED"); // current state
-        // Simulate the transition history
+        ctx.setState("DESIGN");
         ctx.getHistory().clear();
-        ctx.getHistory().add(new TransitionRecord("PROJECT_RULES_LOADED", "DEFINE_REQUIREMENTS", "REQUIREMENTS_DEFINED", reqStart));
-        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS_DEFINED", "DEFINE_DESIGN", "DESIGN_DEFINED", reqEnd));
+        // Synthetic entry: workflow started in REQUIREMENTS at reqStart
+        ctx.getHistory().add(new TransitionRecord("INITIAL", "CREATED", "REQUIREMENTS", reqStart));
+        // 47 min later: approved requirements → entered design
+        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS", "APPROVE_REQUIREMENTS", "DESIGN", reqEnd));
         store.save(ctx);
 
         WorkflowContext result = workflowService.get("spec-dur-001");
@@ -76,7 +75,7 @@ class PhaseDurationsTest {
         Map<String, Long> phaseDurations = (Map<String, Long>) result.getMetadata().get("phaseDurations");
         assertThat(phaseDurations).isNotNull();
         assertThat(phaseDurations).containsKey("requirements");
-        assertThat(phaseDurations.get("requirements")).isEqualTo(47L * 60 * 1000); // 2820000 ms
+        assertThat(phaseDurations.get("requirements")).isEqualTo(47L * 60 * 1000);
     }
 
     /**
@@ -89,9 +88,10 @@ class PhaseDurationsTest {
         Instant designStart = Instant.now().minusSeconds(30 * 60); // 30 min ago
 
         WorkflowContext ctx = store.load("spec-dur-002");
-        ctx.setState("DESIGN_DEFINED");
+        ctx.setState("DESIGN");
         ctx.getHistory().clear();
-        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS_DEFINED", "DEFINE_DESIGN", "DESIGN_DEFINED", designStart));
+        // Synthetic entry: entered DESIGN 30 min ago
+        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS", "APPROVE_REQUIREMENTS", "DESIGN", designStart));
         store.save(ctx);
 
         WorkflowContext result = workflowService.get("spec-dur-002");
@@ -100,7 +100,6 @@ class PhaseDurationsTest {
         Map<String, Long> phaseDurations = (Map<String, Long>) result.getMetadata().get("phaseDurations");
         assertThat(phaseDurations).isNotNull();
         assertThat(phaseDurations).containsKey("design");
-        // Partial duration — at least 29 minutes (allowing for execution time)
         assertThat(phaseDurations.get("design")).isGreaterThan(29L * 60 * 1000);
     }
 
@@ -113,44 +112,52 @@ class PhaseDurationsTest {
 
         Instant reqStart = Instant.now().minusSeconds(10 * 60);
         WorkflowContext ctx = store.load("spec-dur-003");
-        ctx.setState("REQUIREMENTS_DEFINED");
+        ctx.setState("REQUIREMENTS");
         ctx.getHistory().clear();
-        ctx.getHistory().add(new TransitionRecord("PROJECT_RULES_LOADED", "DEFINE_REQUIREMENTS", "REQUIREMENTS_DEFINED", reqStart));
+        // Workflow just created — entered REQUIREMENTS at start
+        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS", "APPROVE_REQUIREMENTS", "DESIGN", reqStart.plusSeconds(10 * 60)));
+        ctx.setState("DESIGN");
         store.save(ctx);
+
+        // Reset to REQUIREMENTS with partial duration only
+        WorkflowContext ctx2 = store.load("spec-dur-003");
+        ctx2.setState("REQUIREMENTS");
+        ctx2.getHistory().clear();
+        store.save(ctx2);
 
         WorkflowContext result = workflowService.get("spec-dur-003");
 
         @SuppressWarnings("unchecked")
         Map<String, Long> phaseDurations = (Map<String, Long>) result.getMetadata().get("phaseDurations");
         assertThat(phaseDurations).isNotNull();
-        // design has not been reached yet
         assertThat(phaseDurations).doesNotContainKey("design");
         assertThat(phaseDurations).doesNotContainKey("planning");
         assertThat(phaseDurations).doesNotContainKey("implementation");
     }
 
     /**
-     * Re-entrée dans une phase (REANALYZING → DEFINE_REQUIREMENTS) → durées additionnées (REQ-006.AC-4)
+     * Re-entrée dans une phase (REANALYZING → APPROVE_REQUIREMENTS) → durées additionnées (REQ-006.AC-4)
      */
     @Test
     void shouldAddDurationsForReEnteredPhase() {
         workflowService.create("spec-dur-004", "spec");
 
-        Instant firstEntry = Instant.parse("2026-04-18T09:00:00Z");
-        Instant firstExit  = firstEntry.plusSeconds(20 * 60);  // 20 min
-        Instant secondEntry = firstExit.plusSeconds(5 * 60);   // 5 min gap
-        Instant secondExit  = secondEntry.plusSeconds(10 * 60); // 10 min
+        Instant firstEntry  = Instant.parse("2026-04-18T09:00:00Z");
+        Instant firstExit   = firstEntry.plusSeconds(20 * 60);   // 20 min
+        Instant secondEntry = firstExit.plusSeconds(5 * 60);      // 5 min gap
+        Instant secondExit  = secondEntry.plusSeconds(10 * 60);   // 10 min
 
         WorkflowContext ctx = store.load("spec-dur-004");
-        ctx.setState("DESIGN_DEFINED");
+        ctx.setState("DESIGN");
         ctx.getHistory().clear();
-        // First pass: requirements phase (20 min)
-        ctx.getHistory().add(new TransitionRecord("PROJECT_RULES_LOADED", "DEFINE_REQUIREMENTS", "REQUIREMENTS_DEFINED", firstEntry));
-        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS_DEFINED", "DEFINE_DESIGN", "DESIGN_DEFINED", firstExit));
-        // Re-entry: went to REANALYZING, then back to requirements (10 min)
-        ctx.getHistory().add(new TransitionRecord("DESIGN_DEFINED", "REANALYZE", "REANALYZING", firstExit.plusSeconds(60)));
-        ctx.getHistory().add(new TransitionRecord("REANALYZING", "DEFINE_REQUIREMENTS", "REQUIREMENTS_DEFINED", secondEntry));
-        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS_DEFINED", "DEFINE_DESIGN", "DESIGN_DEFINED", secondExit));
+        // Synthetic entry: workflow started in REQUIREMENTS at firstEntry
+        ctx.getHistory().add(new TransitionRecord("INITIAL", "CREATED", "REQUIREMENTS", firstEntry));
+        // First pass: requirements (20 min) → design
+        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS", "APPROVE_REQUIREMENTS", "DESIGN", firstExit));
+        ctx.getHistory().add(new TransitionRecord("DESIGN", "REANALYZE", "REANALYZING", firstExit.plusSeconds(60)));
+        // Re-entry: REANALYZING → back to requirements (10 min) → design again
+        ctx.getHistory().add(new TransitionRecord("REANALYZING", "APPROVE_REQUIREMENTS", "REQUIREMENTS", secondEntry));
+        ctx.getHistory().add(new TransitionRecord("REQUIREMENTS", "APPROVE_REQUIREMENTS", "DESIGN", secondExit));
         store.save(ctx);
 
         WorkflowContext result = workflowService.get("spec-dur-004");

@@ -36,90 +36,61 @@ class SpecWorkflowDefinitionTest {
     void shouldCompleteFullSpecWorkflow() {
         engine.create("spec-001", "spec");
 
-        // DRAFT -> SCENARIO_DEFINED (no guard)
-        WorkflowContext ctx = engine.fire("spec-001", "DEFINE_SCENARIO");
-        assertThat(ctx.getState()).isEqualTo("SCENARIO_DEFINED");
-
-        // Persist artifact as VALID so the guard passes
-        markAndSave("spec-001", "scenario");
-
-        ctx = engine.fire("spec-001", "LOAD_RULES");
-        assertThat(ctx.getState()).isEqualTo("PROJECT_RULES_LOADED");
-
-        markAndSave("spec-001", "rules");
-
-        ctx = engine.fire("spec-001", "DEFINE_REQUIREMENTS");
-        assertThat(ctx.getState()).isEqualTo("REQUIREMENTS_DEFINED");
-
+        // Starts in REQUIREMENTS — mark artifact valid then approve
         markAndSave("spec-001", "requirements");
-
-        ctx = engine.fire("spec-001", "DEFINE_DESIGN");
-        assertThat(ctx.getState()).isEqualTo("DESIGN_DEFINED");
+        WorkflowContext ctx = engine.fire("spec-001", "APPROVE_REQUIREMENTS");
+        assertThat(ctx.getState()).isEqualTo("DESIGN");
 
         markAndSave("spec-001", "design");
+        ctx = engine.fire("spec-001", "APPROVE_DESIGN");
+        assertThat(ctx.getState()).isEqualTo("WORKTREE");
 
-        ctx = engine.fire("spec-001", "DEFINE_PLAN");
-        assertThat(ctx.getState()).isEqualTo("IMPLEMENTATION_PLAN_DEFINED");
+        ctx = engine.fire("spec-001", "APPROVE_WORKTREE");
+        assertThat(ctx.getState()).isEqualTo("PLANNING");
 
         markAndSave("spec-001", "plan");
+        ctx = engine.fire("spec-001", "APPROVE_PLANNING");
+        assertThat(ctx.getState()).isEqualTo("IMPLEMENTATION");
 
-        ctx = engine.fire("spec-001", "CREATE_WORKTREE");
-        assertThat(ctx.getState()).isEqualTo("WORKTREE_CREATED");
+        ctx = engine.fire("spec-001", "APPROVE_IMPLEMENTATION");
+        assertThat(ctx.getState()).isEqualTo("FINISHING");
 
-        ctx = engine.fire("spec-001", "START_IMPLEMENTATION");
-        assertThat(ctx.getState()).isEqualTo("IMPLEMENTING");
+        ctx = engine.fire("spec-001", "APPROVE_FINISHING");
+        assertThat(ctx.getState()).isEqualTo("RETROSPECTIVE");
 
-        ctx = engine.fire("spec-001", "VALIDATE");
-        assertThat(ctx.getState()).isEqualTo("VALIDATING");
+        ctx = engine.fire("spec-001", "APPROVE_RETROSPECTIVE");
+        assertThat(ctx.getState()).isEqualTo("COMPLETED");
 
-        ctx = engine.fire("spec-001", "FINALIZE");
-        assertThat(ctx.getState()).isEqualTo("FINALIZING");
-
-        ctx = engine.fire("spec-001", "WRITE_RETROSPECTIVE");
-        assertThat(ctx.getState()).isEqualTo("RETROSPECTIVE_DONE");
-
-        ctx = engine.fire("spec-001", "COMPLETE");
-        assertThat(ctx.getState()).isEqualTo("DONE");
-
-        // 11 transitions recorded
-        assertThat(ctx.getHistory()).hasSize(11);
+        assertThat(ctx.getHistory()).hasSize(7);
     }
 
     @Test
     void shouldRejectTransitionFromWrongState() {
         engine.create("spec-002", "spec");
-        // LOAD_RULES requires state SCENARIO_DEFINED, not DRAFT
-        assertThatThrownBy(() -> engine.fire("spec-002", "LOAD_RULES"))
+        // APPROVE_DESIGN is only valid from DESIGN, not REQUIREMENTS
+        assertThatThrownBy(() -> engine.fire("spec-002", "APPROVE_DESIGN"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Transition invalide");
     }
 
     @Test
-    void shouldFailWhenScenarioNotValidForLoadRules() {
+    void shouldFailWhenRequirementsNotValidForApproveRequirements() {
         engine.create("spec-003", "spec");
-        engine.fire("spec-003", "DEFINE_SCENARIO");
-        // scenario artifact is MISSING (not VALID) — guard must reject
-        assertThatThrownBy(() -> engine.fire("spec-003", "LOAD_RULES"))
+        // requirements artifact is MISSING (not VALID) — guard must reject
+        assertThatThrownBy(() -> engine.fire("spec-003", "APPROVE_REQUIREMENTS"))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("scenario");
+                .hasMessageContaining("requirements");
     }
 
     @Test
     void shouldMarkDesignAndPlanStaleWhenRequirementsInvalidated() {
         engine.create("spec-004", "spec");
-        engine.fire("spec-004", "DEFINE_SCENARIO");
-        markAndSave("spec-004", "scenario");
 
-        engine.fire("spec-004", "LOAD_RULES");
-        markAndSave("spec-004", "rules");
-
-        engine.fire("spec-004", "DEFINE_REQUIREMENTS");
         markAndSave("spec-004", "requirements");
-
-        engine.fire("spec-004", "DEFINE_DESIGN");
+        engine.fire("spec-004", "APPROVE_REQUIREMENTS");
         markAndSave("spec-004", "design");
-
-        engine.fire("spec-004", "DEFINE_PLAN");
+        engine.fire("spec-004", "APPROVE_DESIGN");
+        engine.fire("spec-004", "APPROVE_WORKTREE");
         markAndSave("spec-004", "plan");
 
         // Invalidate requirements — design and plan should become STALE

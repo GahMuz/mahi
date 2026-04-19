@@ -38,6 +38,12 @@ dependencies {
 tasks.bootJar {
     archiveFileName = "mahi-mcp-server.jar"
     mainClass = "ia.mahi.MahiMcpApplication"
+    doLast {
+        copy {
+            from(archiveFile)
+            into("${projectDir}/../mahi-plugins/mahi-workflow")
+        }
+    }
 }
 
 tasks.jar {

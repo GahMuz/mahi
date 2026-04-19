@@ -155,8 +155,8 @@ Spec créée par division de `<original-spec-id>` (<original-title>).
 #### Création du workflow Mahi pour la nouvelle spec
 ```
 mahi_create_workflow(
-  type: "spec",
-  title: <new-title>
+  flowId: <new-spec-id>,
+  workflowType: "spec"
 )
 ```
 Stocker le `workflowId` retourné pour écriture dans `active.json` de la nouvelle spec.
@@ -164,8 +164,8 @@ Stocker le `workflowId` retourné pour écriture dans `active.json` de la nouvel
 > Note mahi-workflow : il n'y a pas de création de state.json.
 > La phase initiale est déterminée par le serveur Mahi selon le contenu transféré.
 
-Si des REQs ET des DESs sont transférés : déclencher `mahi_fire_event(workflowId, event="approve")` une fois pour passer en design.
-Si des REQs, DESs ET TASKs sont transférés : déclencher `approve` deux fois (requirements → design → planning).
+Si des REQs ET des DESs sont transférés : déclencher `mahi_fire_event(workflowId, event="APPROVE_REQUIREMENTS")` pour passer en design.
+Si des REQs, DESs ET TASKs sont transférés : déclencher `APPROVE_REQUIREMENTS` puis `APPROVE_DESIGN` (requirements → design → worktree → planning).
 
 ### Step 7: Update Original Spec
 

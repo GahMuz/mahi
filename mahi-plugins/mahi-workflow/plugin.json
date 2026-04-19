@@ -1,7 +1,7 @@
 {
   "name": "mahi-workflow",
   "version": "0.1.0",
-  "description": "Mahi Workflow — SDD spec workflow plugin backed by the Mahi MCP state machine server. Replaces file-based state management (state.json, active.json) with strict server-side FSM via MCP calls.",
+  "description": "Mahi — deterministic SDD workflow via MCP state machine. Bundles the Mahi MCP server (Java 21, Spring Boot fat jar) and the spec/ADR/debug workflow plugin.",
   "author": { "name": "vincent-bailly" },
-  "keywords": ["workflow", "mcp", "sdd", "mahi", "spec", "state-machine", "fsm"]
+  "keywords": ["workflow", "mcp", "sdd", "mahi", "spec", "state-machine", "fsm", "java"]
 }

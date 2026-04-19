@@ -27,7 +27,7 @@ Appeler :
 ```
 mahi_fire_event(
   workflowId: <lire depuis active.json>,
-  event: "approve"
+  event: "APPROVE_WORKTREE"
 )
 ```
 
