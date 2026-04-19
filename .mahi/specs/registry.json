@@ -1,0 +1,45 @@
+{
+  "specs" : [ {
+    "id" : "mahi",
+    "title" : "mahi — Serveur MCP Java pour la machine d'état SDD",
+    "period" : "2026/04",
+    "status" : "completed",
+    "path" : ".mahi/specs/2026/04/mahi"
+  }, {
+    "id" : "sdd-spec",
+    "title" : "sdd-spec",
+    "period" : "2026/04",
+    "status" : "requirements",
+    "path" : ".mahi/specs/2026/04/sdd-spec"
+  }, {
+    "id" : "mahi-workflow",
+    "title" : "mahi-workflow — Intégration sdd-spec comme plugin Mahi",
+    "period" : "2026/04",
+    "status" : "completed",
+    "path" : ".mahi/specs/2026/04/mahi-workflow"
+  }, {
+    "id" : "mcp-for-spec",
+    "title" : "mcp-for-spec — Extension Mahi MCP : opérations granulaires, cohérence et contexte",
+    "period" : "2026/04",
+    "status" : "completed",
+    "path" : ".mahi/specs/2026/04/mcp-for-spec"
+  }, {
+    "id" : "sdd-spec-worktree-mcp",
+    "title" : "sdd-spec-worktree-mcp — Refonte architecturale : MCP, worktree et active.json sur branche principale",
+    "period" : "2026/04",
+    "status" : "completed",
+    "path" : ".mahi/specs/2026/04/sdd-spec-worktree-mcp"
+  }, {
+    "id" : "scenario-phase",
+    "title" : "scenario-phase — Phase scénario commune : dialogue léger, mémoire persistante et routing",
+    "period" : "2026/04",
+    "status" : "requirements",
+    "path" : ".mahi/specs/2026/04/scenario-phase"
+  }, {
+    "id" : "release",
+    "title" : "release — Script de release cross-plateforme pour la marketplace Mahi",
+    "period" : "2026/04",
+    "status" : "completed",
+    "path" : ".mahi/specs/2026/04/release"
+  } ]
+}

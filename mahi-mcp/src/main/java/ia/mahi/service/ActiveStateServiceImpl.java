@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -98,61 +97,58 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public void updateRegistry(String specId, String status, String title, String period) {
-        Path registryPath = repoRoot.resolve(".mahi").resolve("specs").resolve("registry.md");
+        Path registryPath = repoRoot.resolve(".mahi").resolve("specs").resolve("registry.json");
 
         try {
-            if (!Files.exists(registryPath)) {
-                Files.createDirectories(registryPath.getParent());
-                String header = "# Registre des specs\n\n"
-                        + "| Identifiant | Titre | Période | Statut | Requirement | Design | Plan |\n"
-                        + "|-------------|-------|---------|--------|-------------|--------|------|\n";
-                Files.writeString(registryPath, header, StandardCharsets.UTF_8);
-            }
+            Files.createDirectories(registryPath.getParent());
 
-            List<String> lines = new ArrayList<>(Files.readAllLines(registryPath, StandardCharsets.UTF_8));
+            SpecRegistry registry = Files.exists(registryPath)
+                    ? mapper.readValue(registryPath.toFile(), SpecRegistry.class)
+                    : new SpecRegistry();
+
             boolean found = false;
-
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                if (line.startsWith("| " + specId + " |")) {
-                    // Locate the 4th and 5th pipe characters to find the status column.
-                    // This approach is robust against | characters in other cells (e.g., title field).
-                    int pipeCount = 0;
-                    int statusStart = -1, statusEnd = -1;
-                    for (int j = 0; j < line.length(); j++) {
-                        if (line.charAt(j) == '|') {
-                            pipeCount++;
-                            if (pipeCount == 4) statusStart = j + 1;
-                            if (pipeCount == 5) { statusEnd = j; break; }
-                        }
-                    }
-                    if (statusStart != -1 && statusEnd != -1) {
-                        String newLine = line.substring(0, statusStart) + " " + status + " " + line.substring(statusEnd);
-                        lines.set(i, newLine);
-                        found = true;
-                    }
+            for (int i = 0; i < registry.specs.size(); i++) {
+                SpecRegistryEntry e = registry.specs.get(i);
+                if (e.id.equals(specId)) {
+                    registry.specs.set(i, new SpecRegistryEntry(e.id, e.title, e.period, status, e.path));
+                    found = true;
                     break;
                 }
             }
 
             if (!found && title != null && period != null) {
-                String p = period;
-                String t = title;
-                String specPath = ".mahi/specs/" + p + "/" + specId;
-                String row = "| " + specId + " | " + t + " | " + p + " | " + status
-                        + " | [requirement.md](" + specPath + "/requirement.md)"
-                        + " | [design.md](" + specPath + "/design.md)"
-                        + " | [plan.md](" + specPath + "/plan.md) |";
-                lines.add(row);
+                registry.specs.add(new SpecRegistryEntry(
+                        specId, title, period, status,
+                        ".mahi/specs/" + period + "/" + specId));
             }
 
             // Atomic write: temp file + rename to prevent partial writes
-            Path tmp = registryPath.resolveSibling("registry.md.tmp");
-            Files.write(tmp, lines, StandardCharsets.UTF_8);
+            Path tmp = registryPath.resolveSibling("registry.json.tmp");
+            mapper.writeValue(tmp.toFile(), registry);
             Files.move(tmp, registryPath, StandardCopyOption.REPLACE_EXISTING);
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to update registry.md", e);
+            throw new RuntimeException("Failed to update registry.json", e);
+        }
+    }
+
+    // --- Registry model ---
+
+    static class SpecRegistry {
+        public List<SpecRegistryEntry> specs = new ArrayList<>();
+    }
+
+    static class SpecRegistryEntry {
+        public String id, title, period, status, path;
+
+        SpecRegistryEntry() {}
+
+        SpecRegistryEntry(String id, String title, String period, String status, String path) {
+            this.id = id;
+            this.title = title;
+            this.period = period;
+            this.status = status;
+            this.path = path;
         }
     }
 

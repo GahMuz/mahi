@@ -96,7 +96,7 @@ mcp__plugin_mahi_mahi__fire_event(
   event: "APPROVE_RETROSPECTIVE"
 )
 ```
-2. Mettre à jour registry.md : statut → `completed`.
+2. Mettre à jour registry.json : statut → `completed`.
 3. Append log.md : "Rétrospective terminée. Spec complété."
 
 > Note mahi : il n'y a pas de mise à jour de state.json.

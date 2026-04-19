@@ -58,7 +58,7 @@ mcp__plugin_mahi_mahi__fire_event(
   event: "APPROVE_FINISHING"
 )
 ```
-5. Mettre à jour registry.md : statut → `retrospective`.
+5. Mettre à jour registry.json : statut → `retrospective`.
 6. Suivre `references/phase-retro.md`.
 
 > Note mahi : la mise à jour de la phase se fait via `mcp__plugin_mahi_mahi__fire_event`,

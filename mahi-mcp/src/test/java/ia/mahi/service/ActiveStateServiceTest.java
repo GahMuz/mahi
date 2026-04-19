@@ -128,16 +128,15 @@ class ActiveStateServiceTest {
     // --- Registry parser tests ---
 
     @Test
-    void updateRegistry_whenRegistryDoesNotExist_shouldCreateItWithHeader() throws IOException {
+    void updateRegistry_whenRegistryDoesNotExist_shouldCreateItAsJson() throws IOException {
         service.updateRegistry("spec-001", "requirements", "My Feature", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.md");
+        Path registry = tempDir.resolve(".mahi/specs/registry.json");
         assertThat(registry).exists();
         String content = Files.readString(registry);
-        assertThat(content).contains("# Registre des specs");
-        assertThat(content).contains("spec-001");
-        assertThat(content).contains("My Feature");
-        assertThat(content).contains("requirements");
+        assertThat(content).contains("\"spec-001\"");
+        assertThat(content).contains("\"My Feature\"");
+        assertThat(content).contains("\"requirements\"");
     }
 
     @Test
@@ -145,49 +144,47 @@ class ActiveStateServiceTest {
         service.updateRegistry("spec-002", "requirements", "Another Feature", "2026/04");
         service.updateRegistry("spec-002", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.md");
+        Path registry = tempDir.resolve(".mahi/specs/registry.json");
         String content = Files.readString(registry);
-        assertThat(content).contains("design");
-        // requirements status should no longer be present for this spec
+        // Only one entry for spec-002, status must be "design"
         long designCount = content.lines()
-                .filter(l -> l.contains("spec-002") && l.contains("design"))
+                .filter(l -> l.contains("spec-002"))
                 .count();
         assertThat(designCount).isEqualTo(1);
+        assertThat(content).contains("\"design\"");
+        assertThat(content).doesNotContain("\"requirements\"");
     }
 
     @Test
     void updateRegistry_shouldHandleTitleContainingPipeCharacter() throws IOException {
-        // Title with '|' must not break the pipe-counting parser
+        // Title with '|' must serialize and round-trip correctly in JSON
         service.updateRegistry("spec-003", "requirements", "Feature | Edge Case", "2026/04");
         service.updateRegistry("spec-003", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.md");
+        Path registry = tempDir.resolve(".mahi/specs/registry.json");
         String content = Files.readString(registry);
-        // Status should have been updated to design despite the pipe in the title
-        assertThat(content.lines()
-                .filter(l -> l.startsWith("| spec-003 |") && l.contains("| design |"))
-                .findFirst()).isPresent();
+        assertThat(content).contains("Feature | Edge Case");
+        assertThat(content).contains("\"design\"");
+        assertThat(content).doesNotContain("\"requirements\"");
     }
 
     @Test
-    void updateRegistry_shouldAddNewRowWhenSpecIdNotFound() throws IOException {
-        // Create registry with one entry
+    void updateRegistry_shouldAddNewEntryWhenSpecIdNotFound() throws IOException {
         service.updateRegistry("spec-001", "requirements", "Spec One", "2026/04");
-        // Add a second one
         service.updateRegistry("spec-002", "requirements", "Spec Two", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/specs/registry.md");
+        Path registry = tempDir.resolve(".mahi/specs/registry.json");
         String content = Files.readString(registry);
-        assertThat(content).contains("spec-001");
-        assertThat(content).contains("spec-002");
-        assertThat(content).contains("Spec Two");
+        assertThat(content).contains("\"spec-001\"");
+        assertThat(content).contains("\"spec-002\"");
+        assertThat(content).contains("\"Spec Two\"");
     }
 
     @Test
     void updateRegistry_atomicWrite_shouldNotLeaveTemporaryFile() throws IOException {
         service.updateRegistry("spec-001", "requirements", "Feature", "2026/04");
 
-        Path tmpFile = tempDir.resolve(".mahi/specs/registry.md.tmp");
+        Path tmpFile = tempDir.resolve(".mahi/specs/registry.json.tmp");
         assertThat(tmpFile).doesNotExist();
     }
 }

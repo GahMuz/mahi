@@ -211,7 +211,7 @@ public class WorkflowTools {
     }
 
     @McpTool(name = "update_registry",
-          description = "Update the status of a spec row in .mahi/specs/registry.md. Creates the row if absent.")
+          description = "Update the status of a spec entry in .mahi/specs/registry.json. Creates the entry if absent.")
     public void updateRegistry(
             @McpToolParam(description = "Spec identifier", required = true) String specId,
             @McpToolParam(description = "New status (requirements | design | worktree | planning | implementation | finishing | retrospective | completed | discarded)", required = true) String status,

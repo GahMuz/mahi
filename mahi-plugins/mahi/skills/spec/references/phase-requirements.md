@@ -70,7 +70,7 @@ Si oui : signaler le problème de périmètre immédiatement, proposer un split 
 
 ### Step 1e: Specs passés liés
 
-Lire `.mahi/specs/registry.md`. Pour chaque spec avec statut `completed` ou `retrospective` :
+Lire `.mahi/specs/registry.json`. Pour chaque spec avec statut `completed` ou `retrospective` :
 - Comparer le titre et les mots-clés avec le titre et la description du spec courant
 - Si lien probable (même domaine fonctionnel, mêmes entités, même module) : lire son `requirement.md`
 

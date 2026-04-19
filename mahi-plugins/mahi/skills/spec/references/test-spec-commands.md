@@ -24,7 +24,7 @@ mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)
 - [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `specId`, `"requirements"`, `title`, `period`
 - [ ] `mcp__plugin_mahi_mahi__activate` est appelé avec `specId`, `type="spec"`, `path`, `workflowId`
 - [ ] Le LLM n'écrit PAS `active.json` directement
-- [ ] Le LLM n'écrit PAS de ligne dans `registry.md` directement
+- [ ] Le LLM n'écrit PAS de ligne dans `registry.json` directement
 - [ ] `state.json` n'est PAS créé
 - [ ] La phase initiale est retournée par le serveur, pas définie localement
 
@@ -83,7 +83,7 @@ mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)
 - [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec le nouveau statut après transition réussie
 - [ ] `mcp__plugin_mahi_mahi__update_state` est appelé pour mettre à jour la phase dans `state.json`
 - [ ] Le LLM n'écrit PAS `state.json` directement
-- [ ] Le LLM n'écrit PAS dans `registry.md` directement
+- [ ] Le LLM n'écrit PAS dans `registry.json` directement
 - [ ] Aucune logique locale de validation de transition (ex. `requirements → design`) dans SKILL.md
 
 ---
@@ -124,7 +124,7 @@ mcp__plugin_mahi_mahi__deactivate()
 - [ ] `ExitWorktree()` est appelé avant la désactivation
 - [ ] `mcp__plugin_mahi_mahi__deactivate()` est appelé pour supprimer `active.json`
 - [ ] Le LLM ne supprime PAS `active.json` directement
-- [ ] Le LLM n'écrit PAS dans `registry.md` directement
+- [ ] Le LLM n'écrit PAS dans `registry.json` directement
 - [ ] Aucun `fire_event` n'est appelé pour "discard" (événement inexistant dans le FSM)
 
 ---

@@ -41,7 +41,7 @@ When advancing from phase X to phase Y:
 4. Call `mcp__plugin_mahi_mahi__update_registry(specId, <newPhase>)` to reflect the new phase
 5. Call `mcp__plugin_mahi_mahi__update_state(specPath, <newPhase>, changelogEntry)` to persist state.json
 
-Do NOT update `state.json` or `registry.md` locally — all state is managed server-side.
+Do NOT update `state.json` or `registry.json` locally — all state is managed server-side.
 
 ## Event Names per Phase
 

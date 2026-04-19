@@ -12,7 +12,7 @@ Not recommended during `implementation` — finish the current wave first, then 
 ## Process
 
 ### Step 1: Identify Active Spec
-Read `.mahi/specs/registry.md`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
+Read `.mahi/specs/registry.json`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
 
 ### Step 2: Load All Artifacts
 Read the spec's documents based on current phase:

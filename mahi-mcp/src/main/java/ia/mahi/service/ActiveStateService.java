@@ -36,8 +36,8 @@ public interface ActiveStateService {
     void deactivate();
 
     /**
-     * Update the status column of the given spec row in .mahi/specs/registry.md.
-     * Creates a new row if the spec is not already present.
+     * Update the status of the given spec entry in .mahi/specs/registry.json.
+     * Creates a new entry if the spec is not already present.
      *
      * @param specId the spec identifier
      * @param status the new status string
