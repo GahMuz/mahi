@@ -1,261 +1,287 @@
 ---
-description: "Script de release : bump version, build Gradle, commit+tag git, push, bump SNAPSHOT"
-allowed-tools: ["Read", "Bash", "Edit"]
+description: "Release Mahi : bump version, build, commit/tag/push, bump SNAPSHOT"
+allowed-tools: ["Read", "Bash", "Edit", "AskUserQuestion", "TodoWrite"]
 ---
 
 # Commande /release
 
-Cette commande orchestre le processus complet de release du plugin Mahi :
-bump de version, build du jar, commit + tag git, push remote, et remise en SNAPSHOT.
+Orchestre le processus complet de release du plugin Mahi : bump de version,
+build du jar, commit + tag git, push remote, et remise en SNAPSHOT.
 
 **Réservé au mainteneur.** Doit être exécuté depuis la branche `main`.
 
 ---
 
-## Étape 1 : Vérification des pré-conditions
+## Constantes
 
-Vérifier les pré-conditions dans cet ordre avant toute modification :
+- **Fichiers de version** :
+  - `mahi-mcp/build.gradle.kts` (contient `-SNAPSHOT` entre releases)
+  - `mahi-plugins/mahi/.claude-plugin/plugin.json` (sans `-SNAPSHOT`)
+  - `.claude-plugin/marketplace.json` (sans `-SNAPSHOT`)
 
-**1.1 — Vérifier la branche courante**
+- **Jar produit** : `mahi-plugins/mahi/mahi-mcp-server.jar`
 
-Exécuter :
-```bash
-git branch --show-current
-```
-
-Si le résultat est différent de `main`, afficher le message suivant et stopper immédiatement :
-
-> "Release impossible : vous n'êtes pas sur la branche `main` (branche courante : <nom>)."
-
-**1.2 — Vérifier l'absence de spec ou ADR actif**
-
-Tenter de lire le fichier `.mahi/local/active.json` via Read.
-
-Si le fichier existe, afficher le message suivant et stopper immédiatement :
-
-> "Release impossible : un spec ou ADR est actuellement actif. Fermez-le d'abord."
-
-**1.3 — Vérifier la propreté du repo git**
-
-Exécuter :
-```bash
-git status --porcelain
-```
-
-Si la sortie est non vide :
-- Afficher la liste des fichiers modifiés
-- Demander à l'utilisateur : "Des fichiers non commités sont présents. Continuer quand même ? (oui / annuler)"
-- Si la réponse est "annuler" → stopper proprement sans modification
-
-**1.4 — Confirmation de succès**
-
-Afficher : "Pré-conditions vérifiées — prêt pour la release."
-
-## Étape 2 : Saisie et validation de la version cible
-
-**2.1 — Lire la version courante**
-
-Lire `mahi-mcp/build.gradle.kts` et extraire la ligne contenant `version = "..."`.
-
-Exemple : `version = "0.1.1-SNAPSHOT"` → version courante : `0.1.1-SNAPSHOT`.
-
-**2.2 — Calculer les 3 variantes**
-
-À partir de la version courante (après suppression du suffixe `-SNAPSHOT`) :
-- **patch** (défaut) : incrémenter PATCH de 1 — ex. `0.1.1` → `0.1.2`
-- **minor** : incrémenter MINOR de 1, remettre PATCH à 0 — ex. `0.1.1` → `0.2.0`
-- **major** : incrémenter MAJOR de 1, remettre MINOR et PATCH à 0 — ex. `0.1.1` → `1.0.0`
-
-**2.3 — Demander la version cible**
-
-Demander à l'utilisateur (en affichant la version courante et la version patch par défaut) :
-
-```
-Version courante : 0.1.1-SNAPSHOT
-Version pour cette release [0.1.2] ?
-(Entrée = patch par défaut | major | minor | patch | ou saisir X.Y.Z directement)
-```
-
-**2.4 — Traiter la réponse**
-
-- Réponse **vide** → utiliser la version patch par défaut
-- Réponse **"major"**, **"minor"** ou **"patch"** → calculer la version correspondante, puis retourner à l'étape 2.3 en proposant cette nouvelle version comme défaut
-- Autre réponse → valider le format avec le pattern `^\d+\.\d+\.\d+$`
-  - Format invalide → afficher "Format invalide. Utilisez le format X.Y.Z (ex. 1.2.3)." et retourner à 2.3
-  - Format valide → continuer
-
-**2.5 — Demander confirmation**
-
-Afficher :
-
-> "Release `v<version>` — confirmer ? (oui / annuler)"
-
-Si la réponse est "annuler" → stopper proprement, aucun fichier modifié.
-
-## Étape 3 : Vérification et mise à jour atomique des fichiers de version
-
-**Stratégie : vérification stricte en amont — aucune écriture si un fichier échoue.**
-
-**3.1 — Phase de vérification (lire les 3 fichiers)**
-
-Lire simultanément les 3 fichiers suivants :
-- `mahi-mcp/build.gradle.kts`
-- `mahi-plugins/mahi/.claude-plugin/plugin.json`
-- `.claude-plugin/marketplace.json`
-
-Vérifications à effectuer :
-- `build.gradle.kts` doit contenir la ligne `version = "<version-courante>-SNAPSHOT"` (ex. `version = "0.1.1-SNAPSHOT"`)
-- `plugin.json` doit avoir le champ `"version": "<version-courante-sans-snapshot>"` (ex. `"version": "0.1.1"`)
-- `marketplace.json` doit avoir le champ `"version": "<version-courante-sans-snapshot>"` dans l'entrée correspondant à `mahi`
-
-Si l'un des 3 fichiers n'existe pas ou ne contient pas la valeur attendue :
-- Afficher : "Incohérence dans <fichier> : version attendue <X> mais trouvée <Y>. Release annulée."
-- Stopper immédiatement **sans modifier aucun fichier**
-
-**3.2 — Phase de mise à jour (écriture séquentielle)**
-
-Une fois les 3 fichiers validés, effectuer les modifications :
-
-1. Dans `mahi-mcp/build.gradle.kts` : remplacer `version = "<courante>-SNAPSHOT"` par `version = "<cible>"`
-2. Dans `mahi-plugins/mahi/.claude-plugin/plugin.json` : remplacer `"version": "<courante>"` par `"version": "<cible>"`
-3. Dans `.claude-plugin/marketplace.json` : remplacer `"version": "<courante>"` (dans l'entrée `mahi`) par `"version": "<cible>"`
-
-**Note sécurité :** En cas d'erreur pendant l'écriture, `git restore .` permet de restaurer l'état initial.
-
-**3.3 — Confirmation**
-
-Afficher : "Versions mises à jour dans les 3 fichiers (`build.gradle.kts`, `plugin.json`, `marketplace.json`)."
-
-## Étape 4 : Build Gradle cross-plateforme
-
-**4.1 — Détecter l'OS automatiquement**
-
-Exécuter :
-```bash
-uname -s 2>/dev/null
-```
-
-- Si la sortie contient `MINGW` ou `CYGWIN` (ou si la commande échoue) → **Windows**
-- Si la sortie contient `Linux` → **Linux**
-- Si la sortie contient `Darwin` → **macOS**
-
-**4.2 — Exécuter le build**
-
-Selon l'OS détecté :
-
-**Windows :**
-```bash
-powershell.exe -Command "Set-Location mahi-mcp; .\gradlew.bat bootJar"
-```
-
-**Unix/macOS :**
-```bash
-cd mahi-mcp && ./gradlew bootJar
-```
-
-**4.3 — Gérer l'échec du build**
-
-Si le build échoue (exit code ≠ 0) :
-- Afficher la sortie d'erreur Gradle complète
-- Demander à l'utilisateur : "Le build a échoué. Corriger l'erreur et réessayer, ou annuler la release ? (réessayer / annuler)"
-  - "réessayer" → retourner à l'étape 4.2
-  - "annuler" → stopper (les fichiers de version ont déjà été modifiés — utiliser `git restore .` pour annuler)
-
-**4.4 — Vérifier le jar**
-
-Si le build réussit, vérifier que le fichier `mahi-plugins/mahi/mahi-mcp-server.jar` existe et a bien été mis à jour (date de modification récente).
-
-**4.5 — Confirmation**
-
-Afficher : "Build réussi — jar mis à jour dans `mahi-plugins/mahi/`."
-
-## Étape 5 : Commit, tag git et push
-
-**5.1 — Stager les 4 fichiers modifiés**
-
-```bash
-git add mahi-mcp/build.gradle.kts
-git add mahi-plugins/mahi/.claude-plugin/plugin.json
-git add mahi-plugins/mahi/mahi-mcp-server.jar
-git add .claude-plugin/marketplace.json
-```
-
-**5.2 — Créer le commit de release**
-
-```bash
-git commit -m "chore(release): release v<version>"
-```
-
-Si le commit échoue :
-- Afficher l'erreur
-- Afficher : "Les fichiers ont déjà été modifiés. Utilisez `git restore .` pour annuler si nécessaire."
-- Stopper
-
-**5.3 — Créer le tag annoté**
-
-```bash
-git tag -a "v<version>" -m "Release v<version>"
-```
-
-Si le tag échoue :
-- Afficher l'erreur
-- Afficher : "Le commit a été créé mais le tag a échoué. Créez-le manuellement : `git tag -a v<version> -m 'Release v<version>'`"
-- Stopper
-
-**5.4 — Pousser vers le remote**
-
-```bash
-git push origin main --tags
-```
-
-Si le push échoue :
-- Afficher l'erreur
-- Afficher : "Le commit et le tag ont été créés localement. Rejouez `git push origin main --tags` manuellement."
-- Stopper
-
-**5.5 — Afficher le message de succès**
-
-Lire le hash court du commit :
-```bash
-git log --oneline -1
-```
-
-Afficher :
-> "Release `v<version>` publiée (commit `<hash>`, tag `v<version>`)."
-
-## Étape 6 : Bump SNAPSHOT post-release
-
-**Cette étape est non bloquante : un échec ne remet pas en cause la release déjà publiée.**
-
-**6.1 — Calculer la version SNAPSHOT suivante**
-
-À partir de la version de release (ex. `0.1.2`) :
-- Incrémenter le PATCH de 1 → `0.1.3`
-- Ajouter le suffixe `-SNAPSHOT` → `0.1.3-SNAPSHOT`
-
-**6.2 — Modifier `build.gradle.kts`**
-
-Remplacer la ligne `version = "<version-release>"` par `version = "<patch+1>-SNAPSHOT"`.
-
-**Note :** `plugin.json` et `marketplace.json` ne doivent PAS être modifiés — ils conservent la version de release comme référence stable pour les utilisateurs du plugin.
-
-**6.3 — Stager et committer**
-
-```bash
-git add mahi-mcp/build.gradle.kts
-git commit -m "chore(release): bump to <patch+1>-SNAPSHOT"
-```
-
-**6.4 — Gérer l'échec**
-
-Si une erreur survient à l'étape 6.2 ou 6.3 :
-- Afficher : "Bump SNAPSHOT échoué : <erreur>. Effectuez-le manuellement."
-- Continuer sans bloquer (la release est déjà publiée)
-
-**6.5 — Confirmation finale**
-
-Afficher : "Version de développement : `<patch+1>-SNAPSHOT`"
+- **Placeholders** : `${V_CURRENT}` (ex. `0.1.1-SNAPSHOT`),
+  `${V_RELEASE}` (ex. `0.1.2`), `${V_NEXT}` (ex. `0.1.3-SNAPSHOT`).
 
 ---
 
-**Release terminée.**
+## Étape 1 : Pré-conditions
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "in_progress", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "pending", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "pending", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+### 1.1 — Branche courante
+
+Exécuter `git branch --show-current`.
+
+Si différent de `main` → afficher `"Release impossible : branche courante '<nom>' (attendu : main)."` et stopper.
+
+### 1.2 — Propreté du repo
+
+Exécuter `git status --porcelain`.
+
+Si la sortie est non vide :
+1. Afficher la liste des fichiers.
+2. Appeler `AskUserQuestion(question="Des fichiers non commités sont présents. Continuer la release quand même ?", header="Repo sale", multiSelect=false, options=[{label: "Annuler", description: "Stopper proprement, aucune modification"}, {label: "Continuer", description: "Procéder malgré les fichiers non commités"}])`.
+3. Si "Annuler" → stopper. Si "Continuer" → poursuivre.
+
+### 1.3 — Confirmation
+
+Afficher `"Pré-conditions OK — prêt pour la release."`
+
+---
+
+## Étape 2 : Version cible
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "in_progress", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "pending", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+### 2.1 — Lire la version courante
+
+Extraire `version = "..."` de `mahi-mcp/build.gradle.kts` → `${V_CURRENT}`.
+
+### 2.2 — Calculer les variantes
+
+Depuis `${V_CURRENT}` sans suffixe `-SNAPSHOT` (format `X.Y.Z`) :
+
+- `${V_PATCH}` = `X.Y.(Z+1)`
+- `${V_MINOR}` = `X.(Y+1).0`
+- `${V_MAJOR}` = `(X+1).0.0`
+
+### 2.3 — Proposer le bump
+
+Appeler `AskUserQuestion(question="Version courante : ${V_CURRENT}. Quel type de release ?", header="Bump", multiSelect=false, options=[{label: "Patch → ${V_PATCH} (Recommended)", description: "Correctifs uniquement (Z+1)"}, {label: "Minor → ${V_MINOR}", description: "Features rétrocompatibles (Y+1, Z=0)"}, {label: "Major → ${V_MAJOR}", description: "Breaking changes (X+1, Y=0, Z=0)"}])`.
+
+**Note** : Claude Code ajoute automatiquement une option "Other" pour saisie libre.
+
+### 2.4 — Résoudre `${V_RELEASE}`
+
+Selon la réponse :
+
+- Label "Patch…" → `${V_RELEASE}` = `${V_PATCH}`
+- Label "Minor…" → `${V_RELEASE}` = `${V_MINOR}`
+- Label "Major…" → `${V_RELEASE}` = `${V_MAJOR}`
+- Texte libre (réponse "Other") → valider avec regex `^\d+\.\d+\.\d+$` :
+  - Invalide → re-appeler `AskUserQuestion(question="Format invalide (attendu X.Y.Z). Version cible ?", header="Bump", multiSelect=false, options=[...mêmes options que 2.3])`. Reboucler une seule fois ; deux échecs successifs = stopper avec `"Format invalide persistant, release annulée."`
+  - Valide → `${V_RELEASE}` = la valeur saisie
+
+### 2.5 — Confirmation
+
+Appeler `AskUserQuestion(question="Release v${V_RELEASE} — confirmer ?", header="Release", multiSelect=false, options=[{label: "Annuler", description: "Stopper, aucun fichier modifié"}, {label: "Confirmer", description: "Procéder à la release v${V_RELEASE}"}])`.
+
+Si "Annuler" → stopper.
+
+---
+
+## Étape 3 : Mise à jour atomique des fichiers
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "in_progress", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "pending", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+### 3.1 — Vérifier (lecture seule)
+
+Lire les 3 fichiers. Pour chacun, vérifier que la version attendue est présente :
+
+- `mahi-mcp/build.gradle.kts` doit contenir `version = "${V_CURRENT}"` (avec `-SNAPSHOT`)
+- `mahi-plugins/mahi/.claude-plugin/plugin.json` doit contenir `"version": "${V_CURRENT sans -SNAPSHOT}"`
+- `.claude-plugin/marketplace.json` doit contenir `"version": "${V_CURRENT sans -SNAPSHOT}"` dans l'entrée `mahi`
+
+Si l'un échoue → `"Incohérence dans <fichier> : version attendue <X> mais trouvée <Y>. Release annulée, aucun fichier modifié."` et stopper.
+
+### 3.2 — Écrire
+
+Via `Edit` :
+
+1. `build.gradle.kts` : `version = "${V_CURRENT}"` → `version = "${V_RELEASE}"`
+2. `plugin.json` : `"version": "${V_CURRENT sans -SNAPSHOT}"` → `"version": "${V_RELEASE}"`
+3. `marketplace.json` (entrée `mahi`) : idem
+
+**Note** : en cas d'erreur, `git restore .` annule tout.
+
+### 3.3 — Confirmation
+
+Afficher `"3 fichiers de version mis à jour → ${V_RELEASE}."`
+
+---
+
+## Étape 4 : Build Gradle
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "in_progress", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "pending", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+### 4.1 — Détecter l'OS
+
+Exécuter `uname -s 2>/dev/null`.
+
+- `MINGW*` / `CYGWIN*` ou commande échoue → `windows`
+- `Linux*` → `linux`
+- `Darwin*` → `macos`
+
+### 4.2 — Builder
+
+Selon l'OS :
+
+- Windows : `powershell.exe -Command "Set-Location mahi-mcp; .\gradlew.bat bootJar"`
+- Unix/macOS : `cd mahi-mcp && ./gradlew bootJar`
+
+### 4.3 — Traiter le résultat
+
+**Succès** (exit 0) → passer à 4.4.
+
+**Échec** (exit ≠ 0) :
+1. Afficher la sortie Gradle complète.
+2. Appeler `AskUserQuestion(question="Build Gradle échoué. Que faire ?", header="Build KO", multiSelect=false, options=[{label: "Réessayer", description: "Relancer après correction"}, {label: "Annuler", description: "Stopper (git restore . pour annuler les modifs)"}])`.
+3. Si "Réessayer" → relancer 4.2. Si "Annuler" → stopper en rappelant `git restore .`.
+
+### 4.4 — Vérifier le jar
+
+Exécuter `ls -la mahi-plugins/mahi/mahi-mcp-server.jar` → confirmer présence + mtime récent (< 5 min).
+
+Si absent ou vieux → `"Build réussi mais jar absent/périmé. Release annulée."` et stopper.
+
+### 4.5 — Confirmation
+
+Afficher `"Build OK — jar à jour."`
+
+---
+
+## Étape 5 : Commit, tag, push
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "completed", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "in_progress", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "pending", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+### 5.1 — Stager
+
+```bash
+git add mahi-mcp/build.gradle.kts \
+        mahi-plugins/mahi/.claude-plugin/plugin.json \
+        mahi-plugins/mahi/mahi-mcp-server.jar \
+        .claude-plugin/marketplace.json
+```
+
+### 5.2 — Committer
+
+`git commit -m "chore(release): release v${V_RELEASE}"`.
+
+Si échec → afficher l'erreur + `"Modifications staged. git restore . + git reset pour annuler si besoin."` et stopper.
+
+### 5.3 — Tagger
+
+`git tag -a "v${V_RELEASE}" -m "Release v${V_RELEASE}"`.
+
+Si échec → afficher l'erreur + `"Commit créé, tag à créer manuellement : git tag -a v${V_RELEASE} -m 'Release v${V_RELEASE}'"` et stopper.
+
+### 5.4 — Pousser
+
+`git push origin main --tags`.
+
+Si échec → afficher l'erreur + `"Commit et tag locaux OK. Relancer manuellement : git push origin main --tags"` et stopper.
+
+### 5.5 — Confirmation
+
+Lire le hash : `git log --oneline -1`.
+
+Afficher `"✅ Release v${V_RELEASE} publiée (commit <hash>, tag v${V_RELEASE})."`
+
+---
+
+## Étape 6 : Bump SNAPSHOT post-release
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "completed", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "completed", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "in_progress", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+**Non bloquant** : un échec ici n'invalide pas la release publiée.
+
+### 6.1 — Calculer `${V_NEXT}`
+
+Depuis `${V_RELEASE}` (format `X.Y.Z`) : `${V_NEXT}` = `X.Y.(Z+1)-SNAPSHOT`.
+
+### 6.2 — Modifier `build.gradle.kts` uniquement
+
+Via `Edit` : `version = "${V_RELEASE}"` → `version = "${V_NEXT}"`.
+
+**Important** : `plugin.json` et `marketplace.json` ne doivent **pas** être modifiés — ils restent sur `${V_RELEASE}` comme référence stable pour les utilisateurs du plugin.
+
+### 6.3 — Committer et pousser
+
+```bash
+git add mahi-mcp/build.gradle.kts
+git commit -m "chore(release): bump to ${V_NEXT}"
+git push origin main
+```
+
+### 6.4 — Gérer l'échec
+
+Si erreur à 6.2 ou 6.3 → afficher `"Bump SNAPSHOT échoué : <erreur>. À faire manuellement."`. **Ne pas stopper**, passer à 6.5.
+
+### 6.5 — Clôture
+
+Afficher `"Version dev : ${V_NEXT}"`.
+
+Appeler `TodoWrite(todos=[
+  {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
+  {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
+  {content: "Mettre à jour les 3 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Builder le jar Gradle", status: "completed", activeForm: "Build Gradle"},
+  {content: "Commit, tag et push vers le remote", status: "completed", activeForm: "Commit, tag et push"},
+  {content: "Bump SNAPSHOT post-release", status: "completed", activeForm: "Bump SNAPSHOT post-release"}
+])`.
+
+Afficher : **"Release terminée."**
