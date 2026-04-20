@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ia.mahi"
-version = "0.1.4-SNAPSHOT"
+version = "0.1.5"
 
 java {
     toolchain {
