@@ -18,6 +18,7 @@ build du jar, commit + tag git, push remote.
   - `mahi-mcp/build.gradle.kts`
   - `mahi-plugins/mahi/.claude-plugin/plugin.json`
   - `mahi-plugins/mahi-codebase/.claude-plugin/plugin.json`
+  - `mahi-plugins/mahi-roi/.claude-plugin/plugin.json`
   - `.claude-plugin/marketplace.json`
 
 - **Jar produit** : `mahi-plugins/mahi/mahi-mcp-server.jar`
@@ -26,8 +27,8 @@ build du jar, commit + tag git, push remote.
   `${V_RELEASE}` (version cible, ex. `0.1.2`).
 
 - **Note** : pas de suffixe `-SNAPSHOT` dans ce projet. Entre deux releases,
-  les 4 fichiers contiennent la même version stable (celle de la dernière
-  release publiée). Les plugins `mahi` et `mahi-codebase` partagent
+  les 5 fichiers contiennent la même version stable (celle de la dernière
+  release publiée). Les plugins `mahi`, `mahi-codebase` et `mahi-roi` partagent
   toujours la même version.
 
 ---
@@ -37,7 +38,7 @@ build du jar, commit + tag git, push remote.
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "in_progress", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "pending", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"}
 ])`.
@@ -68,7 +69,7 @@ Afficher `"Pré-conditions OK — prêt pour la release."`
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "in_progress", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "pending", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"}
 ])`.
@@ -115,19 +116,20 @@ Si "Annuler" → stopper.
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "in_progress", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "in_progress", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "pending", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"}
 ])`.
 
 ### 3.1 — Vérifier (lecture seule)
 
-Lire les 4 fichiers en parallèle. Chacun doit contenir exactement `${V_CURRENT}` :
+Lire les 5 fichiers en parallèle. Chacun doit contenir exactement `${V_CURRENT}` :
 
 - `mahi-mcp/build.gradle.kts` : `version = "${V_CURRENT}"`
 - `mahi-plugins/mahi/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"`
 - `mahi-plugins/mahi-codebase/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"`
-- `.claude-plugin/marketplace.json` : `"version": "${V_CURRENT}"` dans les entrées `mahi` ET `mahi-codebase`
+- `mahi-plugins/mahi-roi/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"`
+- `.claude-plugin/marketplace.json` : `"version": "${V_CURRENT}"` dans les entrées `mahi`, `mahi-codebase` ET `mahi-roi`
 
 Si l'un diverge → `"Incohérence dans <fichier> : attendu ${V_CURRENT} trouvé <Y>. Release annulée, aucun fichier modifié."` et stopper.
 
@@ -138,13 +140,14 @@ Via `Edit` :
 1. `build.gradle.kts` : `version = "${V_CURRENT}"` → `version = "${V_RELEASE}"`
 2. `mahi-plugins/mahi/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"` → `"version": "${V_RELEASE}"`
 3. `mahi-plugins/mahi-codebase/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"` → `"version": "${V_RELEASE}"`
-4. `marketplace.json` (entrées `mahi` ET `mahi-codebase`) : `"version": "${V_CURRENT}"` → `"version": "${V_RELEASE}"`
+4. `mahi-plugins/mahi-roi/.claude-plugin/plugin.json` : `"version": "${V_CURRENT}"` → `"version": "${V_RELEASE}"`
+5. `marketplace.json` (entrées `mahi`, `mahi-codebase` ET `mahi-roi`) : `"version": "${V_CURRENT}"` → `"version": "${V_RELEASE}"`
 
 **Note** : en cas d'erreur, `git restore .` annule tout.
 
 ### 3.3 — Confirmation
 
-Afficher `"4 fichiers de version mis à jour → ${V_RELEASE}."`
+Afficher `"5 fichiers de version mis à jour → ${V_RELEASE}."`
 
 ---
 
@@ -153,7 +156,7 @@ Afficher `"4 fichiers de version mis à jour → ${V_RELEASE}."`
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "in_progress", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "pending", activeForm: "Commit, tag et push"}
 ])`.
@@ -199,7 +202,7 @@ Afficher `"Build OK — jar à jour."`
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "completed", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "in_progress", activeForm: "Commit, tag et push"}
 ])`.
@@ -210,6 +213,7 @@ Appeler `TodoWrite(todos=[
 git add mahi-mcp/build.gradle.kts \
         mahi-plugins/mahi/.claude-plugin/plugin.json \
         mahi-plugins/mahi-codebase/.claude-plugin/plugin.json \
+        mahi-plugins/mahi-roi/.claude-plugin/plugin.json \
         mahi-plugins/mahi/mahi-mcp-server.jar \
         .claude-plugin/marketplace.json
 ```
@@ -241,7 +245,7 @@ Afficher `"✅ Release v${V_RELEASE} publiée (commit <hash>, tag v${V_RELEASE})
 Appeler `TodoWrite(todos=[
   {content: "Vérifier les pré-conditions", status: "completed", activeForm: "Vérification des pré-conditions"},
   {content: "Saisir et confirmer la version cible", status: "completed", activeForm: "Saisie de la version cible"},
-  {content: "Mettre à jour les 4 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
+  {content: "Mettre à jour les 5 fichiers de version", status: "completed", activeForm: "Mise à jour des fichiers de version"},
   {content: "Builder le jar Gradle", status: "completed", activeForm: "Build Gradle"},
   {content: "Commit, tag et push vers le remote", status: "completed", activeForm: "Commit, tag et push"}
 ])`.
