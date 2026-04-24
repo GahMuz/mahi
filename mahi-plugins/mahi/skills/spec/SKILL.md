@@ -92,7 +92,7 @@ Extraction du subcommand → action :
 
 ## CHECK_STATE
 
-1. Check `.mahi/config.json` exists. If not : "Lancez `/sdd-init` d'abord pour configurer le projet."
+1. Check `.mahi/config.json` exists. If not : "Lancez `/init` d'abord pour configurer le projet."
 2. Call `mcp__plugin_mahi_mahi__get_active()`. If present : call `mcp__plugin_mahi_mahi__get_workflow(workflowId)` to retrieve current phase — if the call fails, display : "Le serveur Mahi n'est pas démarré ou ne répond pas. Vérifiez que le plugin `mahi` est actif (ou que `.mcp.json` contient la configuration du serveur Mahi) et que le processus Java est lancé." and stop. Show that spec prominently with its current phase. If null : "Aucun spec actif — lancez `/spec new <titre>` ou `/spec open <titre>`."
 
 ## START_NEW
@@ -206,7 +206,7 @@ Execute OPEN on the requested spec, skipping OPEN step 0 (the /clear warning is 
 
 | Skill | Purpose |
 |-------|---------|
-| `/sdd-status` | Vue d'ensemble : spec active, specs en cours, specs terminées |
+| `/init` | Initialiser le projet Mahi : créer `.mahi/`, configurer langages et modèles |
+| `/update [--dry-run]` | Migrer le schéma `.mahi/config.json` vers la version courante |
+| `/evolve <action>` | Faire évoluer la configuration `.claude/` (règles, skills projet) |
 | `/spec-review [--no-fix]` | Revue manuelle spec/code : détecte et corrige les incohérences |
-| `/doc <module \| --all \| update \| analyse \| status>` | Documenter, analyser et maintenir la doc codebase (économie 80-90% tokens) |
-| `/sdd-evolve <action>` | Faire évoluer la configuration .claude/ (ajouter, optimiser, auditer) |

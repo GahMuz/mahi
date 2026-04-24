@@ -281,7 +281,7 @@ Fichier `.mahi/config.json` à la racine du projet :
 
 ```json
 {
-  "schemaVersion": "0.11.0",
+  "schemaVersion": "1.0.0",
   "languages": ["php", "node-typescript", "java"],
   "pipelineReviews": true,
   "parallelTaskLimit": 0,
