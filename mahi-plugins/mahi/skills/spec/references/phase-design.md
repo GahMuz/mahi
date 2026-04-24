@@ -178,7 +178,7 @@ Add a "Couverture des exigences" table at the end of design.md:
 - Any ❌ must be addressed before approval
 
 ### Step 9: Save
-Write design.md using template.
+Write design.md using the template from `references/templates.md` section `design.md`.
 Après écriture du fichier, synchroniser l'artefact :
 ```
 mcp__plugin_mahi_mahi__write_artifact(flowId: <depuis active.json>, artifactName: "design", content: <contenu complet>)

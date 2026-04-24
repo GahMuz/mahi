@@ -125,7 +125,7 @@ Present plan.md:
 - "Relisez le plan. Des tâches à ajuster ?"
 
 ### Step 8: Save
-Write plan.md using template.
+Write plan.md using the template from `references/templates.md` section `plan.md`.
 Après écriture du fichier, appeler :
 ```
 mcp__plugin_mahi_mahi__write_artifact(flowId: <depuis active.json>, artifactName: "plan", content: <contenu complet>)
