@@ -214,6 +214,7 @@ Execute OPEN on the requested spec, skipping OPEN step 0 (the /clear warning is 
 | `/adr new <titre> \| open \| recap \| approve \| close \| switch` | Gérer les ADR avant implémentation |
 | `/graph-query <question>` | Interroger les graphes structurels du codebase (impact, flux, entités) |
 | `/graph-status` | Afficher la fraîcheur des graphes construits |
+| `/roi [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--type spec\|adr\|all]` | Rapport ROI : temps économisé, rentabilité, qualité produite |
 
 **Plugin `mahi-codebase` (optionnel — génération, typiquement CI/CD) :**
 
