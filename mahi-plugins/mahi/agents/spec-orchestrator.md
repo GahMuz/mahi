@@ -72,7 +72,7 @@ Si aucun problème → continuer immédiatement.
 ### Step 2: Build Waves (with resume awareness)
 Read all subtask statuses from plan.md:
 - **Skip** subtasks marked `[x]` (already completed)
-- **Re-dispatch** subtasks marked `[~]` or `[!]` (in-progress or failed — needs retry); for `[!]` subtasks, add to the agent prompt: "Debug protocol: read the error carefully before touching any code; form one hypothesis at a time and test it; after 3 failed attempts stop and report `[!]` with a summary of what was tried and why each hypothesis failed." **Si plusieurs `[!]` existent :**
+- **Re-dispatch** subtasks marked `[~]` or `[!]` (in-progress or failed — needs retry); for `[!]` subtasks, inject the `process-debugging` skill content in the agent prompt (see Step 3 injection). **Si plusieurs `[!]` existent :**
   - Failures dans des fichiers/domaines clairement distincts → dispatcher en parallèle (gains de temps)
   - Failures dans la même zone du code ou avec le même type d'erreur → dispatcher un seul agent d'investigation d'abord ; paralléliser seulement si l'investigation confirme l'indépendance
 - **Queue** subtasks marked `[ ]` (pending)
@@ -108,6 +108,9 @@ Agent({
 
 1. **Module docs**: Check `.mahi/docs/modules/<name>/module-<name>.md` — if cached doc exists for the target module, include it instead of raw file exploration. Also check for feature docs in the same directory for more targeted context injection.
 2. **Project skills**: Utiliser la liste de skills mise en cache en Step 1. Filtrer par correspondance avec le contenu de la sous-tâche (ex : sous-tâche form → inclure skill form ; sous-tâche API → inclure skill API). Ne pas re-scanner le filesystem.
+2b. **Process skills** (injection ciblée) :
+   - `process-tdd` : toujours injecter — lire `**/mahi*/skills/process-tdd/SKILL.md`
+   - `process-debugging` : injecter uniquement pour les retries `[!]` — lire `**/mahi*/skills/process-debugging/SKILL.md` + ses deux références (`root-cause-tracing.md`, `defense-in-depth.md`)
 3. **Rules**: Utiliser les règles chargées en Step 1 via `mahi:rules`. Pour chaque sous-tâche :
    - Toujours injecter les règles plugin (SOLID ; RGPD si DCP ; DORA si contexte financier)
    - Faire correspondre le domaine de la sous-tâche avec la colonne "Charger quand" des règles projet
@@ -190,7 +193,7 @@ If `pipelineReviews` is true and no critical issues expected: start next wave wh
 - **DONE** → proceed to checkpoint normally
 - **DONE_WITH_CONCERNS** → proceed to checkpoint, but include the concern in the review prompt so code-reviewer pays specific attention to it
 - **NEEDS_CONTEXT** → do not mark `[!]`; pause wave, report missing context in French, wait for user to provide it, then re-dispatch
-- **BLOCKED** → mark `[!]`, report blocker in French; on retry include debugging-process skill; if `[!]` a second time, dispatch `spec-deep-dive` before any further attempt
+- **BLOCKED** → mark `[!]`, report blocker in French; on retry inject `process-debugging` skill; if `[!]` a second time, dispatch `spec-deep-dive` before any further attempt
 
 **Other issues:**
 - **Phantom completion**: Revert checkbox, re-dispatch subtask
