@@ -211,3 +211,4 @@ Execute OPEN on the requested spec, skipping OPEN step 0 (the /clear warning is 
 | `/update [--dry-run]` | Migrer le schéma `.mahi/config.json` vers la version courante |
 | `/evolve <action>` | Faire évoluer la configuration `.claude/` (règles, skills projet) |
 | `/spec-review [--no-fix]` | Revue manuelle spec/code : détecte et corrige les incohérences |
+| `/adr new <titre> \| open \| recap \| approve \| close \| switch` | Gérer les ADR avant implémentation |
