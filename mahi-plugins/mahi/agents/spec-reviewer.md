@@ -89,7 +89,7 @@ Pour chaque TASK dont toutes les sous-tâches sont `[x]` :
 - Si fix=true : rétrograder les sous-tâches impactées `[x]` → `[!]`, noter le critère manquant.
 
 **2f — Violations des règles ❌**
-Glob `**/sdd-rules/SKILL.md` → lire et exécuter le protocole de chargement (plugin + projet + priorité). Pour chaque règle chargée, grep des violations dans le worktree.
+Glob `**/mahi*/skills/rules/SKILL.md` → lire et exécuter le protocole de chargement (plugin universelles : SOLID systématiquement, RGPD et DORA si applicables ; règles projet : charger uniquement celles correspondant au domaine du worktree audité). Pour chaque règle chargée, grep des violations dans le worktree.
 - Cannot auto-fix code. Record as action items with file:line.
 
 ### Step 3: Apply Fixes

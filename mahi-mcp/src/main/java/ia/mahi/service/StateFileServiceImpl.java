@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default implementation of StateFileService.
@@ -25,6 +26,7 @@ import java.util.List;
 public class StateFileServiceImpl implements StateFileService {
 
     private static final int MAX_CHANGELOG = 200;
+    private static final ConcurrentHashMap<String, Object> PATH_LOCKS = new ConcurrentHashMap<>();
 
     private final ObjectMapper mapper;
 
@@ -34,6 +36,13 @@ public class StateFileServiceImpl implements StateFileService {
 
     @Override
     public StateSnapshot updateState(String specAbsPath, String currentPhase, ChangelogEntry changelogEntry) {
+        Object lock = PATH_LOCKS.computeIfAbsent(specAbsPath, k -> new Object());
+        synchronized (lock) {
+            return updateStateInternal(specAbsPath, currentPhase, changelogEntry);
+        }
+    }
+
+    private StateSnapshot updateStateInternal(String specAbsPath, String currentPhase, ChangelogEntry changelogEntry) {
         Path specDir = Path.of(specAbsPath);
         Path stateJson = specDir.resolve("state.json");
 

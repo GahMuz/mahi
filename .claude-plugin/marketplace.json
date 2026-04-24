@@ -24,7 +24,7 @@
       "name": "mahi-codebase",
       "source": "./mahi-plugins/mahi-codebase",
       "description": "Mahi Codebase — Génération de documentation structurée, graphes de dépendances et analyses de qualité. Conçu pour l'automatisation CI/CD.",
-      "version": "0.1.0",
+      "version": "0.1.6",
       "author": { "name": "vincent-bailly" },
       "keywords": ["codebase", "doc", "graph", "analyse", "ci-cd", "mahi"],
       "category": "development"

@@ -83,7 +83,7 @@ Then analyze dependencies among remaining subtasks:
 - Continue until all subtasks are assigned
 - Respect `parallelTaskLimit` (0 = unlimited per wave)
 
-**Contrainte RED/GREEN implicite :** en plus des dépendances déclarées, une sous-tâche `[GREEN]` dépend toujours de la sous-tâche `[RED]` du même TASK (même si non déclarée). Ne jamais dispatcher un `[GREEN]` si son `[RED]` correspondant n'est pas `[x]`.
+**Contrainte RED/GREEN implicite :** en plus des dépendances déclarées, une sous-tâche `[GREEN]` dépend toujours du `[RED]` qui la précède immédiatement dans plan.md au sein du même TASK (même si non déclaré). Ex : TASK-001.1[RED] → TASK-001.2[GREEN] → TASK-001.3[RED] → TASK-001.4[GREEN]. Ne jamais dispatcher un `[GREEN]` si le `[RED]` immédiatement antérieur dans le fichier n'est pas `[x]`.
 
 This enables transparent resume: if orchestrator is re-dispatched after suspension, it picks up where it left off.
 

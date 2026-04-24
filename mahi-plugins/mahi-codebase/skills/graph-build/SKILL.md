@@ -124,7 +124,7 @@ Pour **toutes** les unités à (re)construire, dispatcher en parallèle :
 ```
 Agent({
   description: "Graphe <scanName> (entities+endpoints+imports)",
-  subagent_type: "graph-builder-java",
+  subagent_type: "mahi-codebase:graph-builder-java",
   model: <config.models.graph-builder ou "haiku">,
   prompt: "
     module: <moduleName>
@@ -145,7 +145,7 @@ Découper en batches de `serviceThreshold` fichiers et dispatcher en parallèle 
 ```
 Agent({
   description: "Services <scanName> batch-<N>/<total>",
-  subagent_type: "graph-builder-java",
+  subagent_type: "mahi-codebase:graph-builder-java",
   model: <config.models.graph-builder ou "haiku">,
   prompt: "
     module: <moduleName>

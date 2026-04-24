@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
 /**
  * Reads and writes artifact Markdown files.
@@ -25,13 +26,22 @@ import java.nio.file.Path;
 @Service
 public class ArtifactService {
 
+    private static final Pattern ARTIFACT_NAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]*$");
+
     private final ActiveStateService activeStateService;
 
     public ArtifactService(ActiveStateService activeStateService) {
         this.activeStateService = activeStateService;
     }
 
+    private void validateArtifactName(String name) {
+        if (name == null || !ARTIFACT_NAME_PATTERN.matcher(name).matches()) {
+            throw new IllegalArgumentException("Invalid artifactName (kebab-case expected): " + name);
+        }
+    }
+
     public String writeArtifact(String flowId, String artifactName, String content) {
+        validateArtifactName(artifactName);
         Path dir = resolveArtifactDir(flowId);
         try {
             Files.createDirectories(dir);
@@ -47,6 +57,7 @@ public class ArtifactService {
      * @throws IllegalArgumentException if the artifact file does not exist
      */
     public String readArtifact(String flowId, String artifactName) {
+        validateArtifactName(artifactName);
         Path dir = resolveArtifactDir(flowId);
         try {
             Path file = dir.resolve(artifactName + ".md");

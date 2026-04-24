@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Persists workflow contexts as JSON files in .mahi/flows/<flowId>.json
@@ -87,11 +88,19 @@ public class WorkflowStore {
                     }
                 }
 
-                // Increment version, then write atomically via temp file + rename
-                context.setVersion(context.getVersion() + 1);
+                // Increment version and write atomically via temp file + rename.
+                // Version is restored on IOException so a failed save leaves the context
+                // retryable (on-disk version still matches the pre-increment value).
+                long originalVersion = context.getVersion();
+                context.setVersion(originalVersion + 1);
                 Path tmp = target.resolveSibling(context.getFlowId() + ".tmp");
-                Files.writeString(tmp, objectMapper.writeValueAsString(context), StandardCharsets.UTF_8);
-                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+                try {
+                    Files.writeString(tmp, objectMapper.writeValueAsString(context), StandardCharsets.UTF_8);
+                    Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    context.setVersion(originalVersion);
+                    throw e;
+                }
 
                 return context;
             } catch (IllegalStateException e) {
@@ -106,7 +115,12 @@ public class WorkflowStore {
         return Files.exists(file(flowId));
     }
 
+    private static final Pattern FLOW_ID_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]*$");
+
     private Path file(String flowId) {
+        if (flowId == null || !FLOW_ID_PATTERN.matcher(flowId).matches()) {
+            throw new IllegalArgumentException("Invalid flowId (kebab-case expected): " + flowId);
+        }
         return root.resolve(flowId + ".json");
     }
 }
