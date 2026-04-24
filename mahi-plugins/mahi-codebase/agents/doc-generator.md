@@ -62,7 +62,9 @@ Utiliser Glob pour lister tous les fichiers source dans le chemin reçu. Utilise
 
 ### 5. Écrire la documentation
 
-Lire `references/templates.md` et extraire le template correspondant (`module-<nom>` ou `feature-<feature>`). Écrire le fichier dans le chemin indiqué en suivant ce template.
+Localiser les templates via `Glob("**/mahi-codebase*/skills/doc/references/templates.md")` et lire le fichier trouvé.
+Extraire le template correspondant (`module-<nom>` ou `feature-<feature>`).
+Écrire le fichier dans le chemin indiqué en suivant ce template.
 
 ### 6. Capturer les métadonnées
 

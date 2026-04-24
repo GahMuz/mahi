@@ -212,3 +212,13 @@ Execute OPEN on the requested spec, skipping OPEN step 0 (the /clear warning is 
 | `/evolve <action>` | Faire évoluer la configuration `.claude/` (règles, skills projet) |
 | `/spec-review [--no-fix]` | Revue manuelle spec/code : détecte et corrige les incohérences |
 | `/adr new <titre> \| open \| recap \| approve \| close \| switch` | Gérer les ADR avant implémentation |
+| `/graph-query <question>` | Interroger les graphes structurels du codebase (impact, flux, entités) |
+| `/graph-status` | Afficher la fraîcheur des graphes construits |
+
+**Plugin `mahi-codebase` (optionnel — génération, typiquement CI/CD) :**
+
+| Skill | Purpose |
+|-------|---------|
+| `/doc <module> \| --all \| update \| status` | Générer la documentation structurée des modules (réduit les tokens de 80-90%) |
+| `/analyse <module> \| --all` | Analyser qualité, architecture et conformité (RGPD/DORA) |
+| `/graph-build --java \| --incremental` | Construire les graphes structurels (endpoint-flow, entity-model, service-call, module-dep) |

@@ -80,10 +80,10 @@ Score minimum : 0.
 
 ## 7. Écrire les fichiers de sortie
 
-Lire les templates dans `references/templates.md` section "Template : quality.md" et "Template : candidates.md".
+Localiser les templates via `Glob("**/mahi-codebase*/skills/analyse/references/templates.md")` et lire le fichier trouvé.
 
-1. **`quality.md`** — toujours généré
-2. **`candidates.md`** — uniquement si des gaps de règles identifiés
+1. **`quality.md`** — toujours généré (template "Template : quality.md")
+2. **`candidates.md`** — uniquement si des gaps de règles identifiés (template "Template : candidates.md")
 
 ## 8. Capturer le commit
 

@@ -12,6 +12,23 @@ Identifier et analyser toutes les options envisageables. L'objectif est d'avoir 
 
 Lire `.mahi/decisions/YYYY/MM/<adr-id>/framing.md`. Garder en tête les contraintes et non-objectifs — ils élimineront certaines options d'emblée.
 
+### Step 1b: Injecter le contexte codebase (optionnel, si disponible)
+
+**Documentation** : Identifier les modules concernés par la décision architecturale depuis `framing.md`.
+Pour chaque module concerné, vérifier `.mahi/docs/modules/<module>/module-<module>.md` :
+- Si présent : lire ce fichier — il donne une vue synthétique du module sans scanner les sources
+- Utiliser ce contexte dans les analyses des options (compatibilité, complexité d'implémentation)
+
+**Graphe** : Si `.mahi/graph/manifest.json` existe :
+- Pour chaque composant clé identifié (service, entité, module), dispatcher :
+  ```
+  Agent({ subagent_type: "graph-query", model: "haiku",
+    prompt: "Qui dépend de <ComposantConcerné> ?" })
+  ```
+  → injecte le blast radius pour évaluer l'impact de chaque option
+
+Si les deux sont absents : passer silencieusement à Step 2 (le contexte n'est pas bloquant).
+
 ### Step 2: Recueillir les options connues
 
 "Quelles options avez-vous déjà envisagées ou entendues ?" — lister sans juger.

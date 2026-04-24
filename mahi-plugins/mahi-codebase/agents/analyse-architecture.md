@@ -91,8 +91,8 @@ Score minimum : 0.
 
 ## 7. Écrire `architecture.md`
 
-Lire le template dans `references/templates.md` section "Template : architecture.md".
-Écrire `.mahi/analyses/<module>/architecture.md`.
+Localiser les templates via `Glob("**/mahi-codebase*/skills/analyse/references/templates.md")` et lire le fichier trouvé.
+Écrire `.mahi/analyses/<module>/architecture.md` en suivant le template "Template : architecture.md".
 
 **Retourner** dans le résultat : `score: <N>`.
 

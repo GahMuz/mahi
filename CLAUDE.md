@@ -42,9 +42,13 @@ mahi-mcp/          Java MCP server (Spring Boot 3.4.4, Spring AI 1.1.4)
       ├── store/             WorkflowStore (atomic JSON persistence)
       └── service/           ActiveStateService, StateFileService, GitWorktreeService
 
-mahi-plugins/mahi/ Claude Code plugin
+mahi-plugins/mahi/         Claude Code plugin (workflow + graph consumption)
   ├── agents/        Specialized agents (spec-orchestrator, spec-planner…)
-  └── skills/        User-invocable skills (/spec, /release…)
+  └── skills/        User-invocable skills (/spec, /adr, /graph-query, /graph-status…)
+
+mahi-plugins/mahi-codebase/ Claude Code plugin (codebase generation — CI/CD)
+  ├── agents/        Generation agents (doc-generator, graph-builder-java, analyse-*)
+  └── skills/        Generation skills (/doc, /analyse, /graph-build)
 ```
 
 ## Key Design Rules

@@ -115,7 +115,7 @@ Agent({
    - Toujours injecter les règles plugin (SOLID ; RGPD si DCP ; DORA si contexte financier)
    - Faire correspondre le domaine de la sous-tâche avec la colonne "Charger quand" des règles projet
    - Injecter uniquement les règles projet correspondantes (ex: sous-tâche controller → `rules-controller.md`)
-4. **Graph slices** (plugin optionnel `sdd-graph`, si disponible) : Si `.mahi/graph/manifest.json` existe (créé par le plugin sdd-graph) :
+4. **Graph slices** (plugin optionnel `mahi-codebase`, si disponible) : Si `.mahi/graph/manifest.json` existe (créé par le plugin mahi-codebase via `/graph-build`) :
 
    **Phase de déduplication (avant dispatch) :**
    - Pour chaque sous-tâche de la vague, identifier la requête graph nécessaire selon son type (voir règles ci-dessous).
@@ -127,23 +127,23 @@ Agent({
    **Types de requêtes :**
    - Sous-tâche **controller/endpoint** (mots-clés : `@RestController`, `@GetMapping`, `@PostMapping`, route, endpoint) :
      ```
-     Agent({ subagent_type: "sdd-graph:graph-query", model: "haiku",
+     Agent({ subagent_type: "graph-query", model: "haiku",
        prompt: "Flux complet de <METHOD> <path>" })
      ```
      → injecte la chaîne endpoint→service→repo→entité→table
    - Sous-tâche **service** (mots-clés : `@Service`, service, logique métier) :
      ```
-     Agent({ subagent_type: "sdd-graph:graph-query", model: "haiku",
+     Agent({ subagent_type: "graph-query", model: "haiku",
        prompt: "Qui dépend de <ServiceName> ?" })
      ```
      → injecte les callers directs (pour préserver la non-régression)
    - Sous-tâche **entité/domaine** (mots-clés : `@Entity`, entité, table, JPA, migration) :
      ```
-     Agent({ subagent_type: "sdd-graph:graph-query", model: "haiku",
+     Agent({ subagent_type: "graph-query", model: "haiku",
        prompt: "Entité <EntityName>" })
      ```
      → injecte la définition complète champs+relations
-   - Si graphe **absent** → afficher une fois : "⚠ sdd-graph non disponible — injection structurelle désactivée. Lancer `/graph-build --java` pour activer." puis ignorer pour le reste de la vague
+   - Si graphe **absent** → afficher une fois : "⚠ Graphe structurel non disponible — injection désactivée. Lancer `/graph-build --java` (plugin `mahi-codebase` requis) pour activer." puis ignorer pour le reste de la vague
    - Si graphe **stale** → afficher une fois : "⚠ Graphe obsolète — résultats potentiellement inexacts. Lancer `/graph-build --incremental`." puis continuer
    - Si sous-tâche hors catégorie → ignorer silencieusement
    - Ces requêtes sont dispatchées en parallèle avec les autres injections — ne pas bloquer la vague si le graphe ne répond pas

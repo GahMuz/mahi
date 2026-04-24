@@ -119,10 +119,10 @@ Score minimum : 0.
 
 ## 7. Écrire les fichiers de sortie
 
-Lire les templates dans `references/templates.md`.
+Localiser les templates via `Glob("**/mahi-codebase*/skills/analyse/references/templates.md")` et lire le fichier trouvé.
 
-- **`rgpd.md`** — uniquement si RGPD applicable
-- **`dora.md`** — uniquement si DORA applicable
+- **`rgpd.md`** — uniquement si RGPD applicable (template "Template : rgpd.md")
+- **`dora.md`** — uniquement si DORA applicable (template "Template : dora.md")
 
 Si aucun fichier n'est écrit : retourner `{ "rgpd": null, "dora": null }`.
 
