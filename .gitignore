@@ -5,6 +5,7 @@ mahi-mcp/build/
 mahi-mcp/.gradle/
 sdd-spec/
 .claude/settings.local.json
+.claude/worktrees/
 *.class
 *.log
 .DS_Store
