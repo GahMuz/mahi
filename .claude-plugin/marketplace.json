@@ -28,6 +28,15 @@
       "author": { "name": "vincent-bailly" },
       "keywords": ["codebase", "doc", "graph", "analyse", "ci-cd", "mahi"],
       "category": "development"
+    },
+    {
+      "name": "mahi-roi",
+      "source": "./mahi-plugins/mahi-roi",
+      "description": "Mahi ROI — Rapport ROI du workflow spec-driven : temps économisé, rentabilité, qualité.",
+      "version": "0.1.6",
+      "author": { "name": "vincent-bailly" },
+      "keywords": ["roi", "metrics", "efficiency", "reporting", "mahi"],
+      "category": "development"
     }
   ]
 }
