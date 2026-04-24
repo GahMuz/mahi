@@ -207,6 +207,7 @@ Execute OPEN on the requested spec, skipping OPEN step 0 (the /clear warning is 
 | Skill | Purpose |
 |-------|---------|
 | `/init` | Initialiser le projet Mahi : créer `.mahi/`, configurer langages et modèles |
+| `/status [--all]` | Vue d'ensemble de tous les workflows : actif, en cours, terminés |
 | `/update [--dry-run]` | Migrer le schéma `.mahi/config.json` vers la version courante |
 | `/evolve <action>` | Faire évoluer la configuration `.claude/` (règles, skills projet) |
 | `/spec-review [--no-fix]` | Revue manuelle spec/code : détecte et corrige les incohérences |
