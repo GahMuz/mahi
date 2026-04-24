@@ -66,7 +66,7 @@ Si aucun problème → continuer immédiatement.
 - Read `.mahi/config.json` — for parallelTaskLimit, pipelineReviews, models
 - Read `active.json` → get `workflowId`
 - Call `mcp__plugin_mahi_mahi__get_workflow(flowId: <workflowId>)` → verify currentPhase is "implementation"; read artifacts for context
-- Glob `**/sdd-rules/SKILL.md` → exécuter le protocole de chargement (plugin + projet + priorité) — résultat gardé en mémoire pour injection per-subtask en Step 3
+- Glob `**/mahi*/skills/rules/SKILL.md` → exécuter le protocole de chargement (plugin + projet + priorité) — résultat gardé en mémoire pour injection per-subtask en Step 3
 - Glob `.claude/skills/*/SKILL.md` → pour chaque fichier trouvé, lire uniquement le frontmatter (`name` + `description`). Conserver la liste `[{name, description, path}]` en mémoire. **Ne pas re-scanner à chaque sous-tâche** — cette liste est réutilisée pour toute la session d'orchestration.
 
 ### Step 2: Build Waves (with resume awareness)
@@ -108,7 +108,7 @@ Agent({
 
 1. **Module docs**: Check `.mahi/docs/modules/<name>/module-<name>.md` — if cached doc exists for the target module, include it instead of raw file exploration. Also check for feature docs in the same directory for more targeted context injection.
 2. **Project skills**: Utiliser la liste de skills mise en cache en Step 1. Filtrer par correspondance avec le contenu de la sous-tâche (ex : sous-tâche form → inclure skill form ; sous-tâche API → inclure skill API). Ne pas re-scanner le filesystem.
-3. **Rules**: Utiliser les règles chargées en Step 1 via sdd-rules. Pour chaque sous-tâche :
+3. **Rules**: Utiliser les règles chargées en Step 1 via `mahi:rules`. Pour chaque sous-tâche :
    - Toujours injecter les règles plugin (SOLID ; RGPD si DCP ; DORA si contexte financier)
    - Faire correspondre le domaine de la sous-tâche avec la colonne "Charger quand" des règles projet
    - Injecter uniquement les règles projet correspondantes (ex: sous-tâche controller → `rules-controller.md`)
