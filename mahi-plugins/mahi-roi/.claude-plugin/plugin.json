@@ -1,6 +1,6 @@
 {
   "name": "mahi-roi",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "Mahi ROI — Rapport de retour sur investissement du workflow spec-driven. Mesure le temps économisé, la rentabilité financière et la qualité produite sur la période choisie.",
   "author": { "name": "vincent-bailly" },
   "keywords": ["roi", "metrics", "efficiency", "reporting", "mahi"],
