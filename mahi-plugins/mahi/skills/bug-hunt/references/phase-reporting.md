@@ -5,6 +5,27 @@ créer les sessions `/debug` pré-remplies pour les bugs validés.
 
 ---
 
+## Étape 0 — Analyse des causes racines (si ≥ 3 bugs)
+
+Si le findings artifact contient **3 bugs ou plus**, dispatcher l'analyser en premier :
+
+```
+Agent({
+  description: "Analyser les causes racines",
+  subagent_type: "mahi:bug-hunt-analyser",
+  model: "haiku",
+  prompt: "huntPath: <huntPath>
+    findings: <contenu du findings artifact>"
+})
+```
+
+Présenter le rapport de regroupement à l'utilisateur avant la validation individuelle.
+Pour les groupes avec **stratégie "1 session debug unifiée"** : traiter le groupe comme un seul bug lors de l'Étape 2 (titre = "Cause racine : <description>", description = bugs regroupés).
+
+Si moins de 3 bugs : passer directement à l'Étape 1.
+
+---
+
 ## Étape 1 — Présenter le résumé global
 
 Afficher en français :
@@ -12,8 +33,9 @@ Afficher en français :
 # Résultat du Bug Hunt : <titre>
 
 N bugs identifiés : X critiques, Y majeurs, Z mineurs
+<si analyse effectuée> M groupes de cause racine identifiés — <réduction> sessions debug économisées
 
-Validation individuelle à suivre — chaque bug sera présenté séparément.
+Validation individuelle à suivre — chaque bug (ou groupe) sera présenté séparément.
 ```
 
 ---

@@ -97,7 +97,9 @@ public class WorkflowEngine {
         TransitionDefinition transition = definition.getTransitions().get(key);
         if (transition == null) {
             throw new IllegalStateException(
-                    "Transition invalide : " + key + " (workflow: " + definition.getType() + ")");
+                    "Transition invalide : " + key + " — aucune transition depuis l'état '" + fromState
+                    + "' pour l'événement '" + event + "' dans le workflow '" + definition.getType() + "'. "
+                    + "Vérifiez la phase courante avec get_workflow — les événements valides dépendent de l'état actif.");
         }
         return transition;
     }

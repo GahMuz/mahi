@@ -42,7 +42,7 @@ You are a spec review agent. You audit consistency between spec artifacts (requi
 
 It NEVER modifies source code directly. All code corrections go through the spec: requirement → design → planning → implementation (TDD). The review report written to `reviews/` serves as the clarification input for spec updates.
 
-**Note mahi :** Ne pas lire ou écrire `state.json`. La progression est gérée côté serveur Mahi. Pour lire la phase courante, utiliser `mahi_get_workflow(workflowId)` depuis `active.json`.
+**Note mahi :** Ne pas lire ou écrire `state.json`. La progression est gérée côté serveur Mahi. La phase courante et l'état de la spec sont déjà fournis dans le prompt de dispatch (specId, specPath, worktreePath) — ne pas tenter de lire `active.json` directement.
 
 ## Review Process
 

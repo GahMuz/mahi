@@ -62,13 +62,22 @@ public class WorkflowService {
     }
 
     /**
-     * Returns workflow context enriched with phaseDurations metadata.
+     * Returns workflow context enriched with phaseDurations metadata and currentPhaseDurationSeconds.
      */
     public WorkflowContext get(String flowId) {
         WorkflowContext context = engine.get(flowId);
         // Enrich with phase durations (DES-007)
         Map<String, Long> phaseDurations = calculatePhaseDurations(context);
         context.getMetadata().put("phaseDurations", phaseDurations);
+
+        // Convenience field: current phase duration in seconds (avoids manual timestamp arithmetic in agents)
+        WorkflowDefinition definition = registry.get(context.getWorkflowType());
+        String currentPhase = definition.getStateToPhaseMapping().get(context.getState());
+        if (currentPhase != null && phaseDurations.containsKey(currentPhase)) {
+            long ms = phaseDurations.get(currentPhase);
+            context.getMetadata().put("currentPhaseDurationSeconds", ms / 1000L);
+        }
+
         return context;
     }
 
@@ -78,6 +87,9 @@ public class WorkflowService {
 
     /**
      * Writes an artifact file and marks it VALID in the workflow context.
+     * If the workflow definition provides a validator for this artifact, content is validated first.
+     *
+     * @throws IllegalArgumentException if the artifact is unknown or content validation fails
      */
     public WorkflowContext writeArtifact(String flowId, String artifactName, String content) {
         WorkflowContext context = store.load(flowId);
@@ -86,6 +98,18 @@ public class WorkflowService {
         if (artifact == null) {
             throw new IllegalArgumentException("Unknown artifact: " + artifactName
                     + " for workflow type: " + context.getWorkflowType());
+        }
+
+        // Content validation (spec workflow only — FileArtifact has no validator)
+        WorkflowDefinition definition = registry.get(context.getWorkflowType());
+        var validator = definition.getArtifactValidators().get(artifactName);
+        if (validator != null) {
+            var errors = validator.validate(artifactName, content);
+            if (!errors.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Validation échouée pour l'artifact '" + artifactName + "': "
+                        + String.join("; ", errors));
+            }
         }
 
         String path = artifactService.writeArtifact(flowId, artifactName, content);

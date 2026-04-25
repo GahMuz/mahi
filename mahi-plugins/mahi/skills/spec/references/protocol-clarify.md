@@ -58,7 +58,20 @@ REQ-xxx changed
 - If a downstream item is `[ ]` pending: no action needed (it will pick up the change when executed)
 - If a downstream item is `[~]` in-progress or `[!]` failed: mark `[!]` and add a note
 
-### Step 5: Report (in French)
+### Step 5: Persist Context
+
+Appeler `mcp__plugin_mahi_mahi__save_context` pour enregistrer la décision de clarification côté serveur (résistant aux interruptions de session) :
+
+```
+mcp__plugin_mahi_mahi__save_context(flowId: <depuis active.json>, context: {
+  lastAction: "Clarification : <résumé de la modification>",
+  keyDecisions: ["REQ-xxx modifié : <décision prise>"],
+  openQuestions: [],
+  nextStep: "Poursuivre la phase <currentPhase>"
+})
+```
+
+### Step 6: Report (in French)
 
 ```
 Clarification appliquée à '<titre>'.
@@ -71,4 +84,6 @@ Propagation :
 - TASK-002.3 marqué [!] — en cours, vérification requise
 
 Aucune tâche terminée impactée.
+
+Contexte persisté via save_context.
 ```

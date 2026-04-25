@@ -7,12 +7,23 @@ Automatic phase — no user interaction needed. Report progress in French.
 
 ## Process
 
-### Step 1: Project Setup
-In the worktree directory, run setup based on detected project files:
-- `package.json` → `npm install` or `yarn install`
-- `composer.json` → `composer install`
-- `pom.xml` → `mvn install -DskipTests`
-- `build.gradle` → `./gradlew build -x test`
+### Step 1: Project Setup + Baseline (en parallèle si indépendants)
+
+Lancer en parallèle les deux blocs suivants, puis attendre que les deux soient terminés avant de continuer.
+
+**Bloc A — Setup du projet** (dans le répertoire worktree) :
+- Détecter le type de projet depuis les fichiers présents :
+  - `package.json` → `npm install` ou `yarn install`
+  - `composer.json` → `composer install`
+  - `pom.xml` → `mvn install -DskipTests`
+  - `build.gradle` → `./gradlew build -x test`
+- Si aucun fichier de build détecté : passer (projet sans dépendances à installer)
+
+**Bloc B — Pré-chargement du contexte de planning** :
+- Lire `requirement.md` et `design.md` depuis `.mahi/specs/<spec-path>/`
+- Garder ces contenus en mémoire pour l'injection dans la phase de planning qui suit immédiatement
+
+Une fois le setup terminé :
 
 ### Step 2: Capture Test Baseline
 Run project test suite and save results:

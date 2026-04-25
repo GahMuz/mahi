@@ -69,9 +69,15 @@ public class BugHuntWorkflowDefinition implements WorkflowDefinition {
     private static Guard requireValid(String artifactName) {
         return (WorkflowContext context) -> {
             var artifact = context.getArtifacts().get(artifactName);
-            if (artifact == null || !artifact.isValid()) {
+            if (artifact == null) {
                 throw new IllegalStateException(
-                        "Artifact '" + artifactName + "' must be VALID before this transition");
+                        "L'artifact '" + artifactName + "' est absent du contexte — "
+                        + "appeler write_artifact(artifactName=\"" + artifactName + "\", content=...) avant cette transition");
+            }
+            if (!artifact.isValid()) {
+                throw new IllegalStateException(
+                        "L'artifact '" + artifactName + "' est en statut " + artifact.getStatus()
+                        + " — appeler write_artifact(artifactName=\"" + artifactName + "\", content=...) pour le valider avant cette transition");
             }
         };
     }

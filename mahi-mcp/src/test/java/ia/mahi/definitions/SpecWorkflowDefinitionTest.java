@@ -60,6 +60,7 @@ class SpecWorkflowDefinitionTest {
         ctx = engine.fire("spec-001", "APPROVE_FINISHING");
         assertThat(ctx.getState()).isEqualTo("RETROSPECTIVE");
 
+        markAndSave("spec-001", "retrospective");
         ctx = engine.fire("spec-001", "APPROVE_RETROSPECTIVE");
         assertThat(ctx.getState()).isEqualTo("COMPLETED");
 

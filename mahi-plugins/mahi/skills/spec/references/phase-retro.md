@@ -87,7 +87,46 @@ Si au moins une règle est approuvée :
 
 Si aucune règle approuvée : skip.
 
-### Step 6: Finalize
+### Step 6: Write Retrospective Document
+
+Écrire `retrospective.md` dans `.mahi/specs/<spec-path>/` en suivant ce template :
+
+```markdown
+# Rétrospective : <spec-titre>
+
+> Date : <ISO-8601>
+> Durée totale : <durée en jours ou heures depuis la création>
+
+## Ce qui a bien fonctionné
+- <apprentissage positif 1>
+- <apprentissage positif 2>
+
+## Ce qui n'a pas fonctionné / axes d'amélioration
+- <difficulté rencontrée et piste d'amélioration>
+
+## Métriques
+- REQ : <nombre>  |  DES : <nombre>  |  TASKs : <nombre>  |  Tests : <baseline → final>
+- Changements cassants : <nombre> (<liste ou "aucun">)
+- Revues de code : <nombre>
+
+## Règles ajoutées
+- <règle 1 → fichier cible>
+- <ou "Aucune">
+
+## Prochaines actions suggérées
+- <action recommandée 1>
+```
+
+Marquer l'artifact comme valide côté serveur :
+```
+mcp__plugin_mahi_mahi__write_artifact(
+  flowId: <lire depuis active.json>,
+  artifactName: "retrospective",
+  content: <contenu complet de retrospective.md>
+)
+```
+
+### Step 7: Finalize
 
 1. Déclencher la transition vers completed via Mahi MCP :
 ```

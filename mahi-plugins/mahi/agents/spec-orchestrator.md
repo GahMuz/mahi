@@ -64,7 +64,7 @@ Si aucun problème → continuer immédiatement.
 - Read `.mahi/specs/<spec-path>/design.md` — for agent context
 - Read `.mahi/specs/<spec-path>/requirement.md` — for agent context
 - Read `.mahi/config.json` — for parallelTaskLimit, pipelineReviews, models
-- Read `active.json` → get `workflowId`
+- Use the `WorkflowId` provided in this prompt — do NOT read `active.json` directly (worktree-unsafe; the value is already injected by the parent skill)
 - Call `mcp__plugin_mahi_mahi__get_workflow(flowId: <workflowId>)` → verify currentPhase is "implementation"; read artifacts for context
 - Glob `**/mahi*/skills/rules/SKILL.md` → exécuter le protocole de chargement (plugin + projet + priorité) — résultat gardé en mémoire pour injection per-subtask en Step 3
 - Glob `.claude/skills/*/SKILL.md` → pour chaque fichier trouvé, lire uniquement le frontmatter (`name` + `description`). Conserver la liste `[{name, description, path}]` en mémoire. **Ne pas re-scanner à chaque sous-tâche** — cette liste est réutilisée pour toute la session d'orchestration.

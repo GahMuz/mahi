@@ -5,10 +5,14 @@ import ia.mahi.workflow.core.WorkflowDefinition;
 import ia.mahi.workflow.core.WorkflowState;
 import ia.mahi.workflow.core.artifact.Artifact;
 import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.artifact.ArtifactValidator;
 import ia.mahi.workflow.core.transition.Guard;
 import ia.mahi.workflow.core.transition.TransitionDefinition;
 import ia.mahi.workflow.definitions.spec.artifact.DesignArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.DesignArtifactValidator;
 import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifactValidator;
+import ia.mahi.workflow.definitions.spec.artifact.RetrospectiveArtifactValidator;
 import ia.mahi.workflow.definitions.spec.coherence.CoherenceChecker;
 import ia.mahi.workflow.definitions.spec.coherence.CoherenceViolation;
 
@@ -72,7 +76,7 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
 
         t.put(key(RETROSPECTIVE, APPROVE_RETROSPECTIVE),
                 new TransitionDefinition(RETROSPECTIVE, APPROVE_RETROSPECTIVE, COMPLETED,
-                        List.of(), List.of()));
+                        List.of(requireValid("retrospective")), List.of()));
 
         // Re-entry transitions from REANALYZING (triggered by mahi_add_requirement_info / mahi_add_design_info)
         t.put(key(REANALYZING, APPROVE_REQUIREMENTS),
@@ -104,6 +108,15 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     }
 
     @Override
+    public Map<String, ArtifactValidator> getArtifactValidators() {
+        return Map.of(
+                "requirements",  new RequirementsArtifactValidator(),
+                "design",        new DesignArtifactValidator(),
+                "retrospective", new RetrospectiveArtifactValidator()
+        );
+    }
+
+    @Override
     public Map<String, List<String>> getInvalidationGraph() {
         return Map.of(
                 "requirements",  List.of("design", "plan"),
@@ -118,9 +131,15 @@ public class SpecWorkflowDefinition implements WorkflowDefinition {
     private static Guard requireValid(String artifactName) {
         return (WorkflowContext context) -> {
             var artifact = context.getArtifacts().get(artifactName);
-            if (artifact == null || !artifact.isValid()) {
+            if (artifact == null) {
                 throw new IllegalStateException(
-                        "Artifact '" + artifactName + "' must be VALID before this transition");
+                        "L'artifact '" + artifactName + "' est absent du contexte — "
+                        + "appeler write_artifact(artifactName=\"" + artifactName + "\", content=...) avant cette transition");
+            }
+            if (!artifact.isValid()) {
+                throw new IllegalStateException(
+                        "L'artifact '" + artifactName + "' est en statut " + artifact.getStatus()
+                        + " — appeler write_artifact(artifactName=\"" + artifactName + "\", content=...) pour le valider avant cette transition");
             }
         };
     }

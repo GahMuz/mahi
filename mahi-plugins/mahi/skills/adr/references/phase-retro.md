@@ -85,7 +85,24 @@ Si au moins une règle est approuvée ou modifiée :
 
 Si aucune règle : skip.
 
-### Step 6: Marquer l'artefact et finaliser
+### Step 6: Décomposition en specs d'implémentation
+
+Dispatcher l'agent de décomposition pour identifier et valider les specs à créer depuis cet ADR :
+
+```
+Agent({
+  description: "Décomposer l'ADR <adrId> en specs",
+  subagent_type: "mahi:adr-spec-decomposer",
+  model: "sonnet",
+  prompt: "adrId: <adrId>
+    adrPath: <adrPath>
+    workflowId: <workflowId>"
+})
+```
+
+L'agent présente chaque spec dérivé individuellement pour validation avant de le créer. Il n'initialise que les specs approuvés par l'utilisateur.
+
+### Step 7: Marquer l'artefact et finaliser
 
 1. Appeler `mcp__plugin_mahi_mahi__write_artifact(flowId: <workflowId>, artifactName: "retrospective", content: <résumé des règles appliquées ou "Aucune règle candidate">)` — requis avant `fire_event("COMPLETE")`.
 2. Append log.md : "Rétrospective terminée. ADR complété."

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.artifact.FileArtifact;
+import ia.mahi.workflow.definitions.adr.artifact.AdrDecompositionArtifact;
 import ia.mahi.workflow.definitions.spec.artifact.DesignArtifact;
 import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,8 @@ public class WorkflowStore {
         mapper.registerSubtypes(
                 new NamedType(FileArtifact.class, "file"),
                 new NamedType(RequirementsArtifact.class, "requirements"),
-                new NamedType(DesignArtifact.class, "design")
+                new NamedType(DesignArtifact.class, "design"),
+                new NamedType(AdrDecompositionArtifact.class, "decomposition")
         );
         return mapper;
     }

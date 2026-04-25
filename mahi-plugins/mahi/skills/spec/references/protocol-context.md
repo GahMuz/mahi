@@ -72,6 +72,22 @@ Appelé par `/spec open` après identification de la spec. Établit la spec comm
 
 **3. Reconstitution** — si aucun des deux n'existe : appeler `mcp__plugin_mahi_mahi__get_workflow(flowId)` pour obtenir la phase, les artifacts, les statuts courants et le `sessionContext` (si une session précédente a appelé `mcp__plugin_mahi_mahi__save_context`), puis lire `log.md` pour les actions passées.
 
+### Chargement d'artifacts par phase (reconstitution et reprise)
+
+Après identification de la phase courante, charger **uniquement** les fichiers nécessaires à cette phase. Ne pas charger tous les artifacts systématiquement.
+
+| Phase | Fichiers à charger | Raison |
+|-------|-------------------|--------|
+| `requirements` | `requirement.md` | Seul document actif de cette phase |
+| `design` | `requirement.md` + `design.md` | Design doit rester cohérent avec les REQ |
+| `worktree` | aucun | Phase automatique — pas de lecture nécessaire |
+| `planning` | `plan.md` | Plan en cours ; REQ/DES injectés par spec-planner si besoin |
+| `implementation` | `plan.md` | L'orchestrateur chargera design.md et requirement.md à la demande pour l'injection par sous-tâche |
+| `finishing` | `plan.md` | Vérification de complétude des sous-tâches |
+| `retrospective` | — | Le résumé de context.md suffit ; pas de lecture d'artifact |
+
+**Règle :** si le fichier est MISSING (statut retourné par `get_workflow`), ne pas tenter de le lire — utiliser "non disponible" dans le briefing.
+
 Présenter en français :
 ```
 ## Reprise : <spec-id>  [source: memory local | context.md | reconstitué]

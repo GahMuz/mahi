@@ -207,7 +207,7 @@ class CoherenceCheckTest {
     }
 
     private void markArtifactValid(String flowId, String artifactName) {
-        // Use writeArtifact to mark the artifact valid
-        workflowService.writeArtifact(flowId, artifactName, "# Content");
+        // Use writeArtifact to mark the artifact valid — content must pass the artifact validator
+        workflowService.writeArtifact(flowId, artifactName, "# Requirements\n\n## REQ-001 — Placeholder\n- Placeholder requirement.");
     }
 }

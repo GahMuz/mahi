@@ -1,6 +1,7 @@
 package ia.mahi.workflow.core;
 
 import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.artifact.ArtifactValidator;
 import ia.mahi.workflow.core.transition.TransitionDefinition;
 
 import java.util.List;
@@ -41,6 +42,16 @@ public interface WorkflowDefinition {
      * Key = state name (e.g., "REQUIREMENTS_DEFINED"), Value = phase name (e.g., "requirements").
      */
     default Map<String, String> getStateToPhaseMapping() {
+        return Map.of();
+    }
+
+    /**
+     * Optional content validators for write_artifact calls, keyed by artifact name.
+     * If a validator is present for an artifact, it is called before marking the artifact VALID.
+     * Validation failures throw IllegalArgumentException with a human-readable message.
+     * Default implementation returns an empty map (no validation — FileArtifact behaviour).
+     */
+    default Map<String, ArtifactValidator> getArtifactValidators() {
         return Map.of();
     }
 }

@@ -38,6 +38,7 @@ Tu es un agent de rédaction d'exigences. Tu ajoutes des items REQ-xxx bien form
   - "REQ-003 manque de critère d'acceptation pour le cas d'erreur réseau"
   ```
 - `interactive` (boolean, défaut `true`) : si true, présente avant d'écrire
+- `sourceAdrId` (optionnel) : ID de l'ADR dont ce spec est dérivé. Si présent, pré-remplir les findings depuis le contenu de l'ADR (voir Step 1b).
 
 ## Format REQ obligatoire
 
@@ -65,6 +66,19 @@ Mots-clés : `DOIT`, `NE DOIT PAS`, `DEVRAIT`, `PEUT`, `QUAND … ALORS`
 ### Step 1 : Charger le contexte
 
 Lire en parallèle : `<specPath>/requirement.md` (identifier le dernier REQ-xxx ID) + `<specPath>/design.md` (contexte architectural) + Glob `**/sdd-rules/SKILL.md` → exécuter le protocole de chargement.
+
+### Step 1b : Pré-remplissage depuis ADR (si sourceAdrId présent)
+
+Si `sourceAdrId` est fourni :
+1. Lire `.mahi/adrs/<YYYY/MM>/<sourceAdrId>/adr.md` (ou chercher via Glob `**/<sourceAdrId>/adr.md`)
+2. Extraire depuis l'ADR :
+   - La décision prise (section "Décision retenue")
+   - Les contraintes et hypothèses (section "Contexte" ou "Contraintes")
+   - Les conséquences et impacts identifiés
+3. Convertir ces éléments en `findings` initiaux — chaque contrainte ou conséquence devient un besoin d'implémentation potentiel
+4. Ajouter en tête de `requirement.md` une section de référence : `> Dérivé de l'ADR : <sourceAdrId>`
+
+Ces findings pré-remplis s'ajoutent aux findings reçus en paramètre (ne pas les écraser).
 
 ### Step 2 : Générer les REQ depuis les findings
 
