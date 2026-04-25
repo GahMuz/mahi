@@ -3,7 +3,7 @@ package ia.mahi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ia.mahi.workflow.core.ActiveState;
+import ia.mahi.workflow.core.context.ActiveState;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 

@@ -1,11 +1,11 @@
 package ia.mahi.engine;
 
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.ArtifactDefinition;
-import ia.mahi.workflow.core.ArtifactStatus;
-import ia.mahi.workflow.core.FileArtifact;
-import ia.mahi.workflow.core.Guard;
-import ia.mahi.workflow.core.TransitionDefinition;
+import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.artifact.ArtifactStatus;
+import ia.mahi.workflow.core.artifact.FileArtifact;
+import ia.mahi.workflow.core.transition.Guard;
+import ia.mahi.workflow.core.transition.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
 import ia.mahi.workflow.core.WorkflowEvent;

@@ -1,12 +1,12 @@
 package ia.mahi.workflow.engine;
 
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.Artifact;
-import ia.mahi.workflow.core.ArtifactStatus;
-import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
 import ia.mahi.workflow.core.WorkflowRegistry;
+import ia.mahi.workflow.core.artifact.Artifact;
+import ia.mahi.workflow.core.artifact.ArtifactStatus;
+import ia.mahi.workflow.core.transition.TransitionDefinition;
 
 import java.util.List;
 import java.util.Map;

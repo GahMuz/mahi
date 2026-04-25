@@ -34,12 +34,18 @@ Two-layer architecture:
 ```
 mahi-mcp/          Java MCP server (Spring Boot 3.4.4, Spring AI 1.1.4)
   └── ia.mahi/
-      ├── mcp/               MCP tool endpoints (@McpTool)
+      ├── mcp/               MCP tool endpoints — WorkflowTools (6 generic), SpecTools (11 spec), ActiveStateTools (6 state)
       ├── workflow/
-      │   ├── core/          FSM primitives (WorkflowContext, Artifact, Guard…)
+      │   ├── core/          FSM core — WorkflowContext, WorkflowDefinition, WorkflowRegistry
+      │   │   ├── artifact/      Artifact hierarchy (Artifact, FileArtifact, StructuredArtifact, ArtifactStatus…)
+      │   │   ├── transition/    Guard, Action, TransitionDefinition, TransitionRecord
+      │   │   └── context/       ActiveState, SessionContext, StateSnapshot, ChangelogEntry
       │   ├── definitions/   Per-workflow-type state machine definitions
+      │   │   └── spec/
+      │   │       ├── artifact/  RequirementsArtifact, DesignArtifact, RequirementItem, DesignItem…
+      │   │       └── coherence/ CoherenceChecker, CoherenceViolation
       │   └── engine/        WorkflowEngine, WorkflowService
-      ├── store/             WorkflowStore (atomic JSON persistence)
+      ├── store/             WorkflowStore (atomic JSON persistence, registers Jackson subtypes)
       └── service/           ActiveStateService, StateFileService, GitWorktreeService
 
 mahi-plugins/mahi/         Claude Code plugin (workflow + graph consumption)

@@ -3,7 +3,7 @@ package ia.mahi;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.adr.AdrWorkflowDefinition;
 import ia.mahi.workflow.definitions.debug.DebugWorkflowDefinition;
-import ia.mahi.workflow.definitions.findbug.FindBugWorkflowDefinition;
+import ia.mahi.workflow.definitions.bughunt.BugHuntWorkflowDefinition;
 import ia.mahi.workflow.definitions.spec.SpecWorkflowDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +27,7 @@ public class MahiMcpApplication {
         registry.register(new SpecWorkflowDefinition());
         registry.register(new AdrWorkflowDefinition());
         registry.register(new DebugWorkflowDefinition());
-        registry.register(new FindBugWorkflowDefinition());
+        registry.register(new BugHuntWorkflowDefinition());
         return registry;
     }
 }

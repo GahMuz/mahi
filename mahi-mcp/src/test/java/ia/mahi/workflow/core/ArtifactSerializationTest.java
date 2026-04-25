@@ -2,7 +2,16 @@ package ia.mahi.workflow.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import ia.mahi.workflow.core.artifact.Artifact;
+import ia.mahi.workflow.core.artifact.ArtifactStatus;
+import ia.mahi.workflow.core.artifact.FileArtifact;
+import ia.mahi.workflow.core.artifact.ItemStatus;
+import ia.mahi.workflow.definitions.spec.artifact.AcceptanceCriterion;
+import ia.mahi.workflow.definitions.spec.artifact.DesignArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementItem;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +32,12 @@ class ArtifactSerializationTest {
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // Register Artifact subtypes — same as WorkflowStore.buildMapper()
+        mapper.registerSubtypes(
+                new NamedType(FileArtifact.class, "file"),
+                new NamedType(RequirementsArtifact.class, "requirements"),
+                new NamedType(DesignArtifact.class, "design")
+        );
     }
 
     /**

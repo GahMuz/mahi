@@ -1,7 +1,7 @@
 package ia.mahi.service;
 
-import ia.mahi.workflow.core.ChangelogEntry;
-import ia.mahi.workflow.core.StateSnapshot;
+import ia.mahi.workflow.core.context.ChangelogEntry;
+import ia.mahi.workflow.core.context.StateSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

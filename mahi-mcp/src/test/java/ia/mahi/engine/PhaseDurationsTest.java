@@ -3,7 +3,7 @@ package ia.mahi.engine;
 import ia.mahi.service.ArtifactService;
 import ia.mahi.service.GitWorktreeService;
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.TransitionRecord;
+import ia.mahi.workflow.core.transition.TransitionRecord;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.adr.AdrWorkflowDefinition;

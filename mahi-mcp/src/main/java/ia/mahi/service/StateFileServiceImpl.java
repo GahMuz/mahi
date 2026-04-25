@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ia.mahi.workflow.core.ChangelogEntry;
-import ia.mahi.workflow.core.StateSnapshot;
+import ia.mahi.workflow.core.context.ChangelogEntry;
+import ia.mahi.workflow.core.context.StateSnapshot;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

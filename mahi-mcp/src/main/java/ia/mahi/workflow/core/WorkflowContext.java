@@ -1,6 +1,9 @@
 package ia.mahi.workflow.core;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import ia.mahi.workflow.core.artifact.Artifact;
+import ia.mahi.workflow.core.context.SessionContext;
+import ia.mahi.workflow.core.transition.TransitionRecord;
 
 import java.time.Instant;
 import java.util.ArrayList;

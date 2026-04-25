@@ -3,7 +3,7 @@ package ia.mahi.engine;
 import ia.mahi.service.ArtifactService;
 import ia.mahi.service.GitWorktreeService;
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.SessionContext;
+import ia.mahi.workflow.core.context.SessionContext;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.spec.SpecWorkflowDefinition;

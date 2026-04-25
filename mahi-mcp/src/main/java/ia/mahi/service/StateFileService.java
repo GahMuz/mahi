@@ -1,7 +1,7 @@
 package ia.mahi.service;
 
-import ia.mahi.workflow.core.ChangelogEntry;
-import ia.mahi.workflow.core.StateSnapshot;
+import ia.mahi.workflow.core.context.ChangelogEntry;
+import ia.mahi.workflow.core.context.StateSnapshot;
 
 /**
  * Contract for managing state.json files in spec directories.

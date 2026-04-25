@@ -1,10 +1,10 @@
 package ia.mahi.definitions;
 
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.Artifact;
-import ia.mahi.workflow.core.ArtifactStatus;
-import ia.mahi.workflow.core.RequirementItem;
-import ia.mahi.workflow.core.RequirementsArtifact;
+import ia.mahi.workflow.core.artifact.Artifact;
+import ia.mahi.workflow.core.artifact.ArtifactStatus;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementItem;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.spec.SpecWorkflowDefinition;

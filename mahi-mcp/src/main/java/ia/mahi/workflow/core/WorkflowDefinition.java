@@ -1,5 +1,8 @@
 package ia.mahi.workflow.core;
 
+import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.transition.TransitionDefinition;
+
 import java.util.List;
 import java.util.Map;
 

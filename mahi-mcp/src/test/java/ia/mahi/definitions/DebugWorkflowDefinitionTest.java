@@ -1,7 +1,7 @@
 package ia.mahi.definitions;
 
 import ia.mahi.store.WorkflowStore;
-import ia.mahi.workflow.core.ArtifactStatus;
+import ia.mahi.workflow.core.artifact.ArtifactStatus;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.definitions.debug.DebugWorkflowDefinition;

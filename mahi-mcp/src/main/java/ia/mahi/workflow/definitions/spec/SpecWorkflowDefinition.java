@@ -1,16 +1,16 @@
 package ia.mahi.workflow.definitions.spec;
 
-import ia.mahi.workflow.core.Artifact;
-import ia.mahi.workflow.core.ArtifactDefinition;
-import ia.mahi.workflow.core.CoherenceChecker;
-import ia.mahi.workflow.core.CoherenceViolation;
-import ia.mahi.workflow.core.DesignArtifact;
-import ia.mahi.workflow.core.Guard;
-import ia.mahi.workflow.core.RequirementsArtifact;
-import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
 import ia.mahi.workflow.core.WorkflowState;
+import ia.mahi.workflow.core.artifact.Artifact;
+import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.transition.Guard;
+import ia.mahi.workflow.core.transition.TransitionDefinition;
+import ia.mahi.workflow.definitions.spec.artifact.DesignArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
+import ia.mahi.workflow.definitions.spec.coherence.CoherenceChecker;
+import ia.mahi.workflow.definitions.spec.coherence.CoherenceViolation;
 
 import java.util.HashMap;
 import java.util.List;

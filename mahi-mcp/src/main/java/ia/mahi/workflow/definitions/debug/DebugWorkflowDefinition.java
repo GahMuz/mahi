@@ -1,11 +1,11 @@
 package ia.mahi.workflow.definitions.debug;
 
-import ia.mahi.workflow.core.ArtifactDefinition;
-import ia.mahi.workflow.core.Guard;
-import ia.mahi.workflow.core.TransitionDefinition;
 import ia.mahi.workflow.core.WorkflowContext;
 import ia.mahi.workflow.core.WorkflowDefinition;
 import ia.mahi.workflow.core.WorkflowState;
+import ia.mahi.workflow.core.artifact.ArtifactDefinition;
+import ia.mahi.workflow.core.transition.Guard;
+import ia.mahi.workflow.core.transition.TransitionDefinition;
 
 import java.util.HashMap;
 import java.util.List;

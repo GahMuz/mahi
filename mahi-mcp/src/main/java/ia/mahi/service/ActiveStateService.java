@@ -1,6 +1,6 @@
 package ia.mahi.service;
 
-import ia.mahi.workflow.core.ActiveState;
+import ia.mahi.workflow.core.context.ActiveState;
 
 import java.util.Optional;
 

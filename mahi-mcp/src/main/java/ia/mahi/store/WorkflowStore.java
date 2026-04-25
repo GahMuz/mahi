@@ -2,8 +2,12 @@ package ia.mahi.store;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ia.mahi.workflow.core.WorkflowContext;
+import ia.mahi.workflow.core.artifact.FileArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.DesignArtifact;
+import ia.mahi.workflow.definitions.spec.artifact.RequirementsArtifact;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -37,11 +41,22 @@ public class WorkflowStore {
     /** Constructor for testing with a custom root path. */
     public WorkflowStore(Path root) {
         this.root = root;
-        this.objectMapper = new ObjectMapper()
+        this.objectMapper = buildMapper();
+    }
+
+    private static ObjectMapper buildMapper() {
+        ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .enable(SerializationFeature.INDENT_OUTPUT)
                 .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // Register Artifact subtypes here so core does not depend on definitions/spec
+        mapper.registerSubtypes(
+                new NamedType(FileArtifact.class, "file"),
+                new NamedType(RequirementsArtifact.class, "requirements"),
+                new NamedType(DesignArtifact.class, "design")
+        );
+        return mapper;
     }
 
     /**

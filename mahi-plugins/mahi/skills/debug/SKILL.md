@@ -84,9 +84,16 @@ Actions :
 2. `mcp__plugin_mahi_mahi__get_active()`. Si présent avec id différent → exécuter CLOSE.
 3. `mcp__plugin_mahi_mahi__activate(debugId, "debug", path, workflowId)`.
 4. `EnterWorktree(branch="debug/<username>/<debug-id>", path=".worktrees/<debug-id>")`.
-5. `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → `currentPhase`. Si serveur KO : "Le serveur Mahi ne répond pas." et stopper.
-6. Afficher un résumé de la session (titre, phase courante, dernier artifact écrit).
-7. Charger la reference correspondant à la phase courante.
+5. Si `.mahi/debug/YYYY/MM/<debug-id>/prefill.md` existe (session créée depuis un `/bug-hunt`) :
+   → Lire ce fichier et l'utiliser comme contexte initial pour `references/phase-reported.md`
+     (le développeur n'a pas besoin de re-saisir la description — elle est déjà structurée)
+   → Afficher en français : "Contexte pré-rempli depuis un bug-hunt — vérifiez les informations
+     ci-dessous et tapez `/debug approve` pour confirmer le bug-report."
+   → Charger `references/phase-reported.md` : présenter le contenu du prefill.md pour
+     confirmation, ne pas redemander les champs déjà remplis.
+6. `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → `currentPhase`. Si serveur KO : "Le serveur Mahi ne répond pas." et stopper.
+7. Afficher un résumé de la session (titre, phase courante, dernier artifact écrit).
+8. Charger la reference correspondant à la phase courante.
 
 ## APPROVE
 
