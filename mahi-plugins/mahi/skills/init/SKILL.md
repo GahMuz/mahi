@@ -62,7 +62,7 @@ mkdir -p .mahi/work .mahi/docs .mahi/.local
 Écrire `.mahi/config.json` :
 ```json
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "languages": ["<selected>"],
   "pipelineReviews": true,
   "parallelTaskLimit": 0,
