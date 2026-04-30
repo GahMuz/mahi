@@ -55,6 +55,6 @@ Si l'utilisateur lance `/spec new <titre>` après cet ADR, la phase requirements
 
 ### Step 5: L'item actif est déjà libéré
 
-La transition RETROSPECTIVE→DONE via `fire_event("COMPLETE")` et `update_registry(..., "completed")` ont déjà été effectuées dans SKILL.md APPROVE. Pas d'action supplémentaire sur l'état ici.
+La transition RETROSPECTIVE→DONE a été effectuée en amont, soit par `phase-retro.md` Step 7 (cas nominal), soit par SKILL.md APPROVE (cas de reprise sur artefact existant). Dans les deux cas, `fire_event("COMPLETE")`, `update_registry("completed")`, `update_state("done")` et `deactivate()` ont déjà été appelés. Pas d'action supplémentaire sur l'état ici.
 
 L'utilisateur peut maintenant lancer `/clear` pour purger le contexte de cette session.

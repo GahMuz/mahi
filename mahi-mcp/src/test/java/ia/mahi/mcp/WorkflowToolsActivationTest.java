@@ -41,20 +41,20 @@ class WorkflowToolsActivationTest {
     @Test
     void activate_shouldDelegateToActiveStateService() {
         ActiveState expected = new ActiveState("spec", "my-spec", "wf-uuid",
-                ".mahi/specs/2026/04/my-spec", Instant.now());
-        when(activeStateService.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "wf-uuid"))
+                ".mahi/work/spec/2026/04/my-spec", Instant.now());
+        when(activeStateService.activate("my-spec", "spec", ".mahi/work/spec/2026/04/my-spec", "wf-uuid"))
                 .thenReturn(expected);
 
-        ActiveState result = activeStateTools.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "wf-uuid");
+        ActiveState result = activeStateTools.activate("my-spec", "spec", ".mahi/work/spec/2026/04/my-spec", "wf-uuid");
 
-        verify(activeStateService).activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "wf-uuid");
+        verify(activeStateService).activate("my-spec", "spec", ".mahi/work/spec/2026/04/my-spec", "wf-uuid");
         assertThat(result).isEqualTo(expected);
     }
 
     @Test
     void getActive_whenActive_shouldReturnActiveState() {
         ActiveState expected = new ActiveState("spec", "my-spec", "wf-uuid",
-                ".mahi/specs/2026/04/my-spec", Instant.now());
+                ".mahi/work/spec/2026/04/my-spec", Instant.now());
         when(activeStateService.getActive()).thenReturn(Optional.of(expected));
 
         ActiveState result = activeStateTools.getActive();

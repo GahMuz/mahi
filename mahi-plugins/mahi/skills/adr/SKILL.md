@@ -144,9 +144,9 @@ Présenter un résumé structuré :
 
 La phase rétrospective se termine normalement d'elle-même via `phase-retro.md` Step 7 (qui fire `COMPLETE`). Si l'utilisateur fait `/adr approve` en phase RETROSPECTIVE, c'est que `phase-retro.md` s'est interrompu avant Step 7. Dans ce cas :
 
-- Appeler `mcp__plugin_mahi_mahi__read_artifact(flowId: <workflowId>, artifactName: "retrospective")` pour vérifier si l'artefact existe.
-  - **Artefact présent** → fire_event("COMPLETE") directement, update_registry("completed"), update_state("done"), deactivate(), suivre `references/phase-transition.md`. Ne pas relancer phase-retro.md.
-  - **Artefact absent** → lire et suivre `references/phase-retro.md` (qui fire COMPLETE en Step 7 et se termine seul).
+- Utiliser l'outil `Read` pour tenter de lire `<adrPath>/retrospective.md`.
+  - **Fichier présent** → appeler `mcp__plugin_mahi_mahi__fire_event(workflowId, "COMPLETE")`, `mcp__plugin_mahi_mahi__update_registry(adrId, "adr", "completed")`, `mcp__plugin_mahi_mahi__update_state(adrPath, "done", changelogEntry)`, `mcp__plugin_mahi_mahi__deactivate()`, suivre `references/phase-transition.md`. Ne pas relancer phase-retro.md.
+  - **Fichier absent** → lire et suivre `references/phase-retro.md` (qui fire COMPLETE en Step 7 et se termine seul).
 
    Si le serveur retourne une erreur : afficher le message d'erreur en français — ne pas tenter une transition locale.
 
