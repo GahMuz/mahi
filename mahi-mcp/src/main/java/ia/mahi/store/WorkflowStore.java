@@ -18,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -27,18 +29,22 @@ import java.util.regex.Pattern;
  * Layout:
  * <pre>
  *   .mahi/work/
- *     .index/&lt;flowId&gt;         → subpath pointer (e.g. "spec/2026/04/my-spec")
+ *     registry.json              ← managed by ActiveStateServiceImpl (source of truth for paths)
  *     spec/2026/04/my-spec/
  *       context.json
  *     adr/2026/04/my-adr/
  *       context.json
  * </pre>
  *
+ * Path resolution strategy (no separate .index/ directory):
+ * 1. In-memory pathCache — populated by save(), valid for the lifetime of the JVM.
+ * 2. registry.json fallback — used after server restart when the cache is cold.
+ *
  * Artifact markdown files (.md) are written alongside context.json in the same directory
  * by ArtifactService, which calls {@link #getWorkflowDir(String)} to resolve the path.
  *
  * Guarantees:
- * - Atomic writes: content is written to a temp file then renamed, preventing partial writes on crash.
+ * - Atomic writes: content is written to a temp file then renamed.
  * - Optimistic concurrency: version field is checked before each save.
  * - Per-flowId synchronization: concurrent saves for the same flow are serialized within the JVM.
  */
@@ -48,6 +54,8 @@ public class WorkflowStore {
     private final ObjectMapper objectMapper;
     private final Path root;
     private final ConcurrentHashMap<String, Object> flowLocks = new ConcurrentHashMap<>();
+    /** In-memory path cache: flowId → subPath (e.g. "spec/2026/04/my-spec"). */
+    private final ConcurrentHashMap<String, String> pathCache = new ConcurrentHashMap<>();
 
     public WorkflowStore() {
         this(Path.of(".mahi", "work"));
@@ -78,10 +86,10 @@ public class WorkflowStore {
      * Returns the workflow directory for the given flowId.
      * Used by ArtifactService to co-locate artifact files with context.json.
      *
-     * @throws IllegalArgumentException if the flow does not exist
+     * @throws IllegalArgumentException if the flow cannot be resolved
      */
     public Path getWorkflowDir(String flowId) {
-        return root.resolve(readIndex(flowId));
+        return root.resolve(resolveSubPath(flowId));
     }
 
     /**
@@ -89,7 +97,7 @@ public class WorkflowStore {
      */
     public WorkflowContext load(String flowId) {
         try {
-            Path contextFile = contextFile(flowId);
+            Path contextFile = root.resolve(resolveSubPath(flowId)).resolve("context.json");
             return objectMapper.readValue(Files.readString(contextFile, StandardCharsets.UTF_8), WorkflowContext.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load workflow: " + flowId, e);
@@ -98,7 +106,7 @@ public class WorkflowStore {
 
     /**
      * Saves a workflow context atomically.
-     * Computes the storage path from workflowType + createdAt, writes an index entry on first save.
+     * Computes the storage path from workflowType + createdAt, populates the in-memory cache.
      *
      * @throws IllegalStateException if a concurrent modification is detected
      */
@@ -107,18 +115,15 @@ public class WorkflowStore {
         String subPath = computeSubPath(context);
         Path dir = root.resolve(subPath);
         Path target = dir.resolve("context.json");
-        Path indexFile = root.resolve(".index").resolve(flowId);
+
+        // Populate in-memory cache so subsequent load()/getWorkflowDir() calls work
+        // without requiring registry.json (important for tests and same-session calls).
+        pathCache.put(flowId, subPath);
 
         Object lock = flowLocks.computeIfAbsent(flowId, k -> new Object());
         synchronized (lock) {
             try {
                 Files.createDirectories(dir);
-                Files.createDirectories(indexFile.getParent());
-
-                // Write index entry (idempotent — always the same subPath for a given flow)
-                if (!Files.exists(indexFile)) {
-                    Files.writeString(indexFile, subPath, StandardCharsets.UTF_8);
-                }
 
                 // Optimistic concurrency: check on-disk version before writing
                 if (Files.exists(target)) {
@@ -155,26 +160,69 @@ public class WorkflowStore {
     }
 
     public boolean exists(String flowId) {
-        return Files.exists(root.resolve(".index").resolve(flowId));
+        if (pathCache.containsKey(flowId)) return true;
+        return lookupInRegistry(flowId) != null;
     }
 
     // --- Private helpers ---
 
-    private String readIndex(String flowId) {
+    /**
+     * Resolves the subpath for a flowId.
+     * Checks the in-memory cache first, then falls back to registry.json.
+     *
+     * @throws IllegalArgumentException if the flow is not found in either source
+     */
+    private String resolveSubPath(String flowId) {
         validateFlowId(flowId);
-        Path indexFile = root.resolve(".index").resolve(flowId);
-        if (!Files.exists(indexFile)) {
-            throw new IllegalArgumentException("Workflow not found: " + flowId);
+
+        // 1. In-memory cache (populated by save() in the current JVM session)
+        String cached = pathCache.get(flowId);
+        if (cached != null) return cached;
+
+        // 2. registry.json fallback (used after server restart)
+        String fromRegistry = lookupInRegistry(flowId);
+        if (fromRegistry != null) {
+            pathCache.put(flowId, fromRegistry); // warm the cache
+            return fromRegistry;
         }
-        try {
-            return Files.readString(indexFile, StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read index for workflow: " + flowId, e);
-        }
+
+        throw new IllegalArgumentException("Workflow not found: " + flowId);
     }
 
-    private Path contextFile(String flowId) {
-        return root.resolve(readIndex(flowId)).resolve("context.json");
+    /**
+     * Looks up a workflow's subpath from registry.json.
+     * Returns null if registry is absent or the entry is not found.
+     *
+     * Registry stores paths as ".mahi/work/<type>/YYYY/MM/<id>".
+     * WorkflowStore works with subpaths relative to root: "<type>/YYYY/MM/<id>".
+     */
+    private String lookupInRegistry(String flowId) {
+        Path registryPath = root.resolve("registry.json");
+        if (!Files.exists(registryPath)) return null;
+        try {
+            RegistrySnapshot snapshot = objectMapper.readValue(registryPath.toFile(), RegistrySnapshot.class);
+            if (snapshot.workflows == null) return null;
+            for (RegistryEntry entry : snapshot.workflows) {
+                if (flowId.equals(entry.id) && entry.path != null) {
+                    // Strip ".mahi/work/" prefix to get subpath relative to root.
+                    // Works for both real paths (".mahi/work/spec/...") and
+                    // custom test roots (the cache handles those via save()).
+                    return stripWorkPrefix(entry.path);
+                }
+            }
+        } catch (IOException e) {
+            // Registry unreadable — treat as absent
+        }
+        return null;
+    }
+
+    private static String stripWorkPrefix(String registryPath) {
+        // Registry stores ".mahi/work/spec/2026/04/my-spec" — strip the leading ".mahi/work/"
+        if (registryPath.startsWith(".mahi/work/")) {
+            return registryPath.substring(".mahi/work/".length());
+        }
+        // Already a subpath (shouldn't happen, but be defensive)
+        return registryPath;
     }
 
     private static String computeSubPath(WorkflowContext context) {
@@ -194,5 +242,16 @@ public class WorkflowStore {
             throw new IllegalArgumentException("Invalid flowId (kebab-case expected): " + flowId);
         }
         return flowId;
+    }
+
+    // --- Minimal registry model (read-only, for path resolution only) ---
+
+    static class RegistrySnapshot {
+        public List<RegistryEntry> workflows = new ArrayList<>();
+    }
+
+    static class RegistryEntry {
+        public String id;
+        public String path;
     }
 }
