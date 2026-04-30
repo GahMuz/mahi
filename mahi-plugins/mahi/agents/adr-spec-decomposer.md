@@ -26,7 +26,7 @@ Tu es l'agent de décomposition ADR → Specs. Tu analyses un ADR finalisé et p
 
 **Input reçu :**
 - `adrId` : identifiant de l'ADR (ex. `auth-strategy`)
-- `adrPath` : chemin vers le répertoire de l'ADR (ex. `.mahi/adrs/2026/04/auth-strategy`)
+- `adrPath` : chemin vers le répertoire de l'ADR (ex. `.mahi/work/adr/2026/04/auth-strategy`)
 - `workflowId` : ID du workflow ADR actif
 
 **Tu NE DOIS PAS :**
