@@ -117,7 +117,7 @@ Présenter un résumé structuré :
 
 **DECIDING :** `/adr approve` — ADR finalisé, lancer la rétrospective / `/adr close` — sauvegarder et fermer
 
-**RETROSPECTIVE :** en cours — répondre aux propositions de règles une par une / `/adr approve` — finaliser
+**RETROSPECTIVE :** en cours — répondre aux propositions de règles une par une (la phase se termine automatiquement après la dernière règle) / `/adr approve` — forcer la finalisation si la phase est bloquée
 
 **DONE :** `/adr open <titre>` — consulter / `/spec new <titre>` — démarrer l'implémentation
 
@@ -130,7 +130,7 @@ Présenter un résumé structuré :
    - `EXPLORING` : options.md a ≥2 options avec pour/contre
    - `DISCUSSING` : log.md a ≥1 entrée de discussion, consensus mentionné
    - `DECIDING` : adr.md existe avec décision et justification
-   - `RETROSPECTIVE` : règles candidates traitées
+   - `RETROSPECTIVE` : voir traitement spécial ci-dessous — **ne pas relancer phase-retro.md**
 3. Avancer selon la table de transition :
 
 | currentPhase | write_artifact | fire_event | Phase suivante | Référence |
@@ -139,13 +139,18 @@ Présenter un résumé structuré :
 | EXPLORING | `("options", <contenu options.md>)` | `START_DISCUSSION` | DISCUSSING | `references/phase-discussion.md` |
 | DISCUSSING | *(pas d'artefact)* | `FORMALIZE_DECISION` | DECIDING | `references/phase-decision.md` |
 | DECIDING | `("adr", <contenu adr.md>)` | `START_RETROSPECTIVE` | RETROSPECTIVE | `references/phase-retro.md` |
-| RETROSPECTIVE | `("retrospective", <résumé rétro>)` | `COMPLETE` | DONE | `references/phase-transition.md` |
+
+**Traitement spécial — RETROSPECTIVE :**
+
+La phase rétrospective se termine normalement d'elle-même via `phase-retro.md` Step 7 (qui fire `COMPLETE`). Si l'utilisateur fait `/adr approve` en phase RETROSPECTIVE, c'est que `phase-retro.md` s'est interrompu avant Step 7. Dans ce cas :
+
+- Appeler `mcp__plugin_mahi_mahi__read_artifact(flowId: <workflowId>, artifactName: "retrospective")` pour vérifier si l'artefact existe.
+  - **Artefact présent** → fire_event("COMPLETE") directement, update_registry("completed"), update_state("done"), deactivate(), suivre `references/phase-transition.md`. Ne pas relancer phase-retro.md.
+  - **Artefact absent** → lire et suivre `references/phase-retro.md` (qui fire COMPLETE en Step 7 et se termine seul).
 
    Si le serveur retourne une erreur : afficher le message d'erreur en français — ne pas tenter une transition locale.
 
-4. Appeler `mcp__plugin_mahi_mahi__update_registry(adrId, "adr", <newPhase>)` pour mettre à jour le statut dans le registre.
-5. Appeler `mcp__plugin_mahi_mahi__update_state(adrPath, <newPhase>, changelogEntry)` pour mettre à jour l'état.
-6. Entrer la prochaine phase en lisant la référence correspondante.
+4. Pour les phases FRAMING → DECIDING : appeler `mcp__plugin_mahi_mahi__update_registry(adrId, "adr", <newPhase>)` et `mcp__plugin_mahi_mahi__update_state(adrPath, <newPhase>, changelogEntry)`, puis entrer la prochaine phase en lisant la référence correspondante.
 
 ## CLOSE
 

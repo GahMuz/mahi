@@ -104,6 +104,10 @@ L'agent présente chaque spec dérivé individuellement pour validation avant de
 
 ### Step 7: Marquer l'artefact et finaliser
 
-1. Appeler `mcp__plugin_mahi_mahi__write_artifact(flowId: <workflowId>, artifactName: "retrospective", content: <résumé des règles appliquées ou "Aucune règle candidate">)` — requis avant `fire_event("COMPLETE")`.
-2. Append log.md : "Rétrospective terminée. ADR complété."
-3. Suivre `references/phase-transition.md`.
+1. Appeler `mcp__plugin_mahi_mahi__write_artifact(flowId: <workflowId>, artifactName: "retrospective", content: <résumé des règles appliquées ou "Aucune règle candidate">)`.
+2. Appeler `mcp__plugin_mahi_mahi__fire_event(workflowId: <workflowId>, event: "COMPLETE")` — fait passer la FSM en DONE.
+3. Appeler `mcp__plugin_mahi_mahi__update_registry(<adrId>, "adr", "completed")`.
+4. Appeler `mcp__plugin_mahi_mahi__update_state(<adrPath>, "done", changelogEntry)`.
+5. Appeler `mcp__plugin_mahi_mahi__deactivate()` pour libérer le slot actif.
+6. Append log.md : "Rétrospective terminée. ADR complété."
+7. Suivre `references/phase-transition.md`.
