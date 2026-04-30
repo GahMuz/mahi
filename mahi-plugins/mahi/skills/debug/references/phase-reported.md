@@ -77,7 +77,7 @@ Si `.mahi/docs/modules/<module>/module-<module>.md` existe pour le module du com
 → Lire le doc module (remplace l'exploration brute des fichiers).
 
 ### 3d — Lien avec un spec existant (si pertinent)
-Lire `.mahi/registry.json`. Chercher les specs récents (`status != "discarded"`) :
+Lire `.mahi/work/registry.json`. Chercher les specs récents (`status != "discarded"`) :
 - Si un spec mentionne le composant incriminé dans son titre ou path → noter le lien (utile en phase ANALYZING)
 - Ne pas charger le spec entier à ce stade — juste noter l'existence
 

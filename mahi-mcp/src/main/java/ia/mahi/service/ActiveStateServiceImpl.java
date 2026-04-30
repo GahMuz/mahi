@@ -60,7 +60,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
         Instant now = Instant.now();
         ActiveState state = new ActiveState(type, specId, workflowId, path, now);
 
-        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve(".local").resolve("active.json");
         try {
             Files.createDirectories(activeJson.getParent());
             Path tmp = activeJson.resolveSibling("active.json.tmp");
@@ -75,7 +75,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public Optional<ActiveState> getActive() {
-        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve(".local").resolve("active.json");
         if (!Files.exists(activeJson)) {
             return Optional.empty();
         }
@@ -89,7 +89,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public void deactivate() {
-        Path activeJson = repoRoot.resolve(".mahi").resolve("local").resolve("active.json");
+        Path activeJson = repoRoot.resolve(".mahi").resolve(".local").resolve("active.json");
         try {
             Files.deleteIfExists(activeJson);
         } catch (IOException e) {
@@ -99,7 +99,7 @@ public class ActiveStateServiceImpl implements ActiveStateService {
 
     @Override
     public void updateRegistry(String id, String type, String status, String title, String period) {
-        Path registryPath = repoRoot.resolve(".mahi").resolve("registry.json");
+        Path registryPath = repoRoot.resolve(".mahi").resolve("work").resolve("registry.json");
 
         try {
             Files.createDirectories(registryPath.getParent());
@@ -135,19 +135,14 @@ public class ActiveStateServiceImpl implements ActiveStateService {
     }
 
     private static final java.util.Set<String> KNOWN_TYPES =
-            java.util.Set.of("spec", "adr", "debug", "find-bug");
+            java.util.Set.of("spec", "adr", "debug", "bug-hunt");
 
     private static String computePath(String type, String period, String id) {
         if (!KNOWN_TYPES.contains(type)) {
             throw new IllegalArgumentException("Unknown workflow type: '" + type
                     + "'. Expected one of: " + KNOWN_TYPES);
         }
-        String base = switch (type) {
-            case "adr"      -> ".mahi/decisions";
-            case "spec"     -> ".mahi/specs";
-            default         -> ".mahi/" + type;
-        };
-        return base + "/" + period + "/" + id;
+        return ".mahi/work/" + type + "/" + period + "/" + id;
     }
 
     // --- Registry model ---
@@ -174,11 +169,6 @@ public class ActiveStateServiceImpl implements ActiveStateService {
     @Override
     public Path resolveAbsPath(String relativePath) {
         return repoRoot.resolve(relativePath);
-    }
-
-    @Override
-    public Path resolveWorktreePath(String specId, String specRelPath) {
-        return repoRoot.resolve(".worktrees").resolve(specId).resolve(specRelPath);
     }
 
     private Path resolveRepoRoot() {

@@ -1,6 +1,6 @@
 package ia.mahi.service;
 
-import ia.mahi.workflow.core.context.ActiveState;
+import ia.mahi.store.WorkflowStore;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -10,18 +10,17 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 
 /**
- * Reads and writes artifact Markdown files.
+ * Reads and writes artifact Markdown files co-located with context.json.
  *
- * <p>For spec workflows, artifacts are written inside the git worktree so they
- * are committed on the spec branch (not the main branch):
- * <pre>repoRoot/.worktrees/&lt;specId&gt;/&lt;specRelPath&gt;/&lt;artifactName&gt;.md</pre>
+ * <p>All workflow types (spec, adr, debug, bug-hunt) store their artifacts in the same
+ * directory as their context.json:
+ * <pre>.mahi/work/&lt;type&gt;/YYYY/MM/&lt;flowId&gt;/&lt;artifactName&gt;.md</pre>
  *
- * <p>For all other workflow types (adr, debug, find-bug), artifacts are written
- * under the server-internal store:
- * <pre>.mahi/artifacts/&lt;flowId&gt;/&lt;artifactName&gt;.md</pre>
+ * <p>The directory is resolved via {@link WorkflowStore#getWorkflowDir(String)}, which
+ * reads the index written at workflow creation time.
  *
- * <p>Throws {@link IllegalStateException} if no spec is active when a spec artifact
- * is requested, or if the requested flowId does not match the active spec.
+ * <p>If an active workflow is set and its id does not match the requested flowId,
+ * an {@link IllegalStateException} is thrown as a safety check.
  */
 @Service
 public class ArtifactService {
@@ -29,9 +28,11 @@ public class ArtifactService {
     private static final Pattern ARTIFACT_NAME_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9-]*$");
 
     private final ActiveStateService activeStateService;
+    private final WorkflowStore workflowStore;
 
-    public ArtifactService(ActiveStateService activeStateService) {
+    public ArtifactService(ActiveStateService activeStateService, WorkflowStore workflowStore) {
         this.activeStateService = activeStateService;
+        this.workflowStore = workflowStore;
     }
 
     private void validateArtifactName(String name) {
@@ -42,7 +43,8 @@ public class ArtifactService {
 
     public String writeArtifact(String flowId, String artifactName, String content) {
         validateArtifactName(artifactName);
-        Path dir = resolveArtifactDir(flowId);
+        checkActiveMatch(flowId);
+        Path dir = workflowStore.getWorkflowDir(flowId);
         try {
             Files.createDirectories(dir);
             Path file = dir.resolve(artifactName + ".md");
@@ -58,7 +60,8 @@ public class ArtifactService {
      */
     public String readArtifact(String flowId, String artifactName) {
         validateArtifactName(artifactName);
-        Path dir = resolveArtifactDir(flowId);
+        checkActiveMatch(flowId);
+        Path dir = workflowStore.getWorkflowDir(flowId);
         try {
             Path file = dir.resolve(artifactName + ".md");
             if (!Files.exists(file)) {
@@ -71,29 +74,15 @@ public class ArtifactService {
         }
     }
 
-    private Path resolveArtifactDir(String flowId) {
-        return activeStateService.getActive()
-                .map(active -> resolveForActive(flowId, active))
-                .orElseGet(() -> fallbackDir(flowId));
-    }
-
-    private Path resolveForActive(String flowId, ActiveState active) {
-        if (!active.id().equals(flowId)) {
-            throw new IllegalStateException(
-                    "Le spec actif est '" + active.id() + "' mais l'accès est demandé pour '" + flowId + "'");
-        }
-        if ("spec".equals(active.type())) {
-            // Spec artifacts go in the worktree (committed on spec branch, not main)
-            return activeStateService.resolveWorktreePath(active.id(), active.path());
-        }
-        // Other workflow types (adr, debug, find-bug): server-internal storage
-        return fallbackDir(flowId);
-    }
-
     /**
-     * Non-spec workflows store artifacts in the server-internal .mahi/artifacts directory.
+     * Safety check: if an active workflow exists, it must match the requested flowId.
      */
-    private Path fallbackDir(String flowId) {
-        return activeStateService.resolveAbsPath(".mahi/artifacts/" + flowId);
+    private void checkActiveMatch(String flowId) {
+        activeStateService.getActive().ifPresent(active -> {
+            if (!active.id().equals(flowId)) {
+                throw new IllegalStateException(
+                        "Le spec actif est '" + active.id() + "' mais l'accès est demandé pour '" + flowId + "'");
+            }
+        });
     }
 }

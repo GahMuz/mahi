@@ -5,13 +5,13 @@ All output in French.
 ## Process
 
 ### Step 1: Read Requirements
-Load `.mahi/specs/<spec-path>/requirement.md`. Extraire :
+Load `.mahi/work/spec/<spec-path>/requirement.md`. Extraire :
 - Tous les REQ items et leurs critères d'acceptation
 - La section **"Contexte codebase"** : modules existants concernés, patterns en place, points d'attention — cette section oriente directement les décisions architecturales en phase design (quels modules étendre, quels patterns respecter, quelles contraintes techniques appliquer)
 
 ### Step 1b: Specs passés liés
 
-Lire `.mahi/registry.json`. Pour chaque spec avec statut `completed` ou `retrospective` :
+Lire `.mahi/work/registry.json`. Pour chaque spec avec statut `completed` ou `retrospective` :
 - Comparer le titre et les mots-clés avec le spec courant
 - Si lien probable : lire son `design.md`
 

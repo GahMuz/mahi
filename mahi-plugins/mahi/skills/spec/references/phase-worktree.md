@@ -20,7 +20,7 @@ Lancer en parallèle les deux blocs suivants, puis attendre que les deux soient 
 - Si aucun fichier de build détecté : passer (projet sans dépendances à installer)
 
 **Bloc B — Pré-chargement du contexte de planning** :
-- Lire `requirement.md` et `design.md` depuis `.mahi/specs/<spec-path>/`
+- Lire `requirement.md` et `design.md` depuis `.mahi/work/spec/<spec-path>/`
 - Garder ces contenus en mémoire pour l'injection dans la phase de planning qui suit immédiatement
 
 Une fois le setup terminé :
@@ -29,7 +29,7 @@ Une fois le setup terminé :
 Run project test suite and save results:
 - Execute the project's test command (detect from package.json/pom.xml/composer.json)
 - All tests must pass for baseline to be valid
-- Save to `.mahi/specs/<spec-path>/baseline-tests.json`: total, passed, failed, skipped
+- Save to `.mahi/work/spec/<spec-path>/baseline-tests.json`: total, passed, failed, skipped
 - If tests fail: report in French, do NOT proceed to planning
 - Append log.md entry: "Worktree créé. Baseline capturée : X tests passent."
 

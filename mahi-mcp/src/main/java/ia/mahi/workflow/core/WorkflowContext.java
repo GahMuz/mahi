@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * The runtime state of a workflow instance (flow).
- * Persisted as JSON in .mahi/flows/<flowId>.json
+ * Persisted as JSON in .mahi/work/&lt;type&gt;/YYYY/MM/&lt;flowId&gt;/context.json
  */
 public class WorkflowContext {
 
@@ -24,6 +24,7 @@ public class WorkflowContext {
     private String workflowType;
     private String state;
     private long version = 0;
+    private Instant createdAt;
     private Map<String, Artifact> artifacts = new HashMap<>();
     private Map<String, Object> metadata = new HashMap<>();
     private List<TransitionRecord> history = new ArrayList<>();
@@ -40,7 +41,8 @@ public class WorkflowContext {
         this.flowId = flowId;
         this.workflowType = workflowType;
         this.state = definition.getInitialState().name();
-        this.updatedAt = Instant.now();
+        this.createdAt = Instant.now();
+        this.updatedAt = this.createdAt;
         definition.getArtifacts().forEach((k, v) -> artifacts.put(k, v.factory().get()));
     }
 
@@ -72,6 +74,9 @@ public class WorkflowContext {
 
     public long getVersion() { return version; }
     public void setVersion(long version) { this.version = version; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 
     public Map<String, Artifact> getArtifacts() { return artifacts; }
     public void setArtifacts(Map<String, Artifact> artifacts) { this.artifacts = artifacts; }

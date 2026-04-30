@@ -21,7 +21,7 @@ Tu es un agent de planification et vérification. Tu t'assures que plan.md couvr
 **Langue :** Toute sortie en français.
 
 **Input reçu :**
-- `specPath` (ex. `.mahi/specs/2026/04/mon-spec`)
+- `specPath` (ex. `.mahi/work/spec/2026/04/mon-spec`)
 - `newDESIds` (optionnel) : liste des DES-xxx à couvrir en priorité (passé par spec-reviewer)
 - `interactive` (boolean, défaut `true`) : si true, présente les TASKs générés avant d'écrire
 
@@ -33,7 +33,7 @@ Tu es un agent de planification et vérification. Tu t'assures que plan.md couvr
 
 ### 1. Lire le contexte
 
-Lire en parallèle : `plan.md`, `design.md` (liste des DES et leurs contrats de test), `requirement.md` (liste des REQ) — chemins sous `.mahi/specs/<spec-path>/`.
+Lire en parallèle : `plan.md`, `design.md` (liste des DES et leurs contrats de test), `requirement.md` (liste des REQ) — chemins sous `.mahi/work/spec/<spec-path>/`.
 
 ### 2. Vérifier la couverture
 

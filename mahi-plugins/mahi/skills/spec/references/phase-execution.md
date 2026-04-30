@@ -11,7 +11,7 @@ From `.mahi/config.json`:
 - `models`: model assignments per agent
 
 ### Step 2: Verify Baseline Exists
-Check that `.mahi/specs/<spec-path>/baseline-tests.json` exists (captured during worktree phase).
+Check that `.mahi/work/spec/<spec-path>/baseline-tests.json` exists (captured during worktree phase).
 - If missing: capture now (run test suite, save results)
 - If exists: read and report "Baseline existante : X tests."
 - Append log.md entry: "Phase d'implémentation démarrée."
@@ -36,9 +36,9 @@ Agent({
   model: <from config.models.orchestrator, default "sonnet">,
   prompt: "Spec: <spec-id>
     WorkflowId: <workflowId depuis active.json>
-    Plan: .mahi/specs/<spec-path>/plan.md
-    Design: .mahi/specs/<spec-path>/design.md
-    Requirements: .mahi/specs/<spec-path>/requirement.md
+    Plan: .mahi/work/spec/<spec-path>/plan.md
+    Design: .mahi/work/spec/<spec-path>/design.md
+    Requirements: .mahi/work/spec/<spec-path>/requirement.md
     Config: .mahi/config.json
     Worktree: .worktrees/<spec-id>
     Rules: charger via sdd-rules protocol (Glob **/sdd-rules/SKILL.md)

@@ -56,7 +56,7 @@ Si non, laisser l'utilisateur personnaliser chaque modèle.
 ## Step 5 : Créer la structure .mahi/
 
 ```bash
-mkdir -p .mahi/specs .mahi/docs .mahi/local
+mkdir -p .mahi/work .mahi/docs .mahi/.local
 ```
 
 Écrire `.mahi/config.json` :
@@ -100,10 +100,10 @@ Note : `graph.enabled` reste `false` jusqu'à ce que le plugin sdd-graph soit in
 Ajouter dans `.gitignore` si absent :
 ```
 .worktrees/
-.mahi/local/
+.mahi/.local/
 ```
 
-Ne pas ignorer `.mahi/` lui-même — seul `.mahi/local/` est exclu des commits.
+Ne pas ignorer `.mahi/` lui-même — seul `.mahi/.local/` est exclu des commits.
 
 ## Step 7 : Scaffolding des règles projet
 

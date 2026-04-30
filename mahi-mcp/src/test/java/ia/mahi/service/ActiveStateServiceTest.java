@@ -35,7 +35,7 @@ class ActiveStateServiceTest {
     void activate_shouldCreateActiveJsonInSddLocalDirectory() throws IOException {
         service.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "workflow-uuid-123");
 
-        Path activeJson = tempDir.resolve(".mahi/local/active.json");
+        Path activeJson = tempDir.resolve(".mahi/.local/active.json");
         assertThat(activeJson).exists();
     }
 
@@ -43,7 +43,7 @@ class ActiveStateServiceTest {
     void activate_shouldWriteCorrectFields() throws IOException {
         service.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "workflow-uuid-123");
 
-        Path activeJson = tempDir.resolve(".mahi/local/active.json");
+        Path activeJson = tempDir.resolve(".mahi/.local/active.json");
         String content = Files.readString(activeJson);
 
         assertThat(content).contains("\"id\"");
@@ -71,7 +71,7 @@ class ActiveStateServiceTest {
     @Test
     void deactivate_shouldRemoveActiveJson() throws IOException {
         service.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "workflow-uuid-123");
-        Path activeJson = tempDir.resolve(".mahi/local/active.json");
+        Path activeJson = tempDir.resolve(".mahi/.local/active.json");
         assertThat(activeJson).exists();
 
         service.deactivate();
@@ -120,10 +120,10 @@ class ActiveStateServiceTest {
         // The service uses the repoRoot injected at construction — not a relative path
         service.activate("my-spec", "spec", ".mahi/specs/2026/04/my-spec", "wf-uuid");
 
-        Path activeJson = tempDir.resolve(".mahi/local/active.json");
+        Path activeJson = tempDir.resolve(".mahi/.local/active.json");
         assertThat(activeJson).exists();
         // Must NOT be in a nested subdirectory
-        assertThat(activeJson.getParent()).isEqualTo(tempDir.resolve(".mahi/local"));
+        assertThat(activeJson.getParent()).isEqualTo(tempDir.resolve(".mahi/.local"));
     }
 
     // --- Registry parser tests ---
@@ -132,7 +132,7 @@ class ActiveStateServiceTest {
     void updateRegistry_whenRegistryDoesNotExist_shouldCreateItAsJson() throws IOException {
         service.updateRegistry("spec-001", "spec", "requirements", "My Feature", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/registry.json");
+        Path registry = tempDir.resolve(".mahi/work/registry.json");
         assertThat(registry).exists();
         String content = Files.readString(registry);
         assertThat(content).contains("\"spec-001\"");
@@ -146,7 +146,7 @@ class ActiveStateServiceTest {
         service.updateRegistry("spec-002", "spec", "requirements", "Another Feature", "2026/04");
         service.updateRegistry("spec-002", "spec", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/registry.json");
+        Path registry = tempDir.resolve(".mahi/work/registry.json");
         String content = Files.readString(registry);
         // Only one entry for spec-002, status must be "design"
         long designCount = content.lines()
@@ -162,7 +162,7 @@ class ActiveStateServiceTest {
         service.updateRegistry("spec-003", "spec", "requirements", "Feature | Edge Case", "2026/04");
         service.updateRegistry("spec-003", "spec", "design", null, null);
 
-        Path registry = tempDir.resolve(".mahi/registry.json");
+        Path registry = tempDir.resolve(".mahi/work/registry.json");
         String content = Files.readString(registry);
         assertThat(content).contains("Feature | Edge Case");
         assertThat(content).contains("\"design\"");
@@ -174,7 +174,7 @@ class ActiveStateServiceTest {
         service.updateRegistry("spec-001", "spec", "requirements", "Spec One", "2026/04");
         service.updateRegistry("spec-002", "spec", "requirements", "Spec Two", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/registry.json");
+        Path registry = tempDir.resolve(".mahi/work/registry.json");
         String content = Files.readString(registry);
         assertThat(content).contains("\"spec-001\"");
         assertThat(content).contains("\"spec-002\"");
@@ -186,12 +186,12 @@ class ActiveStateServiceTest {
         service.updateRegistry("my-spec", "spec", "requirements", "A Spec", "2026/04");
         service.updateRegistry("my-adr", "adr", "open", "An ADR", "2026/04");
 
-        Path registry = tempDir.resolve(".mahi/registry.json");
+        Path registry = tempDir.resolve(".mahi/work/registry.json");
         String content = Files.readString(registry);
         assertThat(content).contains("\"my-spec\"");
         assertThat(content).contains("\"my-adr\"");
-        assertThat(content).contains(".mahi/specs/2026/04/my-spec");
-        assertThat(content).contains(".mahi/decisions/2026/04/my-adr");
+        assertThat(content).contains(".mahi/work/spec/2026/04/my-spec");
+        assertThat(content).contains(".mahi/work/adr/2026/04/my-adr");
     }
 
     @Test

@@ -12,7 +12,7 @@ Not recommended during `implementation` — finish the current wave first, then 
 ## Process
 
 ### Step 1: Identify Active Spec
-Read `.mahi/registry.json`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
+Read `.mahi/work/registry.json`. If argument provided, match by title. Otherwise show active non-completed specs and ask which to split.
 
 ### Step 2: Load All Artifacts
 Read the spec's documents based on current phase:
@@ -116,7 +116,7 @@ If `<new-title>` was provided as argument, use it. Otherwise ask:
 ### Step 5: Create New Spec Directory
 Note current `YYYY/MM`. Create:
 ```bash
-mkdir -p .mahi/specs/YYYY/MM/<new-kebab-title>/reviews
+mkdir -p .mahi/work/spec/YYYY/MM/<new-kebab-title>/reviews
 ```
 
 ### Step 6: Write New Spec Artifacts
@@ -172,7 +172,7 @@ Si des REQs, DESs ET TASKs sont transférés : déclencher `APPROVE_REQUIREMENTS
 #### requirement.md
 For each transferred REQ, replace the item body with:
 ```
-> Transféré vers la spec `<new-spec-id>` (<new-title>). [Voir REQ-xxx](.mahi/specs/YYYY/MM/<new-spec-id>/requirement.md)
+> Transféré vers la spec `<new-spec-id>` (<new-title>). [Voir REQ-xxx](.mahi/work/spec/YYYY/MM/<new-spec-id>/requirement.md)
 ```
 Keep the REQ-xxx ID in place — never reuse it.
 

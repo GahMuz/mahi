@@ -89,7 +89,7 @@ Si aucune règle approuvée : skip.
 
 ### Step 6: Write Retrospective Document
 
-Écrire `retrospective.md` dans `.mahi/specs/<spec-path>/` en suivant ce template :
+Écrire `retrospective.md` dans `.mahi/work/spec/<spec-path>/` en suivant ce template :
 
 ```markdown
 # Rétrospective : <spec-titre>
@@ -141,4 +141,4 @@ mcp__plugin_mahi_mahi__fire_event(
 > Note mahi : il n'y a pas de mise à jour de state.json.
 > La transition vers `completed` est déclenchée via `mcp__plugin_mahi_mahi__fire_event`.
 
-"Spec `<titre>` complété. Les fichiers sont conservés dans `.mahi/specs/<spec-path>/` pour référence future."
+"Spec `<titre>` complété. Les fichiers sont conservés dans `.mahi/work/spec/<spec-path>/` pour référence future."

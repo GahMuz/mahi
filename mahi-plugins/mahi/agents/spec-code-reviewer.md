@@ -76,7 +76,7 @@ Si le diff n'est pas déjà fourni dans ce prompt (injection orchestrateur) :
 - Chaque test [RED] échoue pour la bonne raison (feature absente, pas erreur technique)
 
 **2c — Régression baseline** :
-- Si `.mahi/specs/<spec-path>/baseline-tests.json` existe : vérifier qu'aucun test précédemment passant n'échoue → régression = CRITIQUE
+- Si `.mahi/work/spec/<spec-path>/baseline-tests.json` existe : vérifier qu'aucun test précédemment passant n'échoue → régression = CRITIQUE
 - Lancer la suite de tests pour confirmer l'état actuel si possible
 
 **2d — Sécurité et gestion d'erreurs** :

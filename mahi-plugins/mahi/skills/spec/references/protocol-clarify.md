@@ -8,7 +8,7 @@ Update an in-progress spec to reflect a new clarification — edit documents in-
 
 ### Step 1: Identify Active Spec and Affected Documents
 
-1. Read `.mahi/local/active.json` to get the active spec's `path` and `workflowId`. (The parent handler already failed if absent.)
+1. Read `.mahi/.local/active.json` to get the active spec's `path` and `workflowId`. (The parent handler already failed if absent.)
 2. Read the user's clarification request.
 3. Determine which documents are affected:
    - Requirement change → `requirement.md` (and potentially `design.md`, `plan.md`)

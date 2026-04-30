@@ -30,7 +30,7 @@ Extraire les valeurs de `--from`, `--to`, `--type` depuis les arguments fournis.
 
 ### Step 1: Scanner les workflows terminés
 
-Lire `.mahi/registry.json`. Structure : `{ "workflows": [ { "id", "type", "title", "period", "status", "path" }, ... ] }`.
+Lire `.mahi/work/registry.json`. Structure : `{ "workflows": [ { "id", "type", "title", "period", "status", "path" }, ... ] }`.
 
 Filtrer les entrées :
 - `status == "completed"`

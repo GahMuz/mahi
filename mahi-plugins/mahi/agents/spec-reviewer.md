@@ -30,7 +30,7 @@ You are a spec review agent. You audit consistency between spec artifacts (requi
 **Language:** All reports in French.
 
 **Input you receive:**
-- `specId` and `specPath` (e.g. `.mahi/specs/2026/04/mon-spec`)
+- `specId` and `specPath` (e.g. `.mahi/work/spec/2026/04/mon-spec`)
 - `worktreePath` (e.g. `.worktrees/mon-spec`)
 - `fix` (boolean, default true) — whether to apply corrections
 - `interactive` (boolean, default true) — if true (manual `/spec-review`), present proposed spec updates and wait for confirmation before writing; if false (auto-dispatch), write directly

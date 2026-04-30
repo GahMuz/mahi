@@ -20,11 +20,11 @@ All communication with the user MUST be in French.
 
 4. **Pas de lecture directe de `active.json`.** Toujours passer par `mcp__plugin_mahi_mahi__get_active()`.
 
-5. **Pas de code en dehors du worktree.** Toutes les modifications de fichiers source se font dans `.worktrees/<debug-id>/`. Les artifacts de documentation vont dans `.mahi/artifacts/<flowId>/` via MCP.
+5. **Pas de code en dehors du worktree.** Toutes les modifications de fichiers source se font dans `.worktrees/<debug-id>/`. Les artifacts de documentation vont dans `.mahi/work/<flowId>/` via MCP.
 
 ## Active Item
 
-La session debug courante est trackée dans `.mahi/local/active.json` — gitignored, local. Lire via `mcp__plugin_mahi_mahi__get_active()`.
+La session debug courante est trackée dans `.mahi/.local/active.json` — gitignored, local. Lire via `mcp__plugin_mahi_mahi__get_active()`.
 
 ```json
 { "type": "debug", "id": "mon-bug", "path": ".mahi/debug/2026/04/mon-bug", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
@@ -43,7 +43,7 @@ Format : `/debug <subcommand> [<args>...]`
 
 ### `/debug open [<titre>]`
 - `<titre>` optionnel, un seul mot kebab-case
-- Si absent → lister les sessions non terminées depuis `.mahi/registry.json`
+- Si absent → lister les sessions non terminées depuis `.mahi/work/registry.json`
 
 ### `/debug approve | recap | close`
 - Pas d'argument attendu
@@ -80,7 +80,7 @@ Actions :
 
 ## OPEN
 
-1. Lire `.mahi/registry.json`. Titre donné → trouver l'entrée. Absent → lister les sessions `status != "completed" && type == "debug"`, demander le choix.
+1. Lire `.mahi/work/registry.json`. Titre donné → trouver l'entrée. Absent → lister les sessions `status != "completed" && type == "debug"`, demander le choix.
 2. `mcp__plugin_mahi_mahi__get_active()`. Si présent avec id différent → exécuter CLOSE.
 3. `mcp__plugin_mahi_mahi__activate(debugId, "debug", path, workflowId)`.
 4. `EnterWorktree(branch="debug/<username>/<debug-id>", path=".worktrees/<debug-id>")`.
@@ -141,7 +141,7 @@ Actions :
 1. `mcp__plugin_mahi_mahi__get_active()`. Si null → "Aucune session debug active."
 2. Appender dans `log.md` : `[<date>] Session fermée — phase : <currentPhase>`.
 3. `ExitWorktree()` — retourner sur la branche principale.
-4. `mcp__plugin_mahi_mahi__deactivate()` — supprimer `.mahi/local/active.json`.
+4. `mcp__plugin_mahi_mahi__deactivate()` — supprimer `.mahi/.local/active.json`.
 5. Confirmer : "Session debug '<titre>' sauvegardée. Rouvrir avec `/debug open <titre>`."
 
 ## Principes clés

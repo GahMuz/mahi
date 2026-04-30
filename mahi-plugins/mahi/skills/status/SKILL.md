@@ -19,7 +19,7 @@ Appeler `mcp__plugin_mahi_mahi__get_active()`.
 
 ## Step 2 : Lire le registre
 
-Lire `.mahi/registry.json`.
+Lire `.mahi/work/registry.json`.
 Si absent : "Aucun workflow enregistré — lancez `/init` puis `/spec new <titre>`."
 
 Parser toutes les entrées. Chaque entrée contient au minimum : `id`, `type`, `title`, `phase`, `workflowId`, `updatedAt`.

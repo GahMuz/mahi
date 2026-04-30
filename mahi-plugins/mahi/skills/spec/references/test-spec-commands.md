@@ -120,7 +120,7 @@ mcp__plugin_mahi_mahi__deactivate()
 - [ ] Confirmation explicite demandée à l'utilisateur avant tout appel MCP
 - [ ] `mcp__plugin_mahi_mahi__remove_worktree` est appelé pour supprimer le worktree côté serveur
 - [ ] `mcp__plugin_mahi_mahi__update_registry` est appelé avec `specId`, `"spec"`, `"discarded"` pour marquer l'entrée en registry
-- [ ] Le répertoire `.mahi/specs/YYYY/MM/<id>/` est supprimé localement
+- [ ] Le répertoire `.mahi/work/spec/YYYY/MM/<id>/` est supprimé localement
 - [ ] `ExitWorktree()` est appelé avant la désactivation
 - [ ] `mcp__plugin_mahi_mahi__deactivate()` est appelé pour supprimer `active.json`
 - [ ] Le LLM ne supprime PAS `active.json` directement

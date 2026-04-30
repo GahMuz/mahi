@@ -41,7 +41,7 @@ Tu es l'agent de décomposition ADR → Specs. Tu analyses un ADR finalisé et p
 Lire en parallèle :
 - `<adrPath>/adr.md` — décision retenue, contraintes, conséquences, alternatives rejetées
 - `<adrPath>/options.md` (si existant) — alternatives considérées
-- `.mahi/registry.json` — specs existants (pour éviter les doublons)
+- `.mahi/work/registry.json` — specs existants (pour éviter les doublons)
 
 Extraire :
 - La **décision principale** en une phrase
@@ -102,7 +102,7 @@ mcp__plugin_mahi_mahi__create_workflow(flowId: <titre-kebab-case>, workflowType:
 
 2. Créer le répertoire du spec :
 - Calculer `YYYY/MM` depuis la date courante
-- Créer `.mahi/specs/YYYY/MM/<titre-kebab-case>/` et son sous-répertoire `reviews/`
+- Créer `.mahi/work/spec/YYYY/MM/<titre-kebab-case>/` et son sous-répertoire `reviews/`
 - Créer `rule-candidates.md` avec l'en-tête `# Règles candidates`
 - Créer `log.md` avec l'entrée : `## <date> — Création\nSpec créé depuis l'ADR \`<adrId>\`.`
 

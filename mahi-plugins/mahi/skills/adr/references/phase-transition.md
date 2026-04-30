@@ -10,7 +10,7 @@ Clore l'ADR et orienter vers la suite : implémentation via spec, autre ADR dép
 
 ### Step 1: Lire les prochaines étapes
 
-Lire la section "Prochaines étapes" dans `.mahi/decisions/YYYY/MM/<adr-id>/adr.md`.
+Lire la section "Prochaines étapes" dans `.mahi/work/adr/YYYY/MM/<adr-id>/adr.md`.
 
 ### Step 2: Proposer la suite
 
@@ -31,7 +31,7 @@ Prochaines étapes suggérées :
 ```
 ADR-NNN finalisé ✓
 
-Décision archivée dans .mahi/decisions/YYYY/MM/<adr-id>/adr.md
+Décision archivée dans .mahi/work/adr/YYYY/MM/<adr-id>/adr.md
 Consultable via `/adr open <titre>` dans toute future session.
 ```
 

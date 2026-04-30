@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # Lightweight hook: inject active item reminder on every user prompt.
-# Reads .mahi/local/active.json — the single source of truth for the active item (spec or ADR).
+# Reads .mahi/.local/active.json — the single source of truth for the active item (spec or ADR).
 
-LOCAL_ACTIVE="${CLAUDE_PROJECT_DIR:-.}/.mahi/local/active.json"
+LOCAL_ACTIVE="${CLAUDE_PROJECT_DIR:-.}/.mahi/.local/active.json"
 
 # Quick exit if no active item
 [ -f "$LOCAL_ACTIVE" ] || exit 0

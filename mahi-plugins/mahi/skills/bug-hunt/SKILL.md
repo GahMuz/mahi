@@ -26,7 +26,7 @@ All communication with the user MUST be in French.
 
 ## Active Item
 
-La session bug-hunt courante est trackée dans `.mahi/local/active.json` — gitignored, local. Lire via `mcp__plugin_mahi_mahi__get_active()`.
+La session bug-hunt courante est trackée dans `.mahi/.local/active.json` — gitignored, local. Lire via `mcp__plugin_mahi_mahi__get_active()`.
 
 ```json
 { "type": "bug-hunt", "id": "mon-hunt", "path": ".mahi/bug-hunt/YYYY/MM/mon-hunt", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
@@ -81,7 +81,7 @@ Actions :
 
 ## OPEN
 
-1. Lire `.mahi/registry.json`. Titre donné → trouver l'entrée `type == "bug-hunt"`. Absent → lister les sessions non complétées, demander le choix.
+1. Lire `.mahi/work/registry.json`. Titre donné → trouver l'entrée `type == "bug-hunt"`. Absent → lister les sessions non complétées, demander le choix.
 2. `mcp__plugin_mahi_mahi__get_active()`. Si présent avec id différent → exécuter CLOSE.
 3. `mcp__plugin_mahi_mahi__activate(huntId, "bug-hunt", path, workflowId)`.
 4. `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → `currentPhase`. Si serveur KO : "Le serveur Mahi ne répond pas. Vérifiez que le plugin `mahi` est actif et que le processus Java est lancé." et stopper.
@@ -123,7 +123,7 @@ Actions :
 
 1. `mcp__plugin_mahi_mahi__get_active()`. Si null → "Aucune session bug-hunt active."
 2. Appender dans `log.md` : `[<date>] Session fermée — phase : <currentPhase>`.
-3. `mcp__plugin_mahi_mahi__deactivate()` — supprimer `.mahi/local/active.json`.
+3. `mcp__plugin_mahi_mahi__deactivate()` — supprimer `.mahi/.local/active.json`.
 4. Confirmer : "Session bug-hunt '<titre>' sauvegardée. Rouvrir avec `/bug-hunt open <titre>`."
 
 ## Principes clés

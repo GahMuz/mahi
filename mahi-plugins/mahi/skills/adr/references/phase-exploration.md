@@ -10,7 +10,7 @@ Identifier et analyser toutes les options envisageables. L'objectif est d'avoir 
 
 ### Step 1: Lire le framing
 
-Lire `.mahi/decisions/YYYY/MM/<adr-id>/framing.md`. Garder en tête les contraintes et non-objectifs — ils élimineront certaines options d'emblée.
+Lire `.mahi/work/adr/YYYY/MM/<adr-id>/framing.md`. Garder en tête les contraintes et non-objectifs — ils élimineront certaines options d'emblée.
 
 ### Step 1b: Injecter le contexte codebase (optionnel, si disponible)
 

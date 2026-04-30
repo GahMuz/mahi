@@ -11,13 +11,13 @@ Formaliser la décision dans un document ADR structuré et durable. Ce document 
 ### Step 1: Synthétiser les inputs
 
 Lire :
-- `.mahi/decisions/YYYY/MM/<adr-id>/framing.md` — problème, contraintes, non-objectifs
-- `.mahi/decisions/YYYY/MM/<adr-id>/options.md` — toutes les options avec trade-offs
-- `.mahi/decisions/YYYY/MM/<adr-id>/log.md` — arguments clés de la discussion, option choisie
+- `.mahi/work/adr/YYYY/MM/<adr-id>/framing.md` — problème, contraintes, non-objectifs
+- `.mahi/work/adr/YYYY/MM/<adr-id>/options.md` — toutes les options avec trade-offs
+- `.mahi/work/adr/YYYY/MM/<adr-id>/log.md` — arguments clés de la discussion, option choisie
 
 ### Step 2: Rédiger adr.md
 
-Écrire `.mahi/decisions/YYYY/MM/<adr-id>/adr.md` :
+Écrire `.mahi/work/adr/YYYY/MM/<adr-id>/adr.md` :
 
 ```markdown
 # ADR-NNN : <titre>

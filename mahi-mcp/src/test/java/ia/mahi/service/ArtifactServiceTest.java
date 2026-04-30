@@ -1,6 +1,10 @@
 package ia.mahi.service;
 
+import ia.mahi.store.WorkflowStore;
+import ia.mahi.workflow.core.WorkflowContext;
+import ia.mahi.workflow.core.WorkflowRegistry;
 import ia.mahi.workflow.core.context.ActiveState;
+import ia.mahi.workflow.definitions.spec.SpecWorkflowDefinition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,85 +24,81 @@ class ArtifactServiceTest {
     Path tempDir;
 
     private ArtifactService service;
+    private WorkflowStore workflowStore;
     private StubActiveStateService activeStateService;
 
     @BeforeEach
     void setUp() {
-        activeStateService = new StubActiveStateService(tempDir);
-        service = new ArtifactService(activeStateService);
+        workflowStore = new WorkflowStore(tempDir.resolve("work"));
+        activeStateService = new StubActiveStateService();
+        service = new ArtifactService(activeStateService, workflowStore);
+
+        // Pre-create spec and adr flows in the store
+        WorkflowRegistry registry = new WorkflowRegistry();
+        registry.register(new SpecWorkflowDefinition());
+        workflowStore.save(new WorkflowContext("my-spec", "spec", registry.get("spec")));
+        workflowStore.save(new WorkflowContext("my-adr", "adr", registry.get("spec"))); // type only matters for path
     }
 
-    // --- writeArtifact: spec → worktree ---
+    // --- writeArtifact: all types go to .mahi/work/<type>/YYYY/MM/<id>/ ---
 
     @Test
-    void writeArtifact_spec_shouldWriteInsideWorktree() throws IOException {
-        activeStateService.setActive("spec", "my-spec", ".mahi/specs/2026/04/my-spec");
+    void writeArtifact_spec_shouldWriteInsideWorkflowDir() throws IOException {
+        activeStateService.setActive("spec", "my-spec", ".mahi/work/spec/2026/04/my-spec");
 
         service.writeArtifact("my-spec", "requirements", "# Requirements\n\nREQ-001...");
 
-        // Spec artifacts land in the worktree, not the main branch
-        Path worktreePath = tempDir.resolve(".worktrees/my-spec/.mahi/specs/2026/04/my-spec/requirements.md");
-        assertThat(worktreePath).exists();
-        assertThat(Files.readString(worktreePath)).contains("REQ-001");
+        Path dir = workflowStore.getWorkflowDir("my-spec");
+        assertThat(dir.resolve("requirements.md")).exists();
+        assertThat(Files.readString(dir.resolve("requirements.md"))).contains("REQ-001");
     }
 
     @Test
-    void writeArtifact_spec_shouldNotWriteToMainBranch() {
-        activeStateService.setActive("spec", "my-spec", ".mahi/specs/2026/04/my-spec");
+    void writeArtifact_spec_shouldNotWriteToWorktree() {
+        activeStateService.setActive("spec", "my-spec", ".mahi/work/spec/2026/04/my-spec");
 
         service.writeArtifact("my-spec", "requirements", "content");
 
-        // Main branch spec path must NOT contain the file
-        Path mainPath = tempDir.resolve(".mahi/specs/2026/04/my-spec/requirements.md");
-        assertThat(mainPath).doesNotExist();
+        // Worktree must NOT be created
+        assertThat(tempDir.resolve(".worktrees/my-spec")).doesNotExist();
     }
 
     @Test
-    void writeArtifact_spec_shouldCreateDirectoriesIfAbsent() {
-        activeStateService.setActive("spec", "my-spec", ".mahi/specs/2026/04/my-spec");
-
-        service.writeArtifact("my-spec", "design", "# Design");
-
-        assertThat(tempDir.resolve(".worktrees/my-spec/.mahi/specs/2026/04/my-spec/design.md")).exists();
-    }
-
-    // --- writeArtifact: non-spec → server-internal fallback ---
-
-    @Test
-    void writeArtifact_nonSpec_shouldWriteToFallbackDirectory() throws IOException {
-        activeStateService.setActive("adr", "my-adr", ".mahi/adrs/2026/04/my-adr");
+    void writeArtifact_adr_shouldWriteInsideWorkflowDir() throws IOException {
+        activeStateService.setActive("adr", "my-adr", ".mahi/work/adr/2026/04/my-adr");
 
         service.writeArtifact("my-adr", "adr", "# ADR content");
 
-        Path fallback = tempDir.resolve(".mahi/artifacts/my-adr/adr.md");
-        assertThat(fallback).exists();
-        assertThat(Files.readString(fallback)).contains("ADR content");
+        Path dir = workflowStore.getWorkflowDir("my-adr");
+        assertThat(dir.resolve("adr.md")).exists();
+        assertThat(Files.readString(dir.resolve("adr.md"))).contains("ADR content");
     }
 
     @Test
-    void writeArtifact_nonSpec_shouldNotWriteToWorktree() {
-        activeStateService.setActive("adr", "my-adr", ".mahi/adrs/2026/04/my-adr");
+    void writeArtifact_shouldCreateDirectoriesIfAbsent() {
+        activeStateService.setActive("spec", "my-spec", ".mahi/work/spec/2026/04/my-spec");
 
-        service.writeArtifact("my-adr", "adr", "content");
+        service.writeArtifact("my-spec", "design", "# Design");
 
-        assertThat(tempDir.resolve(".worktrees/my-adr")).doesNotExist();
+        assertThat(workflowStore.getWorkflowDir("my-spec").resolve("design.md")).exists();
     }
 
-    // --- writeArtifact: no active / mismatch ---
+    // --- writeArtifact: no active state is allowed ---
 
     @Test
-    void writeArtifact_whenNoActive_shouldUseFallback() {
+    void writeArtifact_whenNoActive_shouldSucceedUsingWorkflowStore() {
         activeStateService.clearActive();
 
-        // No active spec → falls back to server-internal dir (no exception)
-        service.writeArtifact("some-flow", "requirements", "content");
+        service.writeArtifact("my-spec", "requirements", "content");
 
-        assertThat(tempDir.resolve(".mahi/artifacts/some-flow/requirements.md")).exists();
+        assertThat(workflowStore.getWorkflowDir("my-spec").resolve("requirements.md")).exists();
     }
+
+    // --- writeArtifact: active / mismatch ---
 
     @Test
     void writeArtifact_whenFlowIdDoesNotMatchActive_shouldThrow() {
-        activeStateService.setActive("spec", "other-spec", ".mahi/specs/2026/04/other-spec");
+        activeStateService.setActive("spec", "other-spec", ".mahi/work/spec/2026/04/other-spec");
 
         assertThatThrownBy(() -> service.writeArtifact("my-spec", "requirements", "content"))
                 .isInstanceOf(IllegalStateException.class)
@@ -109,11 +109,11 @@ class ArtifactServiceTest {
     // --- readArtifact ---
 
     @Test
-    void readArtifact_spec_shouldReadFromWorktree() throws IOException {
-        activeStateService.setActive("spec", "my-spec", ".mahi/specs/2026/04/my-spec");
-        Path worktreeSpecDir = tempDir.resolve(".worktrees/my-spec/.mahi/specs/2026/04/my-spec");
-        Files.createDirectories(worktreeSpecDir);
-        Files.writeString(worktreeSpecDir.resolve("plan.md"), "# Plan\n\nTASK-001...");
+    void readArtifact_shouldReadFromWorkflowDir() throws IOException {
+        activeStateService.setActive("spec", "my-spec", ".mahi/work/spec/2026/04/my-spec");
+        Path dir = workflowStore.getWorkflowDir("my-spec");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("plan.md"), "# Plan\n\nTASK-001...");
 
         String content = service.readArtifact("my-spec", "plan");
 
@@ -122,7 +122,7 @@ class ArtifactServiceTest {
 
     @Test
     void readArtifact_whenFileAbsent_shouldThrowIllegalArgumentException() {
-        activeStateService.setActive("spec", "my-spec", ".mahi/specs/2026/04/my-spec");
+        activeStateService.setActive("spec", "my-spec", ".mahi/work/spec/2026/04/my-spec");
 
         assertThatThrownBy(() -> service.readArtifact("my-spec", "plan"))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -133,12 +133,7 @@ class ArtifactServiceTest {
 
     static class StubActiveStateService implements ActiveStateService {
 
-        private final Path repoRoot;
         private ActiveState active;
-
-        StubActiveStateService(Path repoRoot) {
-            this.repoRoot = repoRoot;
-        }
 
         void setActive(String type, String specId, String relativePath) {
             this.active = new ActiveState(type, specId, "wf-uuid", relativePath, Instant.now());
@@ -170,12 +165,7 @@ class ArtifactServiceTest {
 
         @Override
         public Path resolveAbsPath(String relativePath) {
-            return repoRoot.resolve(relativePath);
-        }
-
-        @Override
-        public Path resolveWorktreePath(String specId, String specRelPath) {
-            return repoRoot.resolve(".worktrees").resolve(specId).resolve(specRelPath);
+            throw new UnsupportedOperationException();
         }
     }
 }

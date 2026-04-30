@@ -60,9 +60,9 @@ Si un problème est détecté → reporter en français, attendre confirmation d
 Si aucun problème → continuer immédiatement.
 
 ### Step 1: Read Context
-- Read `.mahi/specs/<spec-path>/plan.md` — parse all TASK and subtask items with statuses
-- Read `.mahi/specs/<spec-path>/design.md` — for agent context
-- Read `.mahi/specs/<spec-path>/requirement.md` — for agent context
+- Read `.mahi/work/spec/<spec-path>/plan.md` — parse all TASK and subtask items with statuses
+- Read `.mahi/work/spec/<spec-path>/design.md` — for agent context
+- Read `.mahi/work/spec/<spec-path>/requirement.md` — for agent context
 - Read `.mahi/config.json` — for parallelTaskLimit, pipelineReviews, models
 - Use the `WorkflowId` provided in this prompt — do NOT read `active.json` directly (worktree-unsafe; the value is already injected by the parent skill)
 - Call `mcp__plugin_mahi_mahi__get_workflow(flowId: <workflowId>)` → verify currentPhase is "implementation"; read artifacts for context
@@ -172,13 +172,13 @@ Agent({
   prompt: "<completed subtasks list> + <spec references> + <project rules>
     Pour le diff : utiliser `git log --oneline --grep='TASK-xxx'` pour trouver les commits de cette tâche,
     puis `git diff <hash-parent-du-premier-commit>..HEAD` pour obtenir le diff complet.
-    output path: .mahi/specs/<spec-path>/reviews/TASK-xxx-review.md"
+    output path: .mahi/work/spec/<spec-path>/reviews/TASK-xxx-review.md"
 })
 ```
 
 **Règles à injecter dans le prompt du code-reviewer** : inclure les règles déjà chargées en Step 1 — SOLID systématiquement ; RGPD et DORA si applicables au domaine de TASK-xxx ; règles projet correspondant au domaine.
 
-Le code-reviewer écrit lui-même le fichier de review dans `.mahi/specs/<spec-path>/reviews/TASK-xxx-review.md`.
+Le code-reviewer écrit lui-même le fichier de review dans `.mahi/work/spec/<spec-path>/reviews/TASK-xxx-review.md`.
 
 If `pipelineReviews` is true and no critical issues expected: start next wave while review runs.
 

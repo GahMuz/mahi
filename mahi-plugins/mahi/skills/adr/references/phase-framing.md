@@ -30,17 +30,17 @@ Si des rules ou docs pertinents sont trouvés : en tenir compte dans les questio
 
 ### Step 3: Vérifier les ADRs liés
 
-Lire `.mahi/registry.json`. Chercher les entrées `type="adr"` avec `phase="completed"` sur un sujet proche.
+Lire `.mahi/work/registry.json`. Chercher les entrées `type="adr"` avec `phase="completed"` sur un sujet proche.
 Si trouvés : "J'ai trouvé des ADRs liés : <liste>. Souhaitez-vous les consulter avant de continuer ?"
 
 ### Step 4: Vérifier les specs liées
 
-Parcourir `.mahi/registry.json`. Identifier les specs complétées ou en cours sur le même domaine.
+Parcourir `.mahi/work/registry.json`. Identifier les specs complétées ou en cours sur le même domaine.
 Si trouvées : signaler pour contexte.
 
 ### Step 5: Écrire framing.md
 
-Écrire `.mahi/decisions/YYYY/MM/<adr-id>/framing.md` :
+Écrire `.mahi/work/adr/YYYY/MM/<adr-id>/framing.md` :
 
 ```markdown
 # Framing : <titre>

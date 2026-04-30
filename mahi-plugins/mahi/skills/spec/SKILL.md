@@ -24,10 +24,10 @@ These rules override any other interpretation. If in doubt, stop and ask.
 
 ## Local Active Item
 
-The currently active item (spec or ADR) is tracked in `.mahi/local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly** (the file lives in the repo root, not in the current working directory which may be a worktree).
+The currently active item (spec or ADR) is tracked in `.mahi/.local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly** (the file lives in the repo root, not in the current working directory which may be a worktree).
 
 ```json
-{ "type": "spec", "id": "mon-spec", "path": ".mahi/specs/2026/04/mon-spec", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
+{ "type": "spec", "id": "mon-spec", "path": ".mahi/work/spec/2026/04/mon-spec", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
 ```
 
 **Rules:**
@@ -100,21 +100,21 @@ Extraction du subcommand → action :
 0. Call `mcp__plugin_mahi_mahi__get_active()`. If present : execute CLOSE (full context save), then continue.
 1. Verify `.mahi/config.json` exists.
 2. Convert `<titre>` (already validated by Parse Arguments) to kebab-case for directory name. Note current `YYYY/MM` from today's date.
-3. Create `.mahi/specs/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
+3. Create `.mahi/work/spec/YYYY/MM/<kebab-titre>/` and `reviews/` subdirectory.
 4. Create empty `rule-candidates.md` in the spec directory (header only : `# Règles candidates`).
 5. Call `mcp__plugin_mahi_mahi__create_workflow(flowId=<spec-id>, workflowType="spec")` — store the returned `workflowId`.
    Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to create the branch and enter the worktree.
 6. Write initial log.md with creation entry : date, title, "Spec créé". If `INITIAL_DESCRIPTION` is non-empty, append it verbatim under a section `## Description initiale fournie par l'utilisateur`. This description will be read by phase-requirements step 1 as input context — **do not treat it as a task list**.
 7. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", "requirements", title, period)` to add the spec entry in registry.
-8. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch.
+8. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/.local/active.json` on the main branch.
 9. Enter requirements phase — read and follow `references/phase-requirements.md`. The `INITIAL_DESCRIPTION` saved in log.md is one of the inputs for the clarifying questions; the user must still go through the normal requirements process.
 
 ## OPEN
 
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
-1. Read `.mahi/registry.json`. Title given → find matching entry. No title → list non-completed entries, ask user (in French).
+1. Read `.mahi/work/registry.json`. Title given → find matching entry. No title → list non-completed entries, ask user (in French).
 2. Call `mcp__plugin_mahi_mahi__get_active()`. If present with `type="adr"` : execute ADR CLOSE. If `type="spec"` with different id : execute spec CLOSE. If same id : skip to step 4.
-3. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
+3. Call `mcp__plugin_mahi_mahi__activate(specId, "spec", path, workflowId)` to write `.mahi/.local/active.json` on the main branch. Then call `EnterWorktree(branch="spec/<username>/<spec-id>", path=".worktrees/<spec-id>")` to enter the worktree.
 4. Load context following priority order from `references/protocol-context.md` section **Chargement du contexte** — present the briefing before resuming.
 5. Call `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → currentPhase. If the call fails : "Le serveur Mahi n'est pas démarré ou ne répond pas. Vérifiez que le plugin `mahi` est actif (ou que `.mcp.json` contient la configuration du serveur Mahi) et que le processus Java est lancé." and stop. If in implementation → follow `references/protocol-resume.md`.
 6. Report state (in French) and resume.
@@ -155,9 +155,9 @@ Extraction du subcommand → action :
 1. **Ask explicit confirmation** (destructive).
 2. If confirmed :
    - Call `mcp__plugin_mahi_mahi__remove_worktree(workflowId)` — removes the worktree and associated branch server-side.
-   - Remove `.mahi/specs/YYYY/MM/<id>/`.
+   - Remove `.mahi/work/spec/YYYY/MM/<id>/`.
 3. Call `mcp__plugin_mahi_mahi__update_registry(specId, "spec", "discarded")` to mark the entry as discarded in registry.
-4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.mahi/local/active.json`.
+4. Call `ExitWorktree()` to return to the main branch, then call `mcp__plugin_mahi_mahi__deactivate()` to delete `.mahi/.local/active.json`.
 5. Confirm completion.
 
 ## SPLIT

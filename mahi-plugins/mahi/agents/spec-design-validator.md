@@ -29,8 +29,8 @@ Tu es un agent de validation de design. Tu vérifies qu'un document design.md re
 
 ### 1. Lire le contexte
 
-- Lire `.mahi/specs/<spec-path>/design.md`
-- Lire `.mahi/specs/<spec-path>/requirement.md`
+- Lire `.mahi/work/spec/<spec-path>/design.md`
+- Lire `.mahi/work/spec/<spec-path>/requirement.md`
 - Glob `**/sdd-rules/SKILL.md` → lire et exécuter le protocole de chargement des règles (plugin + projet + priorité)
 
 ### 2. Détecter les violations (RED)

@@ -30,7 +30,7 @@ class WorkflowStoreTest {
 
     @BeforeEach
     void setUp() {
-        store = new WorkflowStore(tempDir.resolve("flows"));
+        store = new WorkflowStore(tempDir.resolve("work"));
         registry = new WorkflowRegistry();
         registry.register(new SpecWorkflowDefinition());
     }
@@ -173,7 +173,7 @@ class WorkflowStoreTest {
         WorkflowContext ctx = new WorkflowContext("flow-005", "spec", registry.get("spec"));
         store.save(ctx);
 
-        Path tmpFile = tempDir.resolve("flows").resolve("flow-005.tmp");
+        Path tmpFile = store.getWorkflowDir("flow-005").resolve("context.json.tmp");
         assertThat(tmpFile).doesNotExist();
     }
 }

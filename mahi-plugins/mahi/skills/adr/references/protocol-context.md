@@ -7,7 +7,7 @@ Toute communication en français.
 
 | Niveau | Fichier | Portée | Usage |
 |--------|---------|--------|-------|
-| **Partagé** | `.mahi/decisions/YYYY/MM/<id>/context.md` | Commité dans le repo — accessible à tous les développeurs | Source de vérité partagée |
+| **Partagé** | `.mahi/work/adr/YYYY/MM/<id>/context.md` | Commité dans le repo — accessible à tous les développeurs | Source de vérité partagée |
 | **Local** | `adr_<id>.md` dans le memory Claude Code | Machine locale uniquement (`~/.claude/projects/`) | Cache de session, rechargement rapide |
 
 **Règle :** `/adr close` écrit les deux. `/adr open` charge depuis le memory local s'il existe, sinon depuis `context.md`, sinon reconstitue depuis `mcp__plugin_mahi_mahi__get_workflow(workflowId)` + `log.md`.
@@ -70,7 +70,7 @@ Appelé par `/adr open` après identification de l'ADR. Établit l'ADR comme act
 
 **1. Memory Claude Code local** (`adr_<adr-id>.md`) — si présent, utiliser en priorité (session précédente sur cette machine).
 
-**2. `context.md` dans le repo** (`.mahi/decisions/YYYY/MM/<adr-id>/context.md`) — si présent, utiliser (contexte partagé par un collègue ou session précédente).
+**2. `context.md` dans le repo** (`.mahi/work/adr/YYYY/MM/<adr-id>/context.md`) — si présent, utiliser (contexte partagé par un collègue ou session précédente).
 
 **3. Reconstitution** — si aucun des deux n'existe : appeler `mcp__plugin_mahi_mahi__get_workflow(workflowId)` pour obtenir la phase, les artifacts, les statuts courants et le `sessionContext` (si une session précédente a appelé `mcp__plugin_mahi_mahi__save_context`), puis lire `log.md` pour les actions passées.
 
@@ -121,7 +121,7 @@ mcp__plugin_mahi_mahi__save_context(flowId: <workflowId>, context: {
 Ce `SessionContext` est retourné dans `mcp__plugin_mahi_mahi__get_workflow` lors de la prochaine ouverture.
 
 ### Step 4 : Écrire `context.md` enrichi (repo — partagé)
-Écrire `.mahi/decisions/YYYY/MM/<adr-id>/context.md` en suivant le format ci-dessus (inclut toutes les sections : Problème, Options, Arguments, Contraintes, Questions, Dernières actions).
+Écrire `.mahi/work/adr/YYYY/MM/<adr-id>/context.md` en suivant le format ci-dessus (inclut toutes les sections : Problème, Options, Arguments, Contraintes, Questions, Dernières actions).
 Ce fichier sera commité avec le reste de l'ADR — accessible à tous les développeurs.
 
 ### Step 5 : Écrire l'entrée memory Claude Code (local)
@@ -132,7 +132,7 @@ Mettre à jour `MEMORY.md` : ajouter ou mettre à jour la ligne :
 ```
 
 ### Step 6 : Libérer l'ADR actif via le serveur Mahi
-Appeler `mcp__plugin_mahi_mahi__deactivate()` pour supprimer `.mahi/local/active.json` — plus d'ADR actif sur cette machine.
+Appeler `mcp__plugin_mahi_mahi__deactivate()` pour supprimer `.mahi/.local/active.json` — plus d'ADR actif sur cette machine.
 
 ### Step 7 : Confirmer
 ```

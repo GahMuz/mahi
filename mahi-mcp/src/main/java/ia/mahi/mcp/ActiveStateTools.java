@@ -36,29 +36,29 @@ public class ActiveStateTools {
     // =========================================================================
 
     @McpTool(name = "activate",
-          description = "Write .mahi/local/active.json to mark a spec as active on this machine. Resolves path relative to git repo root.")
+          description = "Write .mahi/.local/active.json to mark a spec as active on this machine. Resolves path relative to git repo root.")
     public ActiveState activate(
             @McpToolParam(description = "Spec identifier (kebab-case)", required = true) String specId,
             @McpToolParam(description = "Type of item: spec | adr", required = true) String type,
-            @McpToolParam(description = "Relative path to spec directory (e.g., .mahi/specs/2026/04/my-spec)", required = true) String path,
+            @McpToolParam(description = "Relative path to spec directory (e.g., .mahi/work/spec/2026/04/my-spec)", required = true) String path,
             @McpToolParam(description = "Workflow identifier (UUID)", required = true) String workflowId) {
         return activeStateService.activate(specId, type, path, workflowId);
     }
 
     @McpTool(name = "get_active",
-          description = "Read .mahi/local/active.json from the git repository root. Returns the active spec/ADR state, or null if no item is currently active. Always use this tool instead of reading the file directly — it resolves the correct path regardless of the current working directory (worktree-safe).")
+          description = "Read .mahi/.local/active.json from the git repository root. Returns the active spec/ADR state, or null if no item is currently active. Always use this tool instead of reading the file directly — it resolves the correct path regardless of the current working directory (worktree-safe).")
     public ActiveState getActive() {
         return activeStateService.getActive().orElse(null);
     }
 
     @McpTool(name = "deactivate",
-          description = "Delete .mahi/local/active.json to release the active spec on this machine.")
+          description = "Delete .mahi/.local/active.json to release the active spec on this machine.")
     public void deactivate() {
         activeStateService.deactivate();
     }
 
     @McpTool(name = "update_registry",
-          description = "Update the status of a workflow entry in .mahi/registry.json (unified registry for all workflow types). Creates the entry if absent.")
+          description = "Update the status of a workflow entry in .mahi/work/registry.json (unified registry for all workflow types). Creates the entry if absent.")
     public void updateRegistry(
             @McpToolParam(description = "Workflow identifier (kebab-case)", required = true) String id,
             @McpToolParam(description = "Workflow type: spec | adr | debug | bug-hunt", required = true) String type,

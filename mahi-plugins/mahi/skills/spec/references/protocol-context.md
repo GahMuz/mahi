@@ -9,7 +9,7 @@ Le contexte d'une spec est persisté sur **deux niveaux complémentaires** :
 
 | Niveau | Fichier | Portée | Usage |
 |--------|---------|--------|-------|
-| **Partagé** | `.mahi/specs/YYYY/MM/<id>/context.md` | Commité dans le repo — accessible à tous les développeurs | Source de vérité partagée |
+| **Partagé** | `.mahi/work/spec/YYYY/MM/<id>/context.md` | Commité dans le repo — accessible à tous les développeurs | Source de vérité partagée |
 | **Local** | `spec_<id>.md` dans le memory Claude Code | Machine locale uniquement (`~/.claude/projects/`) | Cache de session, rechargement rapide |
 
 **Règle :** `/spec close` écrit les deux. `/spec open` charge depuis le memory local s'il existe, sinon depuis `context.md`, sinon reconstitue depuis `log.md` + `mcp__plugin_mahi_mahi__get_workflow(flowId)`.
@@ -68,7 +68,7 @@ Appelé par `/spec open` après identification de la spec. Établit la spec comm
 
 **1. Memory Claude Code local** (`spec_<spec-id>.md`) — si présent, utiliser en priorité (session précédente sur cette machine).
 
-**2. `context.md` dans le repo** (`.mahi/specs/YYYY/MM/<spec-id>/context.md`) — si présent, utiliser (contexte partagé par un collègue ou session précédente).
+**2. `context.md` dans le repo** (`.mahi/work/spec/YYYY/MM/<spec-id>/context.md`) — si présent, utiliser (contexte partagé par un collègue ou session précédente).
 
 **3. Reconstitution** — si aucun des deux n'existe : appeler `mcp__plugin_mahi_mahi__get_workflow(flowId)` pour obtenir la phase, les artifacts, les statuts courants et le `sessionContext` (si une session précédente a appelé `mcp__plugin_mahi_mahi__save_context`), puis lire `log.md` pour les actions passées.
 
@@ -109,7 +109,7 @@ Dernières actions : ...
 Appeler `ExitWorktree()` pour retourner au répertoire principal du dépôt avant la sauvegarde du contexte.
 
 ### Step 1 : Identifier la spec active
-Lire `.mahi/local/active.json`. (Le handler parent a déjà échoué si absent.) Récupérer `flowId`.
+Lire `.mahi/.local/active.json`. (Le handler parent a déjà échoué si absent.) Récupérer `flowId`.
 
 ### Step 2 : Synthétiser le contexte
 Depuis la conversation courante et les fichiers de la spec (log.md, requirement.md, design.md) :
@@ -133,7 +133,7 @@ mcp__plugin_mahi_mahi__save_context(flowId: <depuis active.json>, context: {
 Ce `SessionContext` est retourné dans `mcp__plugin_mahi_mahi__get_workflow` lors de la prochaine ouverture.
 
 ### Step 4 : Écrire `context.md` enrichi (repo — partagé)
-Écrire `.mahi/specs/YYYY/MM/<spec-id>/context.md` en suivant le format ci-dessus (inclut Fichiers identifiés et Dernières actions — plus riche que le SessionContext seul).
+Écrire `.mahi/work/spec/YYYY/MM/<spec-id>/context.md` en suivant le format ci-dessus (inclut Fichiers identifiés et Dernières actions — plus riche que le SessionContext seul).
 Ce fichier sera commité avec le reste de la spec — accessible à tous les développeurs.
 
 ### Step 5 : Écrire l'entrée memory Claude Code (local)
@@ -144,7 +144,7 @@ Mettre à jour `MEMORY.md` : ajouter ou mettre à jour la ligne :
 ```
 
 ### Step 6 : Libérer la spec active via le serveur Mahi
-Appeler `mcp__plugin_mahi_mahi__deactivate()` pour supprimer `.mahi/local/active.json` — plus de spec active sur cette machine.
+Appeler `mcp__plugin_mahi_mahi__deactivate()` pour supprimer `.mahi/.local/active.json` — plus de spec active sur cette machine.
 
 ### Step 7 : Confirmer
 ```

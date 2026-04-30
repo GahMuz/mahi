@@ -22,10 +22,10 @@ All communication with the user MUST be in French.
 
 ## Local Active Item
 
-The currently active item (spec or ADR) is tracked in `.mahi/local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly.**
+The currently active item (spec or ADR) is tracked in `.mahi/.local/active.json` — gitignored, machine-local, never committed. **Always read it via `mcp__plugin_mahi_mahi__get_active()` — never with the `Read` tool directly.**
 
 ```json
-{ "type": "adr", "id": "gestion-secrets-spring", "path": ".mahi/decisions/2026/04/gestion-secrets-spring", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
+{ "type": "adr", "id": "gestion-secrets-spring", "path": ".mahi/work/adr/2026/04/gestion-secrets-spring", "activatedAt": "ISO-8601", "workflowId": "<uuid>" }
 ```
 
 **Rules:**
@@ -59,20 +59,20 @@ Même règle que `/spec new` : `<titre>` = 2-4 premiers mots en kebab-case. Si l
 0. Appeler `mcp__plugin_mahi_mahi__get_active()`. Si présent : exécuter le CLOSE approprié (`type="spec"` → spec CLOSE, `type="adr"` → ADR CLOSE), puis continuer.
 1. Vérifier que `.mahi/config.json` existe.
 2. Convertir le `<titre>` en kebab-case. Noter la date courante `YYYY/MM`.
-3. Calculer le numéro ADR : lire `.mahi/registry.json`, compter les entrées avec `"type": "adr"` (tous statuts confondus) + 1 → `ADR-NNN` (format zéro-padded sur 3 chiffres). Si registry.json absent ou vide : ADR-001.
-4. Créer `.mahi/decisions/YYYY/MM/<adr-id>/`.
+3. Calculer le numéro ADR : lire `.mahi/work/registry.json`, compter les entrées avec `"type": "adr"` (tous statuts confondus) + 1 → `ADR-NNN` (format zéro-padded sur 3 chiffres). Si registry.json absent ou vide : ADR-001.
+4. Créer `.mahi/work/adr/YYYY/MM/<adr-id>/`.
 5. Créer `log.md` (en-tête : `# Journal : <titre>` + entrée de création) et `rule-candidates.md` (en-tête : `# Règles candidates`).
 6. Appeler `mcp__plugin_mahi_mahi__create_workflow(flowId=<adr-id>, workflowType="adr")` — stocker le `workflowId` retourné.
 7. Appeler `mcp__plugin_mahi_mahi__update_registry(adrId, "adr", "framing", title, period)` pour enregistrer l'ADR dans le registre.
-8. Appeler `mcp__plugin_mahi_mahi__activate(adrId, "adr", path, workflowId)` pour écrire `.mahi/local/active.json`.
+8. Appeler `mcp__plugin_mahi_mahi__activate(adrId, "adr", path, workflowId)` pour écrire `.mahi/.local/active.json`.
 9. Entrer la phase framing — lire et suivre `references/phase-framing.md`.
 
 ## OPEN
 
 0. Prévenir : "Pour un contexte propre, cette commande fonctionne mieux après un `/clear`. Si la session contient du contexte accumulé d'un travail précédent, les réponses futures pourraient être influencées par cet historique."
-1. Lire `.mahi/registry.json`. Titre donné → trouver l'entrée correspondante. Pas de titre → lister les entrées non terminées, demander à l'utilisateur (en français).
+1. Lire `.mahi/work/registry.json`. Titre donné → trouver l'entrée correspondante. Pas de titre → lister les entrées non terminées, demander à l'utilisateur (en français).
 2. Appeler `mcp__plugin_mahi_mahi__get_active()`. Si présent avec `type="spec"` : exécuter spec CLOSE. Si `type="adr"` avec id différent : exécuter ADR CLOSE. Si même id : aller directement au step 4.
-3. Appeler `mcp__plugin_mahi_mahi__activate(adrId, "adr", path, workflowId)` pour écrire `.mahi/local/active.json`.
+3. Appeler `mcp__plugin_mahi_mahi__activate(adrId, "adr", path, workflowId)` pour écrire `.mahi/.local/active.json`.
 4. Charger le contexte selon l'ordre de priorité de `references/protocol-context.md` section **Chargement du contexte** — présenter le briefing avant de reprendre.
 5. Appeler `mcp__plugin_mahi_mahi__get_workflow(workflowId)` → `currentPhase`. Si l'appel échoue : "Le serveur Mahi n'est pas démarré ou ne répond pas. Vérifiez que le plugin `mahi` est actif et que le processus Java est lancé." et stopper.
 6. Rapporter l'état (en français) et reprendre.
