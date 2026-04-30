@@ -85,22 +85,17 @@ Si au moins une règle est approuvée ou modifiée :
 
 Si aucune règle : skip.
 
-### Step 6: Décomposition en specs d'implémentation
+### Step 6: Décomposition en specs d'implémentation — OBLIGATOIRE
 
-Dispatcher l'agent de décomposition pour identifier et valider les specs à créer depuis cet ADR :
+**Ne pas passer au Step 7 avant d'avoir terminé cette étape.**
 
-```
-Agent({
-  description: "Décomposer l'ADR <adrId> en specs",
-  subagent_type: "mahi:adr-spec-decomposer",
-  model: "sonnet",
-  prompt: "adrId: <adrId>
-    adrPath: <adrPath>
-    workflowId: <workflowId>"
-})
-```
+Appeler l'outil `Agent` avec les paramètres suivants :
+- `description` : `"Décomposer l'ADR <adrId> en specs"`
+- `subagent_type` : `"mahi:adr-spec-decomposer"`
+- `model` : `"sonnet"`
+- `prompt` : texte multiligne contenant `adrId: <adrId>`, `adrPath: <adrPath>`, `workflowId: <workflowId>`
 
-L'agent présente chaque spec dérivé individuellement pour validation avant de le créer. Il n'initialise que les specs approuvés par l'utilisateur.
+L'agent analyse l'ADR, propose les specs dérivés **un par un** à l'utilisateur (oui / non / modifier), et n'initialise que ceux approuvés. Attendre la fin de l'agent avant de passer au Step 7.
 
 ### Step 7: Marquer l'artefact et finaliser
 
