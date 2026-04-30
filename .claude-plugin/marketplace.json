@@ -15,7 +15,7 @@
       "name": "mahi",
       "source": "./mahi-plugins/mahi",
       "description": "Mahi — deterministic SDD workflow via MCP state machine. Bundles the Mahi MCP server (Java 21, Spring Boot fat jar) and the spec/ADR/debug workflow plugin.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": { "name": "vincent-bailly" },
       "keywords": ["workflow", "mcp", "sdd", "mahi", "spec", "state-machine", "fsm", "java"],
       "category": "development"
@@ -24,7 +24,7 @@
       "name": "mahi-codebase",
       "source": "./mahi-plugins/mahi-codebase",
       "description": "Mahi Codebase — Génération de documentation structurée, graphes de dépendances et analyses de qualité. Conçu pour l'automatisation CI/CD.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": { "name": "vincent-bailly" },
       "keywords": ["codebase", "doc", "graph", "analyse", "ci-cd", "mahi"],
       "category": "development"
@@ -33,7 +33,7 @@
       "name": "mahi-roi",
       "source": "./mahi-plugins/mahi-roi",
       "description": "Mahi ROI — Rapport ROI du workflow spec-driven : temps économisé, rentabilité, qualité.",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": { "name": "vincent-bailly" },
       "keywords": ["roi", "metrics", "efficiency", "reporting", "mahi"],
       "category": "development"
